@@ -11,6 +11,12 @@ Log Cache can be deployed either as a standalone deployment or within
 
 In both cases Log Cache will have to know about Loggregator.
 
+##### Cloud Config
+
+Every bosh deployment requires a [cloud
+config](https://bosh.io/docs/cloud-config.html). The Log Cache deployment
+manifest assumes the CF-Deployment cloud config has been uploaded.
+
 ##### Creating and Uploading Release
 
 The first step in deploying Log Cache is to create a release. Final releases
@@ -36,10 +42,10 @@ that is deployed with a `loggregator-vars.yml` variables file.
 
 ```
 bosh \
-    --environment lite \ # 'lite' can be replaced with your env name
+    --environment lite \
     --deployment log-cache deploy manifests/log-cache.yml \
-    --vars-file vars.yml \ # Log Cache Variables File (bosh creates this)
-    --vars-store loggregator-vars.yml # This file must already exist
+    --vars-store vars.yml \
+    --vars-file ~/workspace/loggregator-release/vars.yml
 ```
 
 ##### Cloud Foundry
@@ -55,11 +61,11 @@ The following command will deploy Log Cache in CF.
 
 ```
 bosh \
-    --environment lite \ # 'lite' can be replaced with your env name
+    --environment lite \ # lite can be replaced with your env name
     --deployment cf \
     deploy \
     ~/workspace/cf-deployment/cf-deployment.yml \
-    --ops-file ~/workspace/cf-deployment/operations/bosh-lite.yml \ # Required for bosh-lite
+    --ops-file ~/workspace/cf-deployment/operations/bosh-lite.yml \
     --ops-file ~/workspace/log-cache-release/manifests/operations/deploy-in-cf.yml \
     --vars-store vars-store.yml \
     -v system_domain=bosh-lite.com # Replace with your system domain

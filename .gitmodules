@@ -1,0 +1,3 @@
+[submodule "src/code.cloudfoundry.org/log-cache"]
+	path = src/code.cloudfoundry.org/log-cache
+	url = https://github.com/cloudfoundry-incubator/log-cache

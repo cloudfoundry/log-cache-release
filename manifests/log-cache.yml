@@ -1,0 +1,50 @@
+name: log-cache
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+releases:
+- name: log-cache
+  version: latest
+
+instance_groups:
+- name: log-cache
+  azs:
+  - z1
+  - z2
+  instances: 1
+  persistent_disk_type: 5GB
+  vm_type: minimal
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: log-cache
+    release: log-cache
+    consumes:
+      reverse_log_proxy: {from: reverse_log_proxy, deployment: loggregator}
+    properties:
+      logs_provider:
+        tls:
+          ca_cert: "((logs_provider.ca))"
+          cert: "((logs_provider.certificate))"
+          key: "((logs_provider.private_key))"
+
+variables:
+- name: logs_provider
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: log-cache
+    extended_key_usage:
+    - client_auth
+    - server_auth
+
+update:
+  canaries: 10
+  max_in_flight: 10
+  canary_watch_time: 30000-60000
+  update_watch_time: 5000-60000
+  serial: true

@@ -1,0 +1,6 @@
+check process log-cache
+  with pidfile /var/vcap/sys/run/log-cache/log-cache.pid
+  start program "/var/vcap/jobs/log-cache/bin/ctl start"
+  stop program "/var/vcap/jobs/log-cache/bin/ctl stop"
+  group vcap
+
