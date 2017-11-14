@@ -23,3 +23,9 @@ src/github.com/vito/gosub
 
 # Bosh Deploys
 vars.yml
+
+# Golang Tools
+src/github.com/client9/misspell
+src/github.com/kisielk/gotool
+src/github.com/mdempsky/unconvert
+src/golang.org/x/tools
