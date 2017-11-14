@@ -17,6 +17,24 @@ cat <<EOF > $tmp_dir/consumes_cf.yml
   value: cf
 EOF
 
+# standalone LogCache does not register any routes via the route_registrar
+cat <<EOF >> $tmp_dir/consumes_cf.yml
+- type: replace
+  path: /instance_groups/name=log-cache/jobs/-
+  value:
+    name: route_registrar
+    release: routing
+    properties:
+      route_registrar:
+        routes:
+        - name: log-cache
+          port: 8080
+          registration_interval: 20s
+          uris:
+          - log-cache.((system_domain))
+          - "*.log-cache.((system_domain))"
+EOF
+
 bosh int manifests/log-cache.yml --ops-file=$tmp_dir/consumes_cf.yml > $tmp_dir/adjusted.yml
 
 ops_file_path=manifests/operations/deploy-in-cf.yml

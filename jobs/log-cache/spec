@@ -22,3 +22,7 @@ properties:
     description: "TLS certificate for the logs-provider connection"
   logs_provider.tls.key:
     description: "TLS key for the logs-provider connection"
+
+  egress_port:
+    description: "The port for the log-cache to listen on"
+    default: 8080

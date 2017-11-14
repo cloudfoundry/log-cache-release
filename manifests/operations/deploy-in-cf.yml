@@ -23,12 +23,24 @@
           from: reverse_log_proxy
       name: log-cache
       properties:
+        egress_port: 8080
         logs_provider:
           tls:
             ca_cert: ((logs_provider.ca))
             cert: ((logs_provider.certificate))
             key: ((logs_provider.private_key))
       release: log-cache
+    - name: route_registrar
+      properties:
+        route_registrar:
+          routes:
+          - name: log-cache
+            port: 8080
+            registration_interval: 20s
+            uris:
+            - log-cache.((system_domain))
+            - '*.log-cache.((system_domain))'
+      release: routing
     name: log-cache
     networks:
     - name: default

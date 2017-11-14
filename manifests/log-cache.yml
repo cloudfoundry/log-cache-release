@@ -37,6 +37,7 @@ instance_groups:
     consumes:
       reverse_log_proxy: {from: reverse_log_proxy, deployment: loggregator}
     properties:
+      egress_port: 8080
       logs_provider:
         tls:
           ca_cert: "((logs_provider.ca))"
