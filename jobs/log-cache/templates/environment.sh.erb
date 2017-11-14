@@ -4,7 +4,8 @@
 %>
 
 export LOGS_PROVIDER_ADDR="<%= rlp_addr %>"
-export LOGS_PROVIDER_CA_FILE="/var/vcap/jobs/log-cache/certs/rlp_ca.crt"
-export LOGS_PROVIDER_CERT_FILE_PATH="/var/vcap/jobs/log-cache/certs/adapter_rlp.crt"
-export LOGS_PROVIDER_KEY_FILE_PATH="/var/vcap/jobs/log-cache/certs/adapter_rlp.key"
-export LOGS_PROVIDER_COMMON_NAME="<%= p('logs_provider.tls.cn') %>"
+export LOGS_PROVIDER_CA_FILE_PATH="/var/vcap/jobs/log-cache/config/certs/logs_provider_ca.crt"
+export LOGS_PROVIDER_CERT_FILE_PATH="/var/vcap/jobs/log-cache/config/certs/logs_provider.crt"
+export LOGS_PROVIDER_KEY_FILE_PATH="/var/vcap/jobs/log-cache/config/certs/logs_provider.key"
+
+

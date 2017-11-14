@@ -22,6 +22,3 @@ properties:
     description: "TLS certificate for the logs-provider connection"
   logs_provider.tls.key:
     description: "TLS key for the logs-provider connection"
-  logs_provider.tls.cn:
-    description: "TLS common name for the logs-provider connection"
-    default: reverselogproxy

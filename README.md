@@ -61,12 +61,11 @@ The following command will deploy Log Cache in CF.
 
 ```
 bosh \
-    --environment lite \ # lite can be replaced with your env name
+    --environment lite \
     --deployment cf \
-    deploy \
-    ~/workspace/cf-deployment/cf-deployment.yml \
+    deploy ~/workspace/cf-deployment/cf-deployment.yml \
     --ops-file ~/workspace/cf-deployment/operations/bosh-lite.yml \
     --ops-file ~/workspace/log-cache-release/manifests/operations/deploy-in-cf.yml \
-    --vars-store vars-store.yml \
-    -v system_domain=bosh-lite.com # Replace with your system domain
+    --vars-store ~/workspace/cf-deployment/vars-store.yml \
+    -v system_domain=bosh-lite.com
 ```

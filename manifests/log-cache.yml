@@ -8,6 +8,17 @@ stemcells:
 releases:
 - name: log-cache
   version: latest
+- name: bosh-dns
+  version: latest
+
+addons:
+- include:
+    stemcell:
+    - os: ubuntu-trusty
+    jobs:
+    - name: bosh-dns
+      release: bosh-dns
+  name: bosh-dns
 
 instance_groups:
 - name: log-cache
