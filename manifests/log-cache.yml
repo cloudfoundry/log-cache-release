@@ -12,13 +12,13 @@ releases:
   version: latest
 
 addons:
-- include:
+- name: bosh-dns
+  include:
     stemcell:
     - os: ubuntu-trusty
-    jobs:
-    - name: bosh-dns
-      release: bosh-dns
-  name: bosh-dns
+  jobs:
+  - name: bosh-dns
+    release: bosh-dns
 
 instance_groups:
 - name: log-cache
