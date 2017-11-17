@@ -12,6 +12,10 @@ files:
 - code.cloudfoundry.org/log-cache/app/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/web/*.go # gosub
+- github.com/emirpasic/gods/containers/*.go # gosub
+- github.com/emirpasic/gods/trees/*.go # gosub
+- github.com/emirpasic/gods/trees/avltree/*.go # gosub
+- github.com/emirpasic/gods/utils/*.go # gosub
 - github.com/golang/protobuf/jsonpb/*.go # gosub
 - github.com/golang/protobuf/proto/*.go # gosub
 - github.com/golang/protobuf/ptypes/*.go # gosub
