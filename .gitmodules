@@ -31,3 +31,6 @@
 [submodule "src/google.golang.org/genproto"]
 	path = src/google.golang.org/genproto
 	url = https://github.com/google/go-genproto
+[submodule "src/github.com/emirpasic/gods"]
+	path = src/github.com/emirpasic/gods
+	url = https://github.com/emirpasic/gods
