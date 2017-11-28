@@ -29,3 +29,6 @@ properties:
   store_size:
     description: "The number of envelopes to store in memory"
     default: 1000000
+  health_port:
+    description: "The port for LogCache to bind a health endpoint"
+    default: 6060
