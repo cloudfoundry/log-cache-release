@@ -1,0 +1,90 @@
+#!/bin/bash -e
+
+RUN_DIR=/var/vcap/sys/run/expvar-scraper
+LOG_FILE=/var/vcap/sys/log/expvar-scraper/expvar-scraper.log
+PIDFILE=${RUN_DIR}/expvar-scraper.pid
+JOB_DIR=/var/vcap/jobs/expvar-scraper
+
+HEALTH_ADDR=<%= p('health_addr') %>
+DATADOG_API_KEY=<%= p('datadog.api_key') %>
+
+function report {
+  echo $(date) $1
+}
+
+function scrape {
+  tmpdir=$(mktemp -d)
+  while :
+  do
+    report "Scraping $HEALTH_ADDR... and dumping to $tmpdir"
+    curl $HEALTH_ADDR 2>> $LOG_FILE.curl > $tmpdir/expvar.results
+    currenttime=$(date +%s)
+    <%=
+        p('metrics.map').map { |expvar,datadog|
+"value=$(cat $tmpdir/expvar.results | python -c 'import json; import sys; print(json.load(sys.stdin)[\"#{p('metrics.namespace')}\"][\"#{expvar}\"])')
+curl --fail -X POST -H \"Content-type: application/json\" \\
+-d \"{ \\\"series\\\" :
+  [
+    {
+      \\\"metric\\\":\\\"#{datadog}\\\",
+      \\\"points\\\":[[${currenttime}, ${value}]],
+      \\\"type\\\":\\\"gauge\\\",
+      \\\"host\\\":\\\"#{p('datadog.host')}\\\"
+    }
+  ]
+}\" \\
+'https://app.datadoghq.com/api/v1/series?api_key='\"$DATADOG_API_KEY\"
+"
+        }.join("\n\n")
+    %>
+
+    sleep 10
+  done
+}
+
+exec 1>> $LOG_FILE
+exec 2>> $LOG_FILE.ctl
+
+case $1 in
+
+  start)
+    if [ -f $PIDFILE ]; then
+      set +e
+        kill -15 `cat $PIDFILE`
+        kill -9 `cat $PIDFILE`
+        kill -2 `cat $PIDFILE`
+        kill -3 `cat $PIDFILE`
+      set -e
+    fi
+
+    mkdir -p $RUN_DIR $(dirname $LOG_FILE)
+    chown -R vcap:vcap $RUN_DIR $(dirname $LOG_FILE)
+
+    ulimit -n 8192
+
+    scrape &
+    echo $! > $PIDFILE
+
+    ;;
+
+  stop)
+    if [ -f $PIDFILE ]; then
+      set +e
+        kill -15 `cat $PIDFILE`
+        kill -9 `cat $PIDFILE`
+        kill -2 `cat $PIDFILE`
+        kill -3 `cat $PIDFILE`
+      set -e
+    fi
+
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}"
+
+    ;;
+
+esac
+

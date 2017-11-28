@@ -1,0 +1,20 @@
+---
+name: expvar-scraper
+
+templates:
+  ctl.erb: bin/ctl
+
+packages: []
+
+properties:
+  health_addr:
+    description: "The address of the expvar endpoint"
+  datadog.api_key:
+    description: "The datadog API key"
+  datadog.host:
+    description: "The host to post to datadog"
+  metrics.namespace:
+    description: "Metric's namespace in expvar output"
+  metrics.map:
+    description: "Map of metrics. The key is the expvar name and the value is the datadog metric name"
+    default: {}
