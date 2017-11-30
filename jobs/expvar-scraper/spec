@@ -3,6 +3,7 @@ name: expvar-scraper
 
 templates:
   ctl.erb: bin/ctl
+  scrape: bin/scrape
 
 packages: []
 
@@ -12,7 +13,7 @@ properties:
   datadog.api_key:
     description: "The datadog API key"
   datadog.host:
-    description: "The host to post to datadog"
+    description: "The origin of the health metrics getting posted to datadog"
   metrics.namespace:
     description: "Metric's namespace in expvar output"
   metrics.map:

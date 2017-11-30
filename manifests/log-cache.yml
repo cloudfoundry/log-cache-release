@@ -44,20 +44,6 @@ instance_groups:
           ca_cert: "((logs_provider.ca))"
           cert: "((logs_provider.certificate))"
           key: "((logs_provider.private_key))"
-  - name: expvar-scraper
-    release: log-cache
-    properties:
-      health_addr: localhost:6060/debug/vars
-      datadog:
-        host: ((system_domain))
-        api_key: ((datadog_api_key))
-      metrics:
-        namespace: LogCache
-        map:
-          Egress: "log-cache.egress"
-          Ingress: "log-cache.ingress"
-          Expired: "log-cache.expired"
-          CachePeriod: "log-cache.cache_period"
 
 variables:
 - name: logs_provider

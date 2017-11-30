@@ -29,3 +29,4 @@ src/github.com/client9/misspell
 src/github.com/kisielk/gotool
 src/github.com/mdempsky/unconvert
 src/golang.org/x/tools
+deployment-vars.yml
