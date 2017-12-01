@@ -7,6 +7,6 @@
       health_addr: http://localhost:6060/debug/vars
       datadog:
         host: "((system_domain))"
-        api_key: "((datadog_api_key))"
+        api_key: "((datadog_key))"
       metrics:
         namespace: LogCache
