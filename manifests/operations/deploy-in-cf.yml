@@ -31,20 +31,6 @@
             cert: ((logs_provider.certificate))
             key: ((logs_provider.private_key))
       release: log-cache
-    - name: expvar-scraper
-      properties:
-        datadog:
-          api_key: ((datadog_api_key))
-          host: ((system_domain))
-        health_addr: localhost:6060/debug/vars
-        metrics:
-          map:
-            CachePeriod: log-cache.cache_period
-            Egress: log-cache.egress
-            Expired: log-cache.expired
-            Ingress: log-cache.ingress
-          namespace: LogCache
-      release: log-cache
     - name: route_registrar
       properties:
         route_registrar:
