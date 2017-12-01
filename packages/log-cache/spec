@@ -10,8 +10,10 @@ files:
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
 - code.cloudfoundry.org/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/app/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/egress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/ingress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/rpc/logcache/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/web/*.go # gosub
 - github.com/emirpasic/gods/containers/*.go # gosub
