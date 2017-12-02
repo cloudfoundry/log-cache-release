@@ -34,3 +34,6 @@
 [submodule "src/github.com/emirpasic/gods"]
 	path = src/github.com/emirpasic/gods
 	url = https://github.com/emirpasic/gods
+[submodule "src/code.cloudfoundry.org/loggregator-api"]
+	path = src/code.cloudfoundry.org/loggregator-api
+	url = https://github.com/cloudfoundry/loggregator-api

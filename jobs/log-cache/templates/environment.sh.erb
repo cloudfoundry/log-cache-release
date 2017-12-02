@@ -11,5 +11,18 @@ export LOGS_PROVIDER_KEY_FILE_PATH="/var/vcap/jobs/log-cache/config/certs/logs_p
 
 # Log Cache
 export EGRESS_ADDR="<%= ":#{p('egress_port')}" %>"
+export INGRESS_ADDR="<%= ":#{p('ingress_port')}" %>"
 export HEALTH_PORT="<%= "#{p('health_port')}" %>"
 export STORE_SIZE="<%= "#{p('store_size')}" %>"
+
+# Clustered Configuration
+<%=
+sorted_instances=link("log-cache").instances.sort_by {|i|i.address}
+index=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
+addrs=sorted_instances.map{|i| "#{i.address}:#{p('ingress_port')}"}
+
+"
+export NODE_INDEX=#{index}
+export NODE_ADDRS=#{addrs.join(",")}
+"
+%>

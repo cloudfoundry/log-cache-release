@@ -11,9 +11,15 @@ templates:
 packages:
 - log-cache
 
+provides:
+- name: log-cache
+  type: log-cache
+
 consumes:
 - name: reverse_log_proxy
   type: reverse_log_proxy
+- name: log-cache
+  type: log-cache
 
 properties:
   logs_provider.tls.ca_cert:
@@ -26,6 +32,10 @@ properties:
   egress_port:
     description: "The port for the log-cache to listen on"
     default: 8080
+  ingress_port:
+    description: "The port for the log-cache to listen on for intra node routing"
+    default: 8081
+
   store_size:
     description: "The number of envelopes to store in memory"
     default: 1000000
