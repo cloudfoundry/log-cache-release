@@ -1,0 +1,22 @@
+---
+name: log-cache-gateway
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+
+packages:
+- log-cache-gateway
+
+provides:
+- name: log-cache-gateway
+  type: log-cache-gateway
+
+consumes:
+- name: log-cache
+  type: log-cache
+
+properties:
+  gateway_port:
+    description: "The port for the log-cache-gateway to listen on"
+    default: 8082

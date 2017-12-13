@@ -7,7 +7,7 @@ export GOROOT=$(readlink -nf /var/vcap/packages/golang1.9.2)
 export GOPATH=$BOSH_INSTALL_TARGET
 export PATH=$GOROOT/bin:$PATH
 
-go build -o ${BOSH_INSTALL_TARGET}/log-cache code.cloudfoundry.org/log-cache/cmd/logcache
+go build -o ${BOSH_INSTALL_TARGET}/log-cache-gateway code.cloudfoundry.org/log-cache/cmd/gateway
 
 # clean up source artifacts
 rm -rf ${BOSH_INSTALL_TARGET}/src ${BOSH_INSTALL_TARGET}/pkg

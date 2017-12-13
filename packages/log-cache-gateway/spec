@@ -1,5 +1,5 @@
 ---
-name: log-cache
+name: log-cache-gateway
 
 dependencies:
 - golang1.9.2
@@ -9,7 +9,7 @@ files:
 - code.cloudfoundry.org/go-loggregator/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
 - code.cloudfoundry.org/log-cache/*.go # gosub
-- code.cloudfoundry.org/log-cache/cmd/logcache/*.go # gosub
+- code.cloudfoundry.org/log-cache/cmd/gateway/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/egress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/ingress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub

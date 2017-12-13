@@ -31,12 +31,14 @@
             cert: ((logs_provider.certificate))
             key: ((logs_provider.private_key))
       release: log-cache
+    - name: log-cache-gateway
+      release: log-cache
     - name: route_registrar
       properties:
         route_registrar:
           routes:
           - name: log-cache
-            port: 8080
+            port: 8081
             registration_interval: 20s
             uris:
             - log-cache.((system_domain))

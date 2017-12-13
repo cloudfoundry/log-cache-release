@@ -44,6 +44,8 @@ instance_groups:
           ca_cert: "((logs_provider.ca))"
           cert: "((logs_provider.certificate))"
           key: "((logs_provider.private_key))"
+  - name: log-cache-gateway
+    release: log-cache
 
 variables:
 - name: logs_provider

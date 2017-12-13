@@ -37,3 +37,9 @@
 [submodule "src/code.cloudfoundry.org/loggregator-api"]
 	path = src/code.cloudfoundry.org/loggregator-api
 	url = https://github.com/cloudfoundry/loggregator-api
+[submodule "src/github.com/golang/glog"]
+	path = src/github.com/golang/glog
+	url = https://github.com/golang/glog
+[submodule "src/github.com/grpc-ecosystem/grpc-gateway"]
+	path = src/github.com/grpc-ecosystem/grpc-gateway
+	url = https://github.com/grpc-ecosystem/grpc-gateway

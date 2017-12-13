@@ -14,6 +14,9 @@ packages:
 provides:
 - name: log-cache
   type: log-cache
+  properties:
+  - egress_port
+  - ingress_port
 
 consumes:
 - name: reverse_log_proxy
