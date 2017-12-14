@@ -28,7 +28,7 @@ cat <<EOF >> $tmp_dir/consumes_cf.yml
       route_registrar:
         routes:
         - name: log-cache
-          port: 8080
+          port: 8081
           registration_interval: 20s
           uris:
           - log-cache.((system_domain))

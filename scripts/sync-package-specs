@@ -30,6 +30,7 @@ function sync_package() {
   )
 }
 
-sync_package log-cache -app  code.cloudfoundry.org/log-cache &
+sync_package log-cache         -app  code.cloudfoundry.org/log-cache/cmd/logcache &
+sync_package log-cache-gateway -app  code.cloudfoundry.org/log-cache/cmd/gateway &
 
 wait
