@@ -19,4 +19,4 @@ consumes:
 properties:
   gateway_port:
     description: "The port for the log-cache-gateway to listen on"
-    default: 8082
+    default: 8081
