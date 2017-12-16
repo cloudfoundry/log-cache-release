@@ -13,7 +13,7 @@ trap "rm -r $tmp_dir" EXIT
 # standalone LogCache consumes from Loggregator. Replace it with CF.
 cat <<EOF > $tmp_dir/consumes_cf.yml
 - type: replace
-  path: /instance_groups/name=log-cache/jobs/name=log-cache/consumes/reverse_log_proxy/deployment?
+  path: /instance_groups/name=log-cache/jobs/name=log-cache-nozzle/consumes/reverse_log_proxy/deployment?
   value: cf
 EOF
 

@@ -1,0 +1,13 @@
+<%
+    l = link('reverse_log_proxy')
+    rlp_addr = "#{l.address}:#{l.p('reverse_log_proxy.egress.port')}"
+%>
+
+# Logs Provider
+export LOGS_PROVIDER_ADDR="<%= rlp_addr %>"
+export LOGS_PROVIDER_CA_FILE_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/logs_provider_ca.crt"
+export LOGS_PROVIDER_CERT_FILE_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/logs_provider.crt"
+export LOGS_PROVIDER_KEY_FILE_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/logs_provider.key"
+
+# Log Cache
+export LOG_CACHE_ADDR="<%= "localhost:#{link('log-cache').p('port')}" %>"
