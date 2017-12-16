@@ -34,18 +34,21 @@ instance_groups:
   jobs:
   - name: log-cache
     release: log-cache
-    consumes:
-      reverse_log_proxy: {from: reverse_log_proxy, deployment: loggregator}
     properties:
       egress_port: 8080
       health_port: 6060
+  - name: log-cache-gateway
+    release: log-cache
+  - name: log-cache-nozzle
+    release: log-cache
+    consumes:
+      reverse_log_proxy: {from: reverse_log_proxy, deployment: loggregator}
+    properties:
       logs_provider:
         tls:
           ca_cert: "((logs_provider.ca))"
           cert: "((logs_provider.certificate))"
           key: "((logs_provider.private_key))"
-  - name: log-cache-gateway
-    release: log-cache
 
 variables:
 - name: logs_provider

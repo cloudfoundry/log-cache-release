@@ -3,9 +3,6 @@ name: log-cache
 
 templates:
   ctl: bin/ctl
-  logs_provider.crt.erb: config/certs/logs_provider.crt
-  logs_provider.key.erb: config/certs/logs_provider.key
-  logs_provider_ca.crt.erb: config/certs/logs_provider_ca.crt
   environment.sh.erb: bin/environment.sh
 
 packages:
@@ -18,19 +15,10 @@ provides:
   - port
 
 consumes:
-- name: reverse_log_proxy
-  type: reverse_log_proxy
 - name: log-cache
   type: log-cache
 
 properties:
-  logs_provider.tls.ca_cert:
-    description: "CA root required for key/cert verification to connect to the logs-provider"
-  logs_provider.tls.cert:
-    description: "TLS certificate for the logs-provider connection"
-  logs_provider.tls.key:
-    description: "TLS key for the logs-provider connection"
-
   port:
     description: "The port for the log-cache to listen on"
     default: 8080

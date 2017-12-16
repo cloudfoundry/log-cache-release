@@ -1,0 +1,52 @@
+#!/bin/bash -e
+
+RUN_DIR=/var/vcap/sys/run/log-cache-nozzle
+LOG_DIR=/var/vcap/sys/log/log-cache-nozzle
+PIDFILE=${RUN_DIR}/log-cache-nozzle.pid
+JOB_DIR=/var/vcap/jobs/log-cache-nozzle
+CERT_DIR=$JOB_DIR/config/certs
+
+PACKAGE_DIR=/var/vcap/packages/log-cache-nozzle
+ENVIRONMENT=/var/vcap/jobs/log-cache-nozzle/bin/environment.sh
+
+case $1 in
+
+  start)
+    set +e
+      killall -15 log-cache-nozzle
+      killall -9 log-cache-nozzle
+      killall -2 log-cache-nozzle
+      killall -3 log-cache-nozzle
+    set -e
+
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+    cd $PACKAGE_DIR
+
+    ulimit -n 8192
+
+    source $ENVIRONMENT
+    echo $$ > $PIDFILE
+    exec chpst -u vcap:vcap ./log-cache-nozzle &>> ${LOG_DIR}/log-cache-nozzle.log
+
+    ;;
+
+  stop)
+    set +e
+      killall -15 log-cache-nozzle
+      killall -9 log-cache-nozzle
+      killall -2 log-cache-nozzle
+      killall -3 log-cache-nozzle
+    set -e
+
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}"
+
+    ;;
+
+esac

@@ -32,5 +32,6 @@ function sync_package() {
 
 sync_package log-cache         -app  code.cloudfoundry.org/log-cache/cmd/logcache &
 sync_package log-cache-gateway -app  code.cloudfoundry.org/log-cache/cmd/gateway &
+sync_package log-cache-nozzle  -app  code.cloudfoundry.org/log-cache/cmd/nozzle &
 
 wait

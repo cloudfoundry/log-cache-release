@@ -17,21 +17,24 @@
     - z2
     instances: 1
     jobs:
+    - name: log-cache
+      properties:
+        egress_port: 8080
+        health_port: 6060
+      release: log-cache
+    - name: log-cache-gateway
+      release: log-cache
     - consumes:
         reverse_log_proxy:
           deployment: cf
           from: reverse_log_proxy
-      name: log-cache
+      name: log-cache-nozzle
       properties:
-        egress_port: 8080
-        health_port: 6060
         logs_provider:
           tls:
             ca_cert: ((logs_provider.ca))
             cert: ((logs_provider.certificate))
             key: ((logs_provider.private_key))
-      release: log-cache
-    - name: log-cache-gateway
       release: log-cache
     - name: route_registrar
       properties:
