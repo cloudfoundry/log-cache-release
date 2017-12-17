@@ -46,3 +46,6 @@
 [submodule "src/code.cloudfoundry.org/go-log-cache"]
 	path = src/code.cloudfoundry.org/go-log-cache
 	url = https://github.com/cloudfoundry-incubator/go-log-cache
+[submodule "src/code.cloudfoundry.org/go-diodes"]
+	path = src/code.cloudfoundry.org/go-diodes
+	url = https://github.com/cloudfoundry/go-diodes
