@@ -1,6 +1,0 @@
-check process expvar-scraper
-  with pidfile /var/vcap/sys/run/expvar-scraper/expvar-scraper.pid
-  start program "/var/vcap/jobs/expvar-scraper/bin/ctl start"
-  stop program "/var/vcap/jobs/expvar-scraper/bin/ctl stop"
-  group vcap
-
