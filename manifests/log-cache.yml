@@ -49,6 +49,27 @@ instance_groups:
           ca_cert: "((logs_provider.ca))"
           cert: "((logs_provider.certificate))"
           key: "((logs_provider.private_key))"
+  - name: log-cache-expvar-forwarder
+    release: log-cache
+    properties:
+      counters:
+      - name: egress
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Egress}}"
+      - name: ingress
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Ingress}}"
+      - name: expired
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Expired}}"
+      gauges:
+      - name: cache-period
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.CachePeriod}}"
 
 variables:
 - name: logs_provider

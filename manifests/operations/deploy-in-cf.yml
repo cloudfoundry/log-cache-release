@@ -36,6 +36,27 @@
             cert: ((logs_provider.certificate))
             key: ((logs_provider.private_key))
       release: log-cache
+    - name: log-cache-expvar-forwarder
+      properties:
+        counters:
+        - addr: http://localhost:6060/debug/vars
+          name: egress
+          source_id: log-cache
+          template: '{{.LogCache.Egress}}'
+        - addr: http://localhost:6060/debug/vars
+          name: ingress
+          source_id: log-cache
+          template: '{{.LogCache.Ingress}}'
+        - addr: http://localhost:6060/debug/vars
+          name: expired
+          source_id: log-cache
+          template: '{{.LogCache.Expired}}'
+        gauges:
+        - addr: http://localhost:6060/debug/vars
+          name: cache-period
+          source_id: log-cache
+          template: '{{.LogCache.CachePeriod}}'
+      release: log-cache
     - name: route_registrar
       properties:
         route_registrar:

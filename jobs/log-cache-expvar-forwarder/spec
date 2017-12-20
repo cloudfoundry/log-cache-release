@@ -1,0 +1,42 @@
+---
+name: log-cache-expvar-forwarder
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+
+packages:
+- log-cache-expvar-forwarder
+
+provides:
+- name: log-cache-expvar-forwarder
+  type: log-cache-expvar-forwarder
+
+consumes:
+- name: log-cache
+  type: log-cache
+
+properties:
+  counters:
+    description: |
+        A array of Objects that have the following fields:
+        - addr: address of the expvar endpoint
+        - name: The output name of the Counter
+        - source_id: The output sourceID of the Counter
+        - template: The golang text/template to find the metric in the expvar
+          output.
+        - tags: An object that can only have string values. They will be
+          passed as tags on the envelope.
+    default: ~
+  gauges:
+    description: |
+        A array of Objects that have the following fields:
+        - addr: address of the expvar endpoint
+        - name: The output name of the Counter
+        - unit: The output unit of the Counter
+        - source_id: The output sourceID of the Counter
+        - template: The golang text/template to find the metric in the expvar
+          output.
+        - tags: An object that can only have string values. They will be
+          passed as tags on the envelope.
+    default: ~
