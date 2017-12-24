@@ -1,0 +1,52 @@
+#!/bin/bash -e
+
+RUN_DIR=/var/vcap/sys/run/log-cache-web-hook
+LOG_DIR=/var/vcap/sys/log/log-cache-web-hook
+PIDFILE=${RUN_DIR}/log-cache-web-hook.pid
+JOB_DIR=/var/vcap/jobs/log-cache-web-hook
+CERT_DIR=$JOB_DIR/config/certs
+
+PACKAGE_DIR=/var/vcap/packages/log-cache-web-hook
+ENVIRONMENT=/var/vcap/jobs/log-cache-web-hook/bin/environment.sh
+
+case $1 in
+
+  start)
+    set +e
+      killall -15 log-cache-web-hook
+      killall -9 log-cache-web-hook
+      killall -2 log-cache-web-hook
+      killall -3 log-cache-web-hook
+    set -e
+
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+    cd $PACKAGE_DIR
+
+    ulimit -n 8192
+
+    source $ENVIRONMENT
+    echo $$ > $PIDFILE
+    exec chpst -u vcap:vcap ./log-cache-web-hook &>> ${LOG_DIR}/log-cache-web-hook.log
+
+    ;;
+
+  stop)
+    set +e
+      killall -15 log-cache-web-hook
+      killall -9 log-cache-web-hook
+      killall -2 log-cache-web-hook
+      killall -3 log-cache-web-hook
+    set -e
+
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}"
+
+    ;;
+
+esac
