@@ -1,0 +1,53 @@
+---
+name: log-cache-web-hook
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
+
+packages:
+- log-cache-web-hook
+
+consumes:
+- name: log-cache
+  type: log-cache
+- name: log-cache-group-reader
+  type: log-cache-group-reader
+
+provides:
+- name: log-cache-web-hook
+  type: log-cache-web-hook
+
+properties:
+  queries:
+    description: |
+      The queries tell web-hook how to analyze the data and where to post
+      data. Each query is a golang text template
+      (https://golang.org/pkg/text/template/)  that is applied to a slice of
+      loggregator envelopes
+      (https://github.com/cloudfoundry/go-loggregator/blob/master/rpc/loggregator_v2/envelope.pb.go).
+      There are a few functions available for the query to aggregate the data.
+      There is a 'post' function that takes a URL, headers map and data.
+    example:
+      - source_ids:
+        - some-id-1
+        - some-id-2
+        query: |
+          {{ if (eq (countEnvelopes .) 1) }}
+              {{post "http://some.url" nil "Page Me 1"}}
+          {{ else if eq (averageEnvelopes .) 100.0 }}
+              {{post "http://some.url" nil "Page Me 2"}}
+          {{end}}
+      - source_ids:
+        - some-id-1
+        - some-id-3
+        follow: true
+        query: |
+          {{ if (eq (countEnvelopes .) 1) }}
+              {{post "http://some.url" nil "Page Me 1"}}
+          {{ else if eq (averageEnvelopes .) 100.0 }}
+              {{post "http://some.url" nil "Page Me 2"}}
+          {{end}}

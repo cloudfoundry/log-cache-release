@@ -36,5 +36,6 @@ sync_package log-cache-nozzle            -app  code.cloudfoundry.org/log-cache/c
 sync_package log-cache-expvar-forwarder  -app  code.cloudfoundry.org/log-cache/cmd/expvar-forwarder &
 sync_package log-cache-group-reader      -app  code.cloudfoundry.org/log-cache/cmd/group-reader &
 sync_package log-cache-cf-auth-proxy     -app  code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy &
+sync_package log-cache-web-hook          -app  code.cloudfoundry.org/log-cache/cmd/web-hook &
 
 wait
