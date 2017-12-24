@@ -1,0 +1,6 @@
+check process log-cache-web-hook
+  with pidfile /var/vcap/sys/run/log-cache-web-hook/log-cache-web-hook.pid
+  start program "/var/vcap/jobs/log-cache-web-hook/bin/ctl start"
+  stop program "/var/vcap/jobs/log-cache-web-hook/bin/ctl stop"
+  group vcap
+
