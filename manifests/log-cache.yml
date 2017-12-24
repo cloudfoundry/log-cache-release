@@ -53,6 +53,7 @@ instance_groups:
     release: log-cache
     properties:
       counters:
+        # Log Cache
       - name: egress
         source_id: log-cache
         addr: http://localhost:6060/debug/vars
@@ -65,7 +66,22 @@ instance_groups:
         source_id: log-cache
         addr: http://localhost:6060/debug/vars
         template: "{{.LogCache.Expired}}"
+
+        # Nozzle
+      - name: egress
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Egress}}"
+      - name: ingress
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Ingress}}"
+      - name: err
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Err}}"
       gauges:
+        # Log Cache
       - name: cache-period
         source_id: log-cache
         addr: http://localhost:6060/debug/vars

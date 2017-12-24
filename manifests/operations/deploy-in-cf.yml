@@ -51,6 +51,18 @@
           name: expired
           source_id: log-cache
           template: '{{.LogCache.Expired}}'
+        - addr: http://localhost:6061/debug/vars
+          name: egress
+          source_id: log-cache-nozzle
+          template: '{{.Nozzle.Egress}}'
+        - addr: http://localhost:6061/debug/vars
+          name: ingress
+          source_id: log-cache-nozzle
+          template: '{{.Nozzle.Ingress}}'
+        - addr: http://localhost:6061/debug/vars
+          name: err
+          source_id: log-cache-nozzle
+          template: '{{.Nozzle.Err}}'
         gauges:
         - addr: http://localhost:6060/debug/vars
           name: cache-period
