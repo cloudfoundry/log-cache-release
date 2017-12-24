@@ -11,6 +11,8 @@ packages:
 provides:
 - name: log-cache-gateway
   type: log-cache-gateway
+  properties:
+  - gateway_port
 
 consumes:
 - name: log-cache
