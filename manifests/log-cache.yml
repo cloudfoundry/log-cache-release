@@ -39,6 +39,8 @@ instance_groups:
       health_port: 6060
   - name: log-cache-gateway
     release: log-cache
+  - name: log-cache-group-reader
+    release: log-cache
   - name: log-cache-nozzle
     release: log-cache
     consumes:

@@ -17,6 +17,8 @@ provides:
 consumes:
 - name: log-cache
   type: log-cache
+- name: log-cache-group-reader
+  type: log-cache-group-reader
 
 properties:
   gateway_port:

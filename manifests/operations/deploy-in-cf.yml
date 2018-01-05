@@ -24,6 +24,8 @@
       release: log-cache
     - name: log-cache-gateway
       release: log-cache
+    - name: log-cache-group-reader
+      release: log-cache
     - consumes:
         reverse_log_proxy:
           deployment: cf
