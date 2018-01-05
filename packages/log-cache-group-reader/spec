@@ -1,5 +1,5 @@
 ---
-name: log-cache-expvar-forwarder
+name: log-cache-group-reader
 
 dependencies:
 - golang1.9.2
@@ -17,10 +17,11 @@ files:
 - code.cloudfoundry.org/go-stream-aggregator/*.go # gosub
 - code.cloudfoundry.org/go-stream-aggregator/internal/traverser/*.go # gosub
 - code.cloudfoundry.org/log-cache/*.go # gosub
-- code.cloudfoundry.org/log-cache/cmd/expvar-forwarder/*.go # gosub
+- code.cloudfoundry.org/log-cache/cmd/group-reader/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/egress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/groups/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/ingress/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - github.com/emirpasic/gods/containers/*.go # gosub
 - github.com/emirpasic/gods/trees/*.go # gosub

@@ -1,0 +1,30 @@
+---
+name: log-cache-group-reader
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+
+packages:
+- log-cache-group-reader
+
+provides:
+- name: log-cache-group-reader
+  type: log-cache-group-reader
+  properties:
+  - port
+
+consumes:
+- name: log-cache
+  type: log-cache
+- name: log-cache-group-reader
+  type: log-cache-group-reader
+
+properties:
+  port:
+    description: "The port for the GroupReader to listen on"
+    default: 8082
+
+  health_port:
+    description: "The port for GroupReader to bind a health endpoint"
+    default: 6062

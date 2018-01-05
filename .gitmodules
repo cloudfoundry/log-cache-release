@@ -52,3 +52,9 @@
 [submodule "src/code.cloudfoundry.org/go-batching"]
 	path = src/code.cloudfoundry.org/go-batching
 	url = https://github.com/cloudfoundry/go-batching
+[submodule "src/code.cloudfoundry.org/go-pubsub"]
+	path = src/code.cloudfoundry.org/go-pubsub
+	url = https://github.com/cloudfoundry/go-pubsub
+[submodule "src/code.cloudfoundry.org/go-stream-aggregator"]
+	path = src/code.cloudfoundry.org/go-stream-aggregator
+	url = https://github.com/cloudfoundry-incubator/go-stream-aggregator
