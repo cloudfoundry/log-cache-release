@@ -58,3 +58,6 @@
 [submodule "src/code.cloudfoundry.org/go-stream-aggregator"]
 	path = src/code.cloudfoundry.org/go-stream-aggregator
 	url = https://github.com/cloudfoundry-incubator/go-stream-aggregator
+[submodule "src/code.cloudfoundry.org/go-orchestrator"]
+	path = src/code.cloudfoundry.org/go-orchestrator
+	url = https://github.com/cloudfoundry/go-orchestrator
