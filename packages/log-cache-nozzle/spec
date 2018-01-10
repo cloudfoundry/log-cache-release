@@ -12,6 +12,7 @@ files:
 - code.cloudfoundry.org/go-log-cache/rpc/logcache/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
+- code.cloudfoundry.org/go-orchestrator/*.go # gosub
 - code.cloudfoundry.org/go-pubsub/*.go # gosub
 - code.cloudfoundry.org/go-pubsub/internal/node/*.go # gosub
 - code.cloudfoundry.org/go-stream-aggregator/*.go # gosub
