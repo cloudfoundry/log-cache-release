@@ -6,6 +6,9 @@ templates:
   logs_provider.crt.erb: config/certs/logs_provider.crt
   logs_provider.key.erb: config/certs/logs_provider.key
   logs_provider_ca.crt.erb: config/certs/logs_provider_ca.crt
+  log_cache_ca.crt.erb: config/certs/log_cache_ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
   environment.sh.erb: bin/environment.sh
 
 packages:

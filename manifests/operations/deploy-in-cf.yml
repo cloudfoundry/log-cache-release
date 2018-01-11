@@ -21,6 +21,10 @@
       properties:
         egress_port: 8080
         health_port: 6060
+        tls:
+          ca_cert: ((log_cache.ca))
+          cert: ((log_cache.certificate))
+          key: ((log_cache.private_key))
       release: log-cache
     - name: log-cache-gateway
       release: log-cache
@@ -94,6 +98,29 @@
     name: logs_provider
     options:
       ca: loggregator_ca
+      common_name: log-cache
+      extended_key_usage:
+      - client_auth
+      - server_auth
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: log_cache_ca
+    options:
+      common_name: log-cache
+      is_ca: true
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: log_cache
+    options:
+      alternative_names:
+      - log_cache
+      - log-cache
+      - logcache
+      ca: log_cache_ca
       common_name: log-cache
       extended_key_usage:
       - client_auth

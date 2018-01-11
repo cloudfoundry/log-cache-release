@@ -4,6 +4,9 @@ name: log-cache
 templates:
   ctl: bin/ctl
   environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
 
 packages:
 - log-cache
@@ -13,6 +16,7 @@ provides:
   type: log-cache
   properties:
   - port
+  - tls
 
 consumes:
 - name: log-cache
@@ -29,3 +33,10 @@ properties:
   health_port:
     description: "The port for LogCache to bind a health endpoint"
     default: 6060
+
+  tls.ca_cert:
+    description: "The Certificate Authority for log cache mutual TLS."
+  tls.cert:
+    description: "The client cert for log cache mutual TLS."
+  tls.key:
+    description: "The client private key for log cache mutual TLS."

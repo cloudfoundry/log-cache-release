@@ -43,7 +43,15 @@ ops_file_path=manifests/operations/deploy-in-cf.yml
 instance_groups=`bosh int $tmp_dir/adjusted.yml --path /instance_groups | sed 's/^\-/ /' | sed 's/^/  /'`
 
 # save the variables
-variables=`bosh int $tmp_dir/adjusted.yml --path /variables | sed 's/^\-/ /' | sed 's/^/  /'`
+for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | egrep '^- name' | awk '{print $3}')
+do
+cat <<EOF >> $tmp_dir/vars.yml
+- type: replace
+  path: /variables/-
+  value:
+$(bosh int $tmp_dir/adjusted.yml --path /variables/name=$v | sed 's/^/    /')
+EOF
+done
 
 # write instance_groups and variables to new ops-file
 cat <<EOF > manifests/operations/deploy-in-cf.yml
@@ -62,8 +70,5 @@ cat <<EOF > manifests/operations/deploy-in-cf.yml
   path: /instance_groups/-
   value:
 $instance_groups
-- type: replace
-  path: /variables/-
-  value:
-$variables
+$(cat $tmp_dir/vars.yml)
 EOF

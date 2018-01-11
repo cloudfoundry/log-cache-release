@@ -1,3 +1,6 @@
 export LOG_CACHE_ADDR="<%= "localhost:#{link('log-cache').p('port')}" %>"
 export GROUP_READER_ADDR="<%= "localhost:#{link('log-cache-group-reader').p('port')}" %>"
 export ADDR="<%= ":#{p('gateway_port')}" %>"
+export CA_PATH="/var/vcap/jobs/log-cache-gateway/config/certs/ca.crt"
+export CERT_PATH="/var/vcap/jobs/log-cache-gateway/config/certs/log_cache.crt"
+export KEY_PATH="/var/vcap/jobs/log-cache-gateway/config/certs/log_cache.key"

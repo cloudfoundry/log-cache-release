@@ -4,6 +4,9 @@ name: log-cache-expvar-forwarder
 templates:
   ctl: bin/ctl
   environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
 
 packages:
 - log-cache-expvar-forwarder
