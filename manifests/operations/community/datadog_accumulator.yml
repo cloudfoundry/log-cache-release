@@ -1,0 +1,26 @@
+- type: replace
+  path: /instance_groups/name=log-cache/jobs/name=log-cache-web-hook?/properties?/queries?/-
+  value:
+    follow: true
+    query: |
+      {{ if .GetCounter }}
+          {{\$m:=mapInit "metric" (printf "log-cache.%s" .GetCounter.GetName)}}
+          {{\$m.Add "host" "some-domain.com"}}
+          {{\$m.Add "type" "gauge"}}
+          {{\$m.Add "points" (sliceInit (sliceInit (nsToTime .Timestamp).Unix .GetCounter.GetTotal)) }}
+          {{\$s:=mapInit "series" (sliceInit \$m)}}
+          {{post "https://app.datadoghq.com/api/v1/series?api_key=((datadog_api_key))" nil \$s}}
+      {{ else if .GetGauge }}
+          {{\$timestamp:=.Timestamp}}
+          {{ range \$name, \$value := .GetGauge.GetMetrics }}
+              {{\$m:=mapInit "metric" (printf "log-cache.%s" \$name)}}
+              {{\$m.Add "host" "some-domain.com"}}
+              {{\$m.Add "type" "gauge"}}
+              {{\$m.Add "points" (sliceInit (sliceInit (nsToTime \$timestamp).Unix \$value.GetValue)) }}
+              {{\$s:=mapInit "series" (sliceInit \$m)}}
+              {{post "https://app.datadoghq.com/api/v1/series?api_key=((datadog_api_key))" nil \$s}}
+          {{end}}
+      {{end}}
+    source_ids:
+    - log-cache
+    - log-cache-nozzle
