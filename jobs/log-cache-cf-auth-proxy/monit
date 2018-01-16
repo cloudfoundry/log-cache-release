@@ -1,0 +1,6 @@
+check process log-cache-cf-auth-proxy
+  with pidfile /var/vcap/sys/run/log-cache-cf-auth-proxy/log-cache-cf-auth-proxy.pid
+  start program "/var/vcap/jobs/log-cache-cf-auth-proxy/bin/ctl start"
+  stop program "/var/vcap/jobs/log-cache-cf-auth-proxy/bin/ctl stop"
+  group vcap
+

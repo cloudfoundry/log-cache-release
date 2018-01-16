@@ -1,0 +1,20 @@
+<%
+    gateway = link('log-cache-gateway')
+    cc = link('cloud_controller')
+%>
+
+export CAPI_ADDR="<%= p('cc.capi_internal_addr') %>"
+export CAPI_CERT_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/cc.crt"
+export CAPI_KEY_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/cc.key"
+export CAPI_CA_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/cc_ca.crt"
+export CAPI_COMMON_NAME="<%= p('cc.common_name') %>"
+
+export UAA_CLIENT_ID="<%= p('uaa.client_id') %>"
+export UAA_CLIENT_SECRET="<%= p('uaa.client_secret') %>"
+export UAA_ADDR="<%= p('uaa.internal_addr') %>"
+export UAA_CA_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/uaa_ca.crt"
+
+export SKIP_CERT_VERIFY="<%= p('skip_cert_verify') %>"
+
+export LOG_CACHE_GATEWAY_ADDR="<%= "http://localhost:#{gateway.p('gateway_port')}" %>"
+export ADDR="<%= ":#{p('proxy_port')}" %>"

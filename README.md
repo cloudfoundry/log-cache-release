@@ -68,8 +68,8 @@ bosh \
     deploy ~/workspace/cf-deployment/cf-deployment.yml \
     --ops-file ~/workspace/cf-deployment/operations/bosh-lite.yml \
     --ops-file ~/workspace/cf-deployment/operations/experimental/use-bosh-dns.yml \
-    --ops-file ~/workspace/cf-deployment/operations/use-postgres.yml \
     --ops-file ~/workspace/cf-deployment/operations/use-compiled-releases.yml \
+    --ops-file ~/workspace/cf-deployment/operations/use-postgres.yml \
     --ops-file ~/workspace/log-cache-release/manifests/operations/deploy-in-cf.yml \
     --vars-store ~/workspace/cf-deployment/vars-store.yml \
     -v system_domain=bosh-lite.com
