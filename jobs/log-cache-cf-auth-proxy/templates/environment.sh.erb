@@ -3,7 +3,7 @@
     cc = link('cloud_controller')
 %>
 
-export CAPI_ADDR="<%= p('cc.capi_internal_addr') %>"
+export CAPI_ADDR="<%= "#{cc.address}:9023" %>"
 export CAPI_CERT_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/cc.crt"
 export CAPI_KEY_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/cc.key"
 export CAPI_CA_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/cc_ca.crt"

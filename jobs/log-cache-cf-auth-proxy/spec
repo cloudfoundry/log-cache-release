@@ -29,8 +29,6 @@ properties:
     default: false
   proxy_port:
     description: "The port for the cf-auth-proxy to listen on"
-  cc.capi_internal_addr:
-    description: "The endpoint used for the internal CC api"
   cc.ca_cert:
     description: "The CA for the internal api"
   cc.common_name:
