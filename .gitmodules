@@ -61,3 +61,6 @@
 [submodule "src/code.cloudfoundry.org/go-orchestrator"]
 	path = src/code.cloudfoundry.org/go-orchestrator
 	url = https://github.com/cloudfoundry-incubator/go-orchestrator.git
+[submodule "src/github.com/gorilla/mux"]
+	path = src/github.com/gorilla/mux
+	url = https://github.com/gorilla/mux
