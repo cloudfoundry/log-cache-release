@@ -64,6 +64,6 @@
 [submodule "src/github.com/gorilla/mux"]
 	path = src/github.com/gorilla/mux
 	url = https://github.com/gorilla/mux
-[submodule "src/code.cloudfoundry.org/gosigar"]
-	path = src/code.cloudfoundry.org/gosigar
+[submodule "src/github.com/cloudfoundry/gosigar"]
+	path = src/github.com/cloudfoundry/gosigar
 	url = https://github.com/cloudfoundry/gosigar
