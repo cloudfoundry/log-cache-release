@@ -17,6 +17,8 @@ files:
 - code.cloudfoundry.org/go-pubsub/internal/node/*.go # gosub
 - code.cloudfoundry.org/go-stream-aggregator/*.go # gosub
 - code.cloudfoundry.org/go-stream-aggregator/internal/traverser/*.go # gosub
+- code.cloudfoundry.org/gosigar/*.go # gosub
+- code.cloudfoundry.org/gosigar/vendor/github.com/pkg/errors/*.go # gosub
 - code.cloudfoundry.org/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/gateway/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/egress/*.go # gosub
@@ -24,6 +26,7 @@ files:
 - code.cloudfoundry.org/log-cache/internal/ingress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
+- github.com/cloudfoundry/gosigar/sys/windows/*.go # gosub
 - github.com/emirpasic/gods/containers/*.go # gosub
 - github.com/emirpasic/gods/trees/*.go # gosub
 - github.com/emirpasic/gods/trees/avltree/*.go # gosub
