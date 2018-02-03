@@ -74,6 +74,18 @@
           name: cache-period
           source_id: log-cache
           template: '{{.LogCache.CachePeriod}}'
+        - addr: http://localhost:6060/debug/vars
+          name: store-size
+          source_id: log-cache
+          template: '{{.LogCache.StoreSize}}'
+        - addr: http://localhost:6060/debug/vars
+          name: total-system-memory
+          source_id: log-cache
+          template: '{{.LogCache.TotalSystemMemory}}'
+        - addr: http://localhost:6060/debug/vars
+          name: available-system-memory
+          source_id: log-cache
+          template: '{{.LogCache.AvailableSystemMemory}}'
       release: log-cache
     - name: route_registrar
       properties:
