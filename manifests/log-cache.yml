@@ -92,6 +92,18 @@ instance_groups:
         source_id: log-cache
         addr: http://localhost:6060/debug/vars
         template: "{{.LogCache.CachePeriod}}"
+      - name: store-size
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.StoreSize}}"
+      - name: total-system-memory
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.TotalSystemMemory}}"
+      - name: available-system-memory
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.AvailableSystemMemory}}"
 
 variables:
 - name: logs_provider
