@@ -33,7 +33,7 @@
         ca_cert: "((uaa_ca.certificate))"
 
 - type: replace
-  path: /instance_groups/name=log-cache/jobs/log-cache-gateway/properties/gateway_addr?
+  path: /instance_groups/name=log-cache/jobs/name=log-cache-gateway/properties?/gateway_addr?
   value: localhost:8081
 
 - type: replace
