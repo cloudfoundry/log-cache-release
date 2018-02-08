@@ -33,6 +33,10 @@
         ca_cert: "((uaa_ca.certificate))"
 
 - type: replace
+  path: /instance_groups/name=log-cache/jobs/log-cache-gateway/properties/gateway_addr?
+  value: localhost:8081
+
+- type: replace
   path: /variables/-
   value:
     name: log_cache_tls_cc_auth_proxy
