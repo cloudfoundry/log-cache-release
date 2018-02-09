@@ -27,6 +27,8 @@
           key: ((log_cache.private_key))
       release: log-cache
     - name: log-cache-gateway
+      properties:
+        gateway_addr: localhost:8081
       release: log-cache
     - name: log-cache-group-reader
       release: log-cache

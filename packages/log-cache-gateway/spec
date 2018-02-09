@@ -2,7 +2,7 @@
 name: log-cache-gateway
 
 dependencies:
-- golang1.9.2
+- golang1.9.4
 
 files:
 - code.cloudfoundry.org/go-batching/*.go # gosub
@@ -24,10 +24,6 @@ files:
 - code.cloudfoundry.org/log-cache/internal/ingress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
-- github.com/cloudfoundry/gosigar/*.go # gosub
-- github.com/cloudfoundry/gosigar/sys/windows/*.go # gosub
-- github.com/cloudfoundry/gosigar/vendor/github.com/pkg/errors/*.go # gosub
-- github.com/cloudfoundry/gosigar/vendor/golang.org/x/sys/windows/*.go # gosub
 - github.com/emirpasic/gods/containers/*.go # gosub
 - github.com/emirpasic/gods/trees/*.go # gosub
 - github.com/emirpasic/gods/trees/avltree/*.go # gosub

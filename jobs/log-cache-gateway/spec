@@ -15,7 +15,7 @@ provides:
 - name: log-cache-gateway
   type: log-cache-gateway
   properties:
-  - gateway_port
+  - gateway_addr
 
 consumes:
 - name: log-cache
@@ -24,6 +24,6 @@ consumes:
   type: log-cache-group-reader
 
 properties:
-  gateway_port:
-    description: "The port for the log-cache-gateway to listen on"
-    default: 8081
+  gateway_addr:
+    description: "The address for the log-cache-gateway to listen on"
+    default: ":8081"

@@ -19,5 +19,5 @@ export UAA_CA_PATH="/var/vcap/jobs/log-cache-cf-auth-proxy/config/certs/uaa_ca.c
 
 export SKIP_CERT_VERIFY="<%= p('skip_cert_verify') %>"
 
-export LOG_CACHE_GATEWAY_ADDR="<%= "http://localhost:#{gateway.p('gateway_port')}" %>"
+export LOG_CACHE_GATEWAY_ADDR="<%= "http://#{gateway.p('gateway_addr')}" %>"
 export ADDR="<%= ":#{p('proxy_port')}" %>"
