@@ -28,7 +28,11 @@ case $1 in
 
     source $ENVIRONMENT
     echo $$ > $PIDFILE
-    exec chpst -u vcap:vcap ./log-cache-expvar-forwarder &>> ${LOG_DIR}/log-cache-expvar-forwarder.log
+
+    exec >>${LOG_DIR}/captured-metrics.log \
+        2>>${LOG_DIR}/log-cache-expvar-forwarder.log
+
+    exec chpst -u vcap:vcap ./log-cache-expvar-forwarder
 
     ;;
 

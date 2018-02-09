@@ -20,6 +20,9 @@ consumes:
   type: log-cache
 
 properties:
+  log_metrics:
+    description: Write each metric from the endpoints to Log Cache and stdout.
+    default: true
   counters:
     description: |
         A array of Objects that have the following fields:
