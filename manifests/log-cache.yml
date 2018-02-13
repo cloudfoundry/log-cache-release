@@ -45,6 +45,8 @@ instance_groups:
     release: log-cache
   - name: log-cache-group-reader
     release: log-cache
+    properties:
+      port: 8084
   - name: log-cache-nozzle
     release: log-cache
     consumes:
