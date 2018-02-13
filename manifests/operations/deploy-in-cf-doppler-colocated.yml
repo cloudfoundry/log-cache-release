@@ -38,6 +38,21 @@
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
   value:
+    consumes:
+      reverse_log_proxy:
+        deployment: cf
+        from: reverse_log_proxy
+    name: log-cache-nozzle
+    properties:
+      logs_provider:
+        tls:
+          ca_cert: ((logs_provider.ca))
+          cert: ((logs_provider.certificate))
+          key: ((logs_provider.private_key))
+    release: log-cache
+- type: replace
+  path: /instance_groups/name=doppler/jobs/-
+  value:
     name: log-cache-web-hook
     release: log-cache
 - type: replace

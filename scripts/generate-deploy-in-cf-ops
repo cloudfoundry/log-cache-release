@@ -4,7 +4,7 @@ set -eu
 
 trap "echo Exited!; exit 1;" SIGINT SIGTERM
 
-colocate_with_dopple=false
+colocate_with_doppler=false
 while getopts ":c" opt; do
   case $opt in
     c)
@@ -31,13 +31,11 @@ EOF
 
 bosh int manifests/log-cache.yml --ops-file=$tmp_dir/consumes_cf.yml --ops-file=scripts/operations/cf-auth-proxy.yml > $tmp_dir/adjusted.yml
 
-ops_file_path=manifests/operations/deploy-in-cf.yml
-
 # save the instance_groups
 instance_groups=`bosh int $tmp_dir/adjusted.yml --path /instance_groups | sed 's/^\-/ /' | sed 's/^/  /'`
 
 # save the variables
-for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | egrep '^- name' | awk '{print $3}')
+for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | awk '/^. name: / {print $NF}')
 do
 cat <<EOF >> $tmp_dir/vars.yml
 - type: replace
@@ -47,7 +45,7 @@ $(bosh int $tmp_dir/adjusted.yml --path /variables/name=$v | sed 's/^/    /')
 EOF
 done
 
-for j in $(bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache/jobs | egrep '^- name' | awk '{print $3}')
+for j in $(bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache/jobs | awk '/^. name: / {print $NF}')
 do
 cat <<EOF >> $tmp_dir/jobs.yml
 - type: replace

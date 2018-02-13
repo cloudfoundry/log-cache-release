@@ -31,6 +31,8 @@
         gateway_addr: localhost:8081
       release: log-cache
     - name: log-cache-group-reader
+      properties:
+        port: 8084
       release: log-cache
     - consumes:
         reverse_log_proxy:
