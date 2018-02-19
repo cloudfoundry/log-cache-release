@@ -1,0 +1,18 @@
+# Log Cache
+export HEALTH_PORT="<%= "#{p('health_port')}" %>"
+
+export CA_PATH="/var/vcap/jobs/log-cache-scheduler/config/certs/ca.crt"
+export CERT_PATH="/var/vcap/jobs/log-cache-scheduler/config/certs/log_cache.crt"
+export KEY_PATH="/var/vcap/jobs/log-cache-scheduler/config/certs/log_cache.key"
+
+# Clustered Configuration
+<%=
+sorted_instances=link("log-cache-group-reader").instances.sort_by {|i|i.address}
+addrs=sorted_instances.map{|i| "#{i.address}:#{link("log-cache-group-reader").p('port')}"}
+
+"
+export NODE_ADDRS=#{addrs.join(",")}
+export COUNT=#{p('count')}
+export INTERVAL=#{p('interval')}
+"
+%>

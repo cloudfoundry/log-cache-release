@@ -21,6 +21,20 @@ addons:
     release: bosh-dns
 
 instance_groups:
+- name: log-cache-scheduler
+  azs:
+  - z1
+  - z2
+  instances: 1
+  persistent_disk_type: 5GB
+  vm_type: minimal
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: log-cache-scheduler
+    release: log-cache
+
 - name: log-cache
   azs:
   - z1
