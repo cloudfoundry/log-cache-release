@@ -1,0 +1,34 @@
+---
+name: log-cache-scheduler
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
+
+packages:
+- log-cache-scheduler
+
+provides:
+- name: log-cache-scheduler
+  type: log-cache-scheduler
+
+consumes:
+- name: log-cache
+  type: log-cache
+- name: log-cache-group-reader
+  type: log-cache-group-reader
+
+properties:
+  interval:
+    description: "The interval at which the scheduler operates"
+    default: 15s
+  count:
+    description: "The number of ranges to schedule across the Log Cache cluster"
+    default: 100
+
+  health_port:
+    description: "The port for LogCache to bind a health endpoint"
+    default: 6064

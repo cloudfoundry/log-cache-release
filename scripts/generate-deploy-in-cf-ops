@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eu
+set -o pipefail
 
 trap "echo Exited!; exit 1;" SIGINT SIGTERM
 
@@ -32,7 +33,8 @@ EOF
 bosh int manifests/log-cache.yml --ops-file=$tmp_dir/consumes_cf.yml --ops-file=scripts/operations/cf-auth-proxy.yml > $tmp_dir/adjusted.yml
 
 # save the instance_groups
-instance_groups=`bosh int $tmp_dir/adjusted.yml --path /instance_groups | sed 's/^\-/ /' | sed 's/^/  /'`
+instance_groups_log_cache=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache | sed 's/^/    /'`
+instance_groups_scheduler=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler | sed 's/^/    /'`
 
 # save the variables
 for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | awk '/^. name: / {print $NF}')
@@ -89,7 +91,12 @@ cat <<EOF > manifests/operations/deploy-in-cf.yml
 - type: replace
   path: /instance_groups/-
   value:
-$instance_groups
+$instance_groups_log_cache
+
+- type: replace
+  path: /instance_groups/-
+  value:
+$instance_groups_scheduler
 $(cat $tmp_dir/vars.yml)
 EOF
 fi
