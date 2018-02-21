@@ -20,9 +20,8 @@ files:
 - code.cloudfoundry.org/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/auth/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/egress/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/groups/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/ingress/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/routing/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
 - github.com/cloudfoundry/gosigar/*.go # gosub
