@@ -1,8 +1,0 @@
----
-name: log-cache-web-hook
-
-dependencies:
-- golang1.9.4
-
-files:
-- code.cloudfoundry.org/log-cache/cmd/web-hook/*.go # gosub

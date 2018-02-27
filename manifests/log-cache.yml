@@ -57,8 +57,6 @@ instance_groups:
           ca_cert: "((logs_provider.ca))"
           cert: "((logs_provider.certificate))"
           key: "((logs_provider.private_key))"
-  - name: log-cache-web-hook
-    release: log-cache
   - name: log-cache-expvar-forwarder
     release: log-cache
     properties:
