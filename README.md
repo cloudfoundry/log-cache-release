@@ -6,24 +6,6 @@ for [Log Cache](https://code.cloudfoundry.org/log-cache). It provides
 an [experimental in memory caching layer](https://docs.google.com/document/d/1yhfl0EB_MkHkh4JdRZXGeQMx_BDMCuB-SpPuSrD3VOU/edit#) as a potential future
 alternative for `cf logs --recent` and container metrics retrieval.
 
-### Web Hook
-Example:
-```
-  - name: log-cache-web-hook
-    release: log-cache
-    properties:
-      log_cache_addr: log-cache.((system_domain))
-      queries:
-        my-source-id:
-          follow: false
-          query: |+
-            {{ if (eq (countEnvelopes .) 1) }}
-            {{post "http://localhost:9999" nil "Page Me 1"}}
-            {{ else if eq (averageEnvelopes .) 100.0 }}
-            {{post "http://localhost:9999" nil "Page Me 2"}}
-            {{end}}
-```
-
 ### Deploying Log Cache
 
 Log Cache can be deployed either as a standalone deployment or within

@@ -53,11 +53,6 @@
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
   value:
-    name: log-cache-web-hook
-    release: log-cache
-- type: replace
-  path: /instance_groups/name=doppler/jobs/-
-  value:
     name: log-cache-expvar-forwarder
     properties:
       counters:

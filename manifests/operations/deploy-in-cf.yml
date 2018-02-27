@@ -46,8 +46,6 @@
             cert: ((logs_provider.certificate))
             key: ((logs_provider.private_key))
       release: log-cache
-    - name: log-cache-web-hook
-      release: log-cache
     - name: log-cache-expvar-forwarder
       properties:
         counters:
