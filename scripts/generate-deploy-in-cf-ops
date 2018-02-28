@@ -78,7 +78,6 @@ $(cat $tmp_dir/vars.yml)
   path: /instance_groups/-
   value:
 $instance_groups_scheduler
-$(cat $tmp_dir/vars.yml)
 EOF
 else
 # write instance_groups and variables to new ops-file
