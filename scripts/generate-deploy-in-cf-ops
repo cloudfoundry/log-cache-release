@@ -34,7 +34,7 @@ bosh int manifests/log-cache.yml --ops-file=$tmp_dir/consumes_cf.yml --ops-file=
 
 # save the instance_groups
 instance_groups_log_cache=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache | sed 's/^/    /'`
-instance_groups_scheduler=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler | sed 's/^/    /'`
+jobs_scheduler=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler/jobs | sed 's/^/    /'`
 
 # save the variables
 for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | awk '/^. name: / {print $NF}')
@@ -75,9 +75,9 @@ $(cat $tmp_dir/jobs.yml)
 $(cat $tmp_dir/vars.yml)
 
 - type: replace
-  path: /instance_groups/-
+  path: /instance_groups/name=scheduler/jobs/-
   value:
-$instance_groups_scheduler
+$jobs_scheduler
 EOF
 else
 # write instance_groups and variables to new ops-file
@@ -99,9 +99,9 @@ cat <<EOF > manifests/operations/deploy-in-cf.yml
 $instance_groups_log_cache
 
 - type: replace
-  path: /instance_groups/-
+  path: /instance_groups/name=scheduler/jobs-
   value:
-$instance_groups_scheduler
+$jobs_scheduler
 $(cat $tmp_dir/vars.yml)
 EOF
 fi
