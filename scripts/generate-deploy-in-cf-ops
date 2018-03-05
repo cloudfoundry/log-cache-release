@@ -34,7 +34,7 @@ bosh int manifests/log-cache.yml --ops-file=$tmp_dir/consumes_cf.yml --ops-file=
 
 # save the instance_groups
 instance_groups_log_cache=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache | sed 's/^/    /'`
-jobs_scheduler=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler/jobs | sed 's/^/    /'`
+jobs_scheduler=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler/jobs/0 | sed 's/^/    /'`
 
 # save the variables
 for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | awk '/^. name: / {print $NF}')

@@ -178,5 +178,5 @@
 - type: replace
   path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler?
   value:
-    - name: log-cache-scheduler
-      release: log-cache
+    name: log-cache-scheduler
+    release: log-cache
