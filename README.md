@@ -13,13 +13,13 @@ Log Cache can be deployed either as a standalone deployment or within
 
 In both cases Log Cache will have to know about Loggregator.
 
-##### Cloud Config
+#### Cloud Config
 
 Every bosh deployment requires a [cloud
 config](https://bosh.io/docs/cloud-config.html). The Log Cache deployment
 manifest assumes the CF-Deployment cloud config has been uploaded.
 
-##### Creating and Uploading Release
+#### Creating and Uploading Release
 
 The first step in deploying Log Cache is to create a release. Final releases
 are preferable, however during the development process dev releases are
@@ -33,7 +33,7 @@ bosh create-release --force
 bosh -e lite upload-release --rebase
 ```
 
-##### Standalone
+#### Standalone
 
 Standalone Log Cache only has to know where to find Loggregator. The
 Loggregator CA is named `loggregator_ca`. The given variables file should
@@ -50,7 +50,7 @@ bosh \
     --vars-file ~/workspace/loggregator-release/vars.yml
 ```
 
-##### Cloud Foundry
+#### Cloud Foundry
 
 Log Cache deployed within Cloud Foundry reads from the Loggregator system and
 registers with the [GoRouter](https://github.com/cloudfoundry/gorouter) at
@@ -74,4 +74,16 @@ bosh \
     --ops-file ~/workspace/log-cache-release/manifests/operations/deploy-in-cf.yml \
     --vars-store ~/workspace/cf-deployment/vars-store.yml \
     -v system_domain=bosh-lite.com
+```
+
+##### Log Cache Client
+By Default, Log Cache uses the `doppler` client included with `cf-deployment`.
+
+If you would like to use a custom client, it requires the `uaa.resource` authority:
+```
+<custom_client_id>:
+    authorities: uaa.resource
+    override: true
+    authorized-grant-types: client_credentials
+    secret: <custom_client_secret>
 ```
