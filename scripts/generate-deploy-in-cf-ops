@@ -99,7 +99,7 @@ cat <<EOF > manifests/operations/deploy-in-cf.yml
 $instance_groups_log_cache
 
 - type: replace
-  path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler?-
+  path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler?
   value:
 $jobs_scheduler
 $(cat $tmp_dir/vars.yml)
