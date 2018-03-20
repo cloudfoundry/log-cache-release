@@ -13,10 +13,16 @@ cache_addrs=sorted_cache_instances.map{|i| "#{i.address}:#{link("log-cache").p('
 sorted_group_instances=link("log-cache-group-reader").instances.sort_by {|i|i.address}
 group_addrs=sorted_group_instances.map{|i| "#{i.address}:#{link("log-cache-group-reader").p('port')}"}
 
+replication_factor=p('replication_factor')
+if replication_factor != 1 and replication_factor != 3 and replication_factor != 5
+    raise "invalid replication_factor. Must be 1, 3 or 5."
+end
+
 "
 export NODE_ADDRS=#{cache_addrs.join(",")}
 export GROUP_READER_NODE_ADDRS=#{group_addrs.join(",")}
 export COUNT=#{p('count')}
+export REPLICATION_FACTOR=#{replication_factor}
 export INTERVAL=#{p('interval')}
 "
 %>
