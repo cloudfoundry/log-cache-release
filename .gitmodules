@@ -1,6 +1,6 @@
 [submodule "src/code.cloudfoundry.org/log-cache"]
 	path = src/code.cloudfoundry.org/log-cache
-	url = https://github.com/cloudfoundry-incubator/log-cache
+	url = https://github.com/cloudfoundry/log-cache
 [submodule "src/github.com/onsi/ginkgo"]
 	path = src/github.com/onsi/ginkgo
 	url = https://github.com/onsi/ginkgo
@@ -45,7 +45,7 @@
 	url = https://github.com/grpc-ecosystem/grpc-gateway
 [submodule "src/code.cloudfoundry.org/go-log-cache"]
 	path = src/code.cloudfoundry.org/go-log-cache
-	url = https://github.com/cloudfoundry-incubator/go-log-cache
+	url = https://github.com/cloudfoundry/go-log-cache
 [submodule "src/code.cloudfoundry.org/go-diodes"]
 	path = src/code.cloudfoundry.org/go-diodes
 	url = https://github.com/cloudfoundry/go-diodes
@@ -57,10 +57,10 @@
 	url = https://github.com/cloudfoundry/go-pubsub
 [submodule "src/code.cloudfoundry.org/go-stream-aggregator"]
 	path = src/code.cloudfoundry.org/go-stream-aggregator
-	url = https://github.com/cloudfoundry-incubator/go-stream-aggregator
+	url = https://github.com/cloudfoundry/go-stream-aggregator
 [submodule "src/code.cloudfoundry.org/go-orchestrator"]
 	path = src/code.cloudfoundry.org/go-orchestrator
-	url = https://github.com/cloudfoundry-incubator/go-orchestrator.git
+	url = https://github.com/cloudfoundry/go-orchestrator.git
 [submodule "src/github.com/gorilla/mux"]
 	path = src/github.com/gorilla/mux
 	url = https://github.com/gorilla/mux
