@@ -1,4 +1,4 @@
-export LOG_CACHE_ADDR="<%= "localhost:#{link('log-cache').p('port')}" %>"
+export LOG_CACHE_ADDR="<%= "#{link('log-cache').address}:#{link('log-cache').p('port')}" %>"
 export CA_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/log_cache.key"
