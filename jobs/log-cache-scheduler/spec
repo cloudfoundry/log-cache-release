@@ -20,6 +20,9 @@ consumes:
   type: log-cache
 - name: log-cache-group-reader
   type: log-cache-group-reader
+- name: leader-election-agent
+  type: leader-election-agent
+  optional: true
 
 properties:
   interval:
