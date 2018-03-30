@@ -8,8 +8,6 @@ stemcells:
 releases:
 - name: log-cache
   version: latest
-- name: leadership-election
-  version: latest
 - name: bosh-dns
   version: latest
 
@@ -36,19 +34,6 @@ instance_groups:
   jobs:
   - name: log-cache-scheduler
     release: log-cache
-  - name: leadership-election
-    release: leadership-election
-    properties:
-      port: 9999
-  - name: log-cache-expvar-forwarder
-    release: log-cache
-    properties:
-      counters: []
-      gauges:
-      - addr: http://localhost:6060/debug/vars
-        name: leadership_status
-        source_id: log-cache-scheduler
-        template: "{{.LeadershipElectionAgent.LeadershipStatus}}"
 
 - name: log-cache
   azs:

@@ -125,28 +125,9 @@
     vm_type: minimal
 
 - type: replace
-  path: /instance_groups/name=scheduler/jobs/-
+  path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler?
   value:
     name: log-cache-scheduler
-    release: log-cache
-- type: replace
-  path: /instance_groups/name=scheduler/jobs/-
-  value:
-    name: leadership-election
-    properties:
-      port: 9999
-    release: leadership-election
-- type: replace
-  path: /instance_groups/name=scheduler/jobs/-
-  value:
-    name: log-cache-expvar-forwarder
-    properties:
-      counters: []
-      gauges:
-      - addr: http://localhost:6060/debug/vars
-        name: leadership_status
-        source_id: log-cache-scheduler
-        template: '{{.LeadershipElectionAgent.LeadershipStatus}}'
     release: log-cache
 - type: replace
   path: /variables/-

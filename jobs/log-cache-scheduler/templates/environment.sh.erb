@@ -26,14 +26,3 @@ export REPLICATION_FACTOR=#{replication_factor}
 export INTERVAL=#{p('interval')}
 "
 %>
-
-# Leader Election Service
-<%=
-if_link("leader-election-agent") do |leader_election_link|
-    leader_election_agent_port=leader_election_link.p('port')
-
-"
-export LEADER_ELECTION_ENDPOINT=http://localhost:#{leader_election_agent_port}/v1/leader
-"
-end
-%>

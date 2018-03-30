@@ -34,6 +34,7 @@ bosh int manifests/log-cache.yml --ops-file=$tmp_dir/consumes_cf.yml --ops-file=
 
 # save the instance_groups
 instance_groups_log_cache=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache | sed 's/^/    /'`
+jobs_scheduler=`bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler/jobs/0 | sed 's/^/    /'`
 
 # save the variables
 for v in $(bosh int $tmp_dir/adjusted.yml --path /variables | awk '/^. name: / {print $NF}')
@@ -56,16 +57,6 @@ $(bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache/jobs/nam
 EOF
 done
 
-for j in $(bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler/jobs | awk '/^. name: / {print $NF}')
-do
-cat <<EOF >> $tmp_dir/jobs_scheduler.yml
-- type: replace
-  path: /instance_groups/name=scheduler/jobs/-
-  value:
-$(bosh int $tmp_dir/adjusted.yml --path /instance_groups/name=log-cache-scheduler/jobs/name=$j | sed 's/^/    /')
-EOF
-done
-
 if [ "$collocate_with_doppler" = true ]; then
 # write jobs to the doppler instance group
 cat <<EOF > manifests/operations/deploy-in-cf-doppler-collocated.yml
@@ -82,7 +73,11 @@ cat <<EOF > manifests/operations/deploy-in-cf-doppler-collocated.yml
     version: latest
 $(cat $tmp_dir/jobs.yml)
 $(cat $tmp_dir/vars.yml)
-$(cat $tmp_dir/jobs_scheduler.yml)
+
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler?
+  value:
+$jobs_scheduler
 EOF
 else
 # write instance_groups and variables to new ops-file
@@ -103,7 +98,10 @@ cat <<EOF > manifests/operations/deploy-in-cf.yml
   value:
 $instance_groups_log_cache
 
-$(cat $tmp_dir/jobs_scheduler.yml)
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler?
+  value:
+$jobs_scheduler
 $(cat $tmp_dir/vars.yml)
 EOF
 fi
