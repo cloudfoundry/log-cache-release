@@ -1,0 +1,4 @@
+
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=log-cache-scheduler/properties?/replication_factor?
+  value: 3

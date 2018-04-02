@@ -20,9 +20,13 @@ files:
 - code.cloudfoundry.org/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/expvar-forwarder/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/groups/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/routing/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/store/replication/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/store/replication/api/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
+- github.com/armon/go-metrics/*.go # gosub
 - github.com/cloudfoundry/gosigar/*.go # gosub
 - github.com/cloudfoundry/gosigar/sys/windows/*.go # gosub
 - github.com/cloudfoundry/gosigar/vendor/github.com/pkg/errors/*.go # gosub
@@ -42,6 +46,10 @@ files:
 - github.com/grpc-ecosystem/grpc-gateway/runtime/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/runtime/internal/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/utilities/*.go # gosub
+- github.com/hashicorp/go-immutable-radix/*.go # gosub
+- github.com/hashicorp/go-msgpack/codec/*.go # gosub
+- github.com/hashicorp/golang-lru/simplelru/*.go # gosub
+- github.com/hashicorp/raft/*.go # gosub
 - golang.org/x/net/context/*.go # gosub
 - golang.org/x/net/http2/*.go # gosub
 - golang.org/x/net/http2/hpack/*.go # gosub

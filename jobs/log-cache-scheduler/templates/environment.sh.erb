@@ -18,10 +18,12 @@ if replication_factor != 1 and replication_factor != 3 and replication_factor !=
     raise "invalid replication_factor. Must be 1, 3 or 5."
 end
 
+count=(sorted_cache_instances.size().to_f/replication_factor).ceil
+
 "
 export NODE_ADDRS=#{cache_addrs.join(",")}
 export GROUP_READER_NODE_ADDRS=#{group_addrs.join(",")}
-export COUNT=#{p('count')}
+export COUNT=#{count}
 export REPLICATION_FACTOR=#{replication_factor}
 export INTERVAL=#{p('interval')}
 "
