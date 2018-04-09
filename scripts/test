@@ -12,6 +12,7 @@ function print_usage {
     echo "   cleaners          Run tools that clean the code base"
     echo "   unit              Run the unit tests"
     echo "   linters           Run common linters against the project"
+    echo "   ops_files         Run tests for operation files"
     echo "   install_tools     Install all necessary binaries for these scripts"
 }
 
@@ -105,7 +106,7 @@ function parse_argc {
             print_usage
             exit 0
             ;;
-        all|unit|cleaners|linters|install_tools)
+        all|unit|cleaners|linters|install_tools|ops_files)
             command=run_$arg
             ;;
         *)
