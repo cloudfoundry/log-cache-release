@@ -87,3 +87,26 @@ If you would like to use a custom client, it requires the `uaa.resource` authori
     authorized-grant-types: client_credentials
     secret: <custom_client_secret>
 ```
+
+### Operating Log Cache
+Log cache is currently an experimental release with plans for integrations starting
+in summer 2018. That said we have defined the following service level objectives for the
+release.
+
+#### Reliability SLO
+Log cache depends on Loggregator and is expected to offer slightly lower reliability.
+This is primarly due to the ephimiral nature of the cache. Loss will occur during a 
+deployment. Outside of deployments a 99% reliability can be expected.
+
+#### Cache Duration & Scaling
+Log cache is horizontally scalabale and we recomend scaling based on the formula below.
+We have set a service level objective of 15 minutes with this scaling recomendation.
+```
+Log Cache Nodes = Envelopes Per Second / 10,000
+```
+
+(Note - this is intentionally designed to match the scaling of the Log Router used in the
+Loggregator system for [colocation in cf-deployment][cf-deployment-ops]). 
+
+
+[cf-deployment-ops]:        https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/use-log-cache.yml
