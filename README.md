@@ -56,10 +56,7 @@ Log Cache deployed within Cloud Foundry reads from the Loggregator system and
 registers with the [GoRouter](https://github.com/cloudfoundry/gorouter) at
 `log-cache.<system-domain>` (e.g. for bosh-lite `log-cache.bosh-lite.com`).
 
-It can be deployed in CF Deployment with the provided [operations
-file](manifests/operations/deploy-in-cf.yml).
-
-The following command will deploy Log Cache in CF.
+It can be deployed in CF Deployment with the following command.
 
 ```
 bosh \
