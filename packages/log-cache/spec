@@ -18,7 +18,7 @@ files:
 - code.cloudfoundry.org/go-stream-aggregator/*.go # gosub
 - code.cloudfoundry.org/go-stream-aggregator/internal/traverser/*.go # gosub
 - code.cloudfoundry.org/log-cache/*.go # gosub
-- code.cloudfoundry.org/log-cache/cmd/logcache/*.go # gosub
+- code.cloudfoundry.org/log-cache/cmd/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/groups/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/routing/*.go # gosub
