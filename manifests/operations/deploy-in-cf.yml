@@ -20,7 +20,7 @@
     - name: log-cache
       properties:
         egress_port: 8080
-        health_port: 6060
+        health_addr: localhost:6060
         tls:
           ca_cert: ((log_cache.ca))
           cert: ((log_cache.certificate))

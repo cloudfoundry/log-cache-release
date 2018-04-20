@@ -30,9 +30,9 @@ properties:
   store_size:
     description: "The number of envelopes to store in memory"
     default: 1000000
-  health_port:
-    description: "The port for LogCache to bind a health endpoint"
-    default: 6060
+  health_addr:
+    description: "The address for LogCache to bind a health endpoint"
+    default: localhost:6060
 
   tls.ca_cert:
     description: "The Certificate Authority for log cache mutual TLS."

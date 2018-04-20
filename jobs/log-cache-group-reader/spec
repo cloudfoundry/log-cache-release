@@ -28,6 +28,6 @@ properties:
     description: "The port for the GroupReader to listen on"
     default: 8082
 
-  health_port:
-    description: "The port for GroupReader to bind a health endpoint"
-    default: 6062
+  health_addr:
+    description: "The address for GroupReader to bind a health endpoint"
+    default: localhost:6062
