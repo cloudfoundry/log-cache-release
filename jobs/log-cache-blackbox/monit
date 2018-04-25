@@ -1,0 +1,6 @@
+check process log-cache-blackbox
+  with pidfile /var/vcap/sys/run/log-cache-blackbox/log-cache-blackbox.pid
+  start program "/var/vcap/jobs/log-cache-blackbox/bin/ctl start"
+  stop program "/var/vcap/jobs/log-cache-blackbox/bin/ctl stop"
+  group vcap
+

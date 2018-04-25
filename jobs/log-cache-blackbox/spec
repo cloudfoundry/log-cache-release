@@ -1,0 +1,30 @@
+---
+name: log-cache-blackbox
+
+templates:
+  ctl: bin/ctl
+  log_cache_ca.crt.erb: config/certs/log_cache_ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
+  environment.sh.erb: bin/environment.sh
+
+packages:
+- log-cache-blackbox
+
+consumes:
+- name: log-cache
+  type: log-cache
+
+properties:
+  run_interval:
+    description: "The interval between test runs"
+    default: 10m
+  datadog.api_key:
+    description: "The api key to use when emitting test results to Datadog"
+  datadog.tags:
+    description: "Tags that will be added to the emitted Datadog metrics as a
+comma separated list."
+    default: ""
+  datadog.origin_host:
+    description: "Hostname to be included on the emitted Datadog metrics"
+    default: ""

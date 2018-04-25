@@ -1,0 +1,15 @@
+# Blackbox Test
+export RUN_INTERVAL="<%= p('run_interval') %>"
+
+# Log Cache
+export LOG_CACHE_ADDR="<%= "localhost:#{link('log-cache').p('port')}" %>"
+export CA_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache_ca.crt"
+export CERT_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.crt"
+export KEY_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.key"
+
+# Datadog
+export DATADOG_API_KEY="<%= p('datadog.api_key') %>"
+export DATADOG_TAGS="<%= p('datadog.tags') %>"
+export DATADOG_ORIGIN_HOST="<%= p('datadog.origin_host') %>"
+
+

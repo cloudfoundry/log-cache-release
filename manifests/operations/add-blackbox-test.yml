@@ -1,0 +1,9 @@
+
+- type: replace
+  path: /instance_groups/name=log-cache/jobs/-
+  value:
+    name: log-cache-blackbox
+    release: log-cache
+    properties:
+      datadog:
+        api_key: ((datadog_api_key))
