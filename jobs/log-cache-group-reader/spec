@@ -31,3 +31,7 @@ properties:
   health_addr:
     description: "The address for GroupReader to bind a health endpoint"
     default: localhost:6062
+
+  max_per_source:
+    description: "The store's memory size as number of envelopes for a specific sourceID"
+    default: 20000

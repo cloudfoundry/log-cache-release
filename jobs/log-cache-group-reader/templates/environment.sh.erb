@@ -4,6 +4,7 @@ export LOG_CACHE_ADDR="<%= "#{link('log-cache').address}:#{link('log-cache').p('
 export CA_PATH="/var/vcap/jobs/log-cache-group-reader/config/certs/ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-group-reader/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-group-reader/config/certs/log_cache.key"
+export MAX_PER_SOURCE="<%= "#{p('max_per_source')}" %>"
 
 <%=
 sorted_instances=link("log-cache-group-reader").instances.sort_by {|i|i.address}
