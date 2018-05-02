@@ -19,10 +19,17 @@ function sync_package() {
 
     cd packages/${bosh_pkg}
 
+    gosublist=$(gosub list "$@")
+
     {
       cat spec | grep -v '# gosub'
-      gosub list "$@" | \
-        sed -e 's|\(.*\)|- \1/*.go # gosub|g'
+      for i in $gosublist; do
+          echo $i | sed -e 's|\(.*\)|- \1/*.go # gosub|g'
+
+          if ls $GOPATH/src/$i/*.s &> /dev/null; then
+              echo $i | sed -e 's|\(.*\)|- \1/*.s # gosub|g'
+          fi
+      done
     } > spec.new
 
     mv spec.new spec
