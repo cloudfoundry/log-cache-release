@@ -73,3 +73,6 @@
 [submodule "src/github.com/zorkian/go-datadog-api"]
 	path = src/github.com/zorkian/go-datadog-api
 	url = https://github.com/zorkian/go-datadog-api
+[submodule "src/github.com/loggregator/prometheus"]
+	path = src/github.com/loggregator/prometheus
+	url = https://github.com/loggregator/prometheus
