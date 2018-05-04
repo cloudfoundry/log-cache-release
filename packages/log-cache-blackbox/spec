@@ -2,7 +2,7 @@
 name: log-cache-blackbox
 
 dependencies:
-- golang1.9.4
+- golang1.10.2
 
 files:
 - code.cloudfoundry.org/go-envstruct/*.go # gosub
