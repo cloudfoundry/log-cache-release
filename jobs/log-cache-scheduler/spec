@@ -28,9 +28,6 @@ properties:
   count:
     description: "The number of ranges to schedule across the Log Cache cluster"
     default: 100
-  replication_factor:
-    description: "EXPERIMENTAL: The total number of nodes to replicate data across. Only 1, 3 or 5 are allowed values"
-    default: 1
 
   health_addr:
     description: "The address for LogCache to bind a health endpoint"
