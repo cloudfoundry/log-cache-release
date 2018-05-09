@@ -20,6 +20,9 @@
         ca_cert: ((log_cache.ca))
         cert: ((log_cache.certificate))
         key: ((log_cache.private_key))
+    provides:
+      log-cache:
+        shared: true
     release: log-cache
 - type: replace
   path: /instance_groups/name=doppler/jobs/-

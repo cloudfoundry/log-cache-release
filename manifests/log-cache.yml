@@ -48,6 +48,8 @@ instance_groups:
   jobs:
   - name: log-cache
     release: log-cache
+    provides:
+      log-cache: {shared: true}
     properties:
       egress_port: 8080
       health_addr: "localhost:6060"
