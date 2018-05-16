@@ -1,6 +1,7 @@
+<% unless link('log-cache').p('disabled') %>
 check process log-cache-nozzle
   with pidfile /var/vcap/sys/run/log-cache-nozzle/log-cache-nozzle.pid
   start program "/var/vcap/jobs/log-cache-nozzle/bin/ctl start"
   stop program "/var/vcap/jobs/log-cache-nozzle/bin/ctl stop"
   group vcap
-
+<% end %>

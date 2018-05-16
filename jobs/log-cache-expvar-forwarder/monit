@@ -1,6 +1,7 @@
+<% unless link('log-cache').p('disabled') %>
 check process log-cache-expvar-forwarder
   with pidfile /var/vcap/sys/run/log-cache-expvar-forwarder/log-cache-expvar-forwarder.pid
   start program "/var/vcap/jobs/log-cache-expvar-forwarder/bin/ctl start"
   stop program "/var/vcap/jobs/log-cache-expvar-forwarder/bin/ctl stop"
   group vcap
-
+<% end %>

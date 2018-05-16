@@ -17,6 +17,7 @@ provides:
   properties:
   - port
   - tls
+  - disabled
 
 consumes:
 - name: log-cache
@@ -40,3 +41,7 @@ properties:
     description: "The client cert for log cache mutual TLS."
   tls.key:
     description: "The client private key for log cache mutual TLS."
+
+  disabled:
+    default: false
+    description: "Turns off log cache."

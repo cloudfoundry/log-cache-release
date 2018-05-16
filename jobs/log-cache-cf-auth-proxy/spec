@@ -18,6 +18,8 @@ provides:
   - proxy_port
 
 consumes:
+- name: log-cache
+  type: log-cache
 - name: log-cache-gateway
   type: log-cache-gateway
 - name: cloud_controller

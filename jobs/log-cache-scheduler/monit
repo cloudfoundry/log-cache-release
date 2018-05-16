@@ -1,6 +1,7 @@
+<% unless link('log-cache').p('disabled') %>
 check process log-cache-scheduler
   with pidfile /var/vcap/sys/run/log-cache-scheduler/log-cache-scheduler.pid
   start program "/var/vcap/jobs/log-cache-scheduler/bin/ctl start"
   stop program "/var/vcap/jobs/log-cache-scheduler/bin/ctl stop"
   group vcap
-
+<% end %>
