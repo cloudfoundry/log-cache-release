@@ -3,6 +3,8 @@
     rlp_addr = "#{l.address}:#{l.p('reverse_log_proxy.egress.port')}"
 %>
 
+export HEALTH_ADDR="<%= "#{p('health_addr')}" %>"
+
 # Logs Provider
 export LOGS_PROVIDER_ADDR="<%= rlp_addr %>"
 export LOGS_PROVIDER_CA_FILE_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/logs_provider_ca.crt"

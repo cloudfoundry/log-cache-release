@@ -31,3 +31,7 @@ properties:
     description: "TLS certificate for the logs-provider connection"
   logs_provider.tls.key:
     description: "TLS key for the logs-provider connection"
+
+  health_addr:
+    description: "The address for the Nozzle to bind a health endpoint"
+    default: localhost:6061
