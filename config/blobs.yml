@@ -1,5 +1,5 @@
 ---
-golang/go1.10.2.linux-amd64.tar.gz:
-  size: 132481801
-  object_id: f6c2604a-8d4a-4c62-5217-0d96e9c18c69
-  sha: sha256:4b677d698c65370afa33757b6954ade60347aaca310ea92a63ed717d7cb0c2ff
+golang/go1.9.6.linux-amd64.tar.gz:
+  size: 118279574
+  object_id: dbba59d4-3260-44de-5cc8-f6d2a1c54f70
+  sha: sha256:d1eb07f99ac06906225ac2b296503f06cc257b472e7d7817b8f822fe3766ebfe
