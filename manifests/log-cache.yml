@@ -135,6 +135,28 @@ instance_groups:
         addr: http://localhost:6060/debug/vars
         template: "{{.LogCache.AvailableSystemMemory}}"
 
+        # CF Auth Proxy
+      - name: last-uaa-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastUAALatency}}"
+      - name: last-capi-v3-apps-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV3AppsLatency}}"
+      - name: last-capi-v2-list-service-instances-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV2ListServiceInstancesLatency}}"
+      - name: last-capi-v4-log-access-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV4LogAccessLatency}}"
+      - name: last-capi-v2-service-instances-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV2ServiceInstancesLatency}}"
+
 variables:
 - name: logs_provider
   type: certificate
