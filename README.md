@@ -105,8 +105,10 @@ We have set a service level objective of 15 minutes with this scaling recomendat
 Log Cache Nodes = Envelopes Per Second / 10,000
 ```
 
-(Note - this is intentionally designed to match the scaling of the Log Router used in the
-Loggregator system for [colocation in cf-deployment][cf-deployment-ops]). 
+Note - this is intentionally designed to match the scaling of the Log Router used in the
+Loggregator system for [colocation in cf-deployment][cf-deployment-ops] - that said more 
+recent testing with this colocation strategy has not met these SLO's. If targetting these
+SLO's is critical to your foundation we recommend using a log-cache instance group. 
 
 
-[cf-deployment-ops]:        https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/use-log-cache.yml
+[cf-deployment-ops]:        https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/use-log-cache.yml 
