@@ -29,10 +29,7 @@
   value:
     name: log-cache-gateway
     properties:
-      gateway_addr: "0.0.0.0:8081"
-    provides:
-      log-cache-gateway:
-        shared: true
+      gateway_addr: localhost:8081
     release: log-cache
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
