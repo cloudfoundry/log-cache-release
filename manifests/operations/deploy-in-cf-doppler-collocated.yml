@@ -71,6 +71,14 @@
         name: expired
         source_id: log-cache
         template: '{{.LogCache.Expired}}'
+      - addr: http://localhost:6060/debug/vars
+        name: dropped
+        source_id: log-cache
+        template: '{{.LogCache.Dropped}}'
+      - addr: http://localhost:6060/debug/vars
+        name: promql-timeout
+        source_id: log-cache
+        template: '{{.LogCache.PromQLTimeout}}'
       - addr: http://localhost:6061/debug/vars
         name: egress
         source_id: log-cache-nozzle
@@ -83,6 +91,10 @@
         name: err
         source_id: log-cache-nozzle
         template: '{{.Nozzle.Err}}'
+      - addr: http://localhost:6061/debug/vars
+        name: dropped
+        source_id: log-cache-nozzle
+        template: '{{.Nozzle.Dropped}}'
       gauges:
       - addr: http://localhost:6060/debug/vars
         name: cache-period
@@ -100,6 +112,26 @@
         name: available-system-memory
         source_id: log-cache
         template: '{{.LogCache.AvailableSystemMemory}}'
+      - addr: http://localhost:6065/debug/vars
+        name: last-uaa-latency
+        source_id: log-cache-cf-auth-proxy
+        template: '{{.CFAuthProxy.LastUAALatency}}'
+      - addr: http://localhost:6065/debug/vars
+        name: last-capi-v3-apps-latency
+        source_id: log-cache-cf-auth-proxy
+        template: '{{.CFAuthProxy.LastCAPIV3AppsLatency}}'
+      - addr: http://localhost:6065/debug/vars
+        name: last-capi-v2-list-service-instances-latency
+        source_id: log-cache-cf-auth-proxy
+        template: '{{.CFAuthProxy.LastCAPIV2ListServiceInstancesLatency}}'
+      - addr: http://localhost:6065/debug/vars
+        name: last-capi-v4-log-access-latency
+        source_id: log-cache-cf-auth-proxy
+        template: '{{.CFAuthProxy.LastCAPIV4LogAccessLatency}}'
+      - addr: http://localhost:6065/debug/vars
+        name: last-capi-v2-service-instances-latency
+        source_id: log-cache-cf-auth-proxy
+        template: '{{.CFAuthProxy.LastCAPIV2ServiceInstancesLatency}}'
     release: log-cache
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
