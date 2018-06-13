@@ -63,6 +63,8 @@ instance_groups:
     release: log-cache
     properties:
       port: 8084
+    provides:
+      log-cache-group-reader: {shared: true}
   - name: log-cache-nozzle
     release: log-cache
     consumes:
