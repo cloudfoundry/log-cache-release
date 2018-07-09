@@ -2,7 +2,7 @@
 export RUN_INTERVAL="<%= p('run_interval') %>"
 
 # Log Cache
-export LOG_CACHE_ADDR="<%= "localhost:#{link('log-cache').p('port')}" %>"
+export LOG_CACHE_ADDR="<%= "#{p('log_cache_host')}:#{link('log-cache').p('port')}" %>"
 export CA_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache_ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.key"
