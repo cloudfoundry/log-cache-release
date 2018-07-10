@@ -22,7 +22,7 @@ addons:
 
 instance_groups:
 - name: log-cache-blackbox
-  azs
+  azs:
   - z1
   - z2
   - z3
