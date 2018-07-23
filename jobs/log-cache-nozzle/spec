@@ -34,4 +34,7 @@ properties:
 
   health_addr:
     description: "The address for the Nozzle to bind a health endpoint"
-    default: localhost:6061
+    default: "localhost:6061"
+  shard_id:
+    description: "The sharding group name to use for egress from RLP"
+    default: "log-cache"

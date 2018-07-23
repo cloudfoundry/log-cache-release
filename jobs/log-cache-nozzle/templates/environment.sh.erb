@@ -13,6 +13,7 @@ export LOGS_PROVIDER_KEY_FILE_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs
 
 # Log Cache
 export LOG_CACHE_ADDR="<%= "localhost:#{link('log-cache').p('port')}" %>"
+export SHARD_ID="<%= "#{p('shard_id')}" %>"
 export CA_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/log_cache_ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-nozzle/config/certs/log_cache.key"
