@@ -2,7 +2,7 @@
 name: log-cache-nozzle
 
 dependencies:
-- golang1.9.6
+- golang1.10.3
 
 files:
 - code.cloudfoundry.org/go-batching/*.go # gosub
