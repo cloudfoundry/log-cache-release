@@ -171,7 +171,7 @@
     name: logs_provider
     options:
       ca: loggregator_ca
-      common_name: log-cache
+      common_name: doppler
       extended_key_usage:
       - client_auth
       - server_auth
@@ -181,7 +181,7 @@
   value:
     name: log_cache_ca
     options:
-      common_name: log-cache
+      common_name: doppler
       is_ca: true
     type: certificate
 - type: replace
@@ -194,7 +194,7 @@
       - log-cache
       - logcache
       ca: log_cache_ca
-      common_name: log-cache
+      common_name: doppler
       extended_key_usage:
       - client_auth
       - server_auth
@@ -205,7 +205,7 @@
     name: log_cache_tls_cc_auth_proxy
     options:
       ca: service_cf_internal_ca
-      common_name: log-cache
+      common_name: doppler
       extended_key_usage:
       - client_auth
     type: certificate
