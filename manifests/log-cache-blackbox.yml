@@ -1,0 +1,38 @@
+name: log-cache-blackbox
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+releases:
+- name: log-cache
+  version: latest
+
+instance_groups:
+- name: log-cache-blackbox
+  azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  persistent_disk_type: 5GB
+  vm_type: minimal
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: log-cache-blackbox
+    release: log-cache
+    properties:
+      datadog:
+        api_key: ((datadog_api_key))
+    consumes:
+      log-cache: {from: log-cache, deployment: default}
+
+update:
+  canaries: 10
+  max_in_flight: 10
+  canary_watch_time: 30000-60000
+  update_watch_time: 5000-60000
+  serial: true
