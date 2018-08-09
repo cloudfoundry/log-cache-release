@@ -2,8 +2,6 @@
 export RUN_INTERVAL="<%= p('run_interval') %>"
 
 # Log Cache
-# TODO - want to default to taking addresses off of the consumed link and
-# allowing a set log_cache_host to override
 <%
   logCacheAddr = link("log-cache").address
   if_p("log_cache_host") do |logCacheHost|
