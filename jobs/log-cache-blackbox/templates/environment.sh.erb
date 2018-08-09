@@ -2,7 +2,15 @@
 export RUN_INTERVAL="<%= p('run_interval') %>"
 
 # Log Cache
-export LOG_CACHE_ADDR="<%= "#{p('log_cache_host')}:#{link('log-cache').p('port')}" %>"
+# TODO - want to default to taking addresses off of the consumed link and
+# allowing a set log_cache_host to override
+<%
+  logCacheAddr = link("log-cache").address
+  if_p("log_cache_host") do |logCacheHost|
+      logCacheAddr = logCacheHost
+  end
+%>
+export LOG_CACHE_ADDR="<%= "#{logCacheAddr}:#{link('log-cache').p('port')}" %>"
 export CA_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache_ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.key"
@@ -11,5 +19,4 @@ export KEY_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.key"
 export DATADOG_API_KEY="<%= p('datadog.api_key') %>"
 export DATADOG_TAGS="<%= p('datadog.tags') %>"
 export DATADOG_ORIGIN_HOST="<%= p('datadog.origin_host') %>"
-
 

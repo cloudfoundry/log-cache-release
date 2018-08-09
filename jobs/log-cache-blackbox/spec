@@ -30,4 +30,3 @@ comma separated list."
     default: ""
   log_cache_host:
     description: "BOSH DNS alias at which Log Cache can be found"
-    default: "log-cache.service.cf.internal"
