@@ -46,3 +46,17 @@ properties:
         - tags: An object that can only have string values. They will be
           passed as tags on the envelope.
     default: ~
+  maps:
+    description: |
+        A array of Objects that have the following fields:
+        - addr: address of the expvar endpoint
+        - name: The output name of the Counter
+        - source_id: The output sourceID of the Map
+        - template: The golang text/template to find the metric in the expvar
+          output. (Hint: you'll probably want to use a custom map formatter
+          such as the jsonMap)
+        - tags: An object that can only have string values. They will be
+          passed as tags on the envelope.
+        Each entry in the map will be parsed into one gauge per key before it
+        is forwarder onto the receiving log cache instance.
+    default: ~
