@@ -20,6 +20,11 @@ consumes:
   type: log-cache
 
 properties:
+  interval:
+    description: |
+      How often the expvar-forwarder should scrape registered
+      endpoints and report values.
+    default: 1m
   log_metrics:
     description: Write each metric from the endpoints to Log Cache and stdout.
     default: true

@@ -2,6 +2,7 @@ export LOG_CACHE_ADDR="<%= "#{link('log-cache').address}:#{link('log-cache').p('
 export CA_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/log_cache.key"
+export INTERVAL="<%= p('interval') %>"
 export COUNTERS_JSON='<%= p('counters').to_json %>'
 export GAUGES_JSON='<%= p('gauges').to_json %>'
 export MAPS_JSON='<%= p('maps').to_json %>'
