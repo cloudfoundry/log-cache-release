@@ -2,7 +2,7 @@ name: log-cache
 
 stemcells:
 - alias: default
-  os: ubuntu-trusty
+  os: ubuntu-xenial
   version: latest
 
 releases:
@@ -15,7 +15,7 @@ addons:
 - name: bosh-dns
   include:
     stemcell:
-    - os: ubuntu-trusty
+    - os: ubuntu-xenial
   jobs:
   - name: bosh-dns
     release: bosh-dns
@@ -34,6 +34,24 @@ instance_groups:
   jobs:
   - name: log-cache-scheduler
     release: log-cache
+    consumes:
+      log-cache-group-reader: {from: log-cache-group-reader}
+  - name: log-cache-expvar-forwarder
+    release: log-cache
+    consumes:
+      log-cache: {from: log-cache}
+    properties:
+      counters: []
+      gauges: []
+      maps:
+      - name: worker-assignments
+        source_id: log-cache-scheduler
+        addr: http://localhost:6064/debug/vars
+        template: "{{.WorkerAssignments | jsonMap}}"
+      - name: worker-health
+        source_id: log-cache-scheduler
+        addr: http://localhost:6064/debug/vars
+        template: "{{.WorkerHealth | jsonMap}}"
 
 - name: log-cache
   azs:
@@ -61,6 +79,8 @@ instance_groups:
     release: log-cache
   - name: log-cache-group-reader
     release: log-cache
+    provides:
+      log-cache-group-reader: {shared: false}
     properties:
       port: 8084
   - name: log-cache-nozzle
@@ -156,6 +176,7 @@ instance_groups:
         source_id: log-cache-cf-auth-proxy
         addr: http://localhost:6065/debug/vars
         template: "{{.CFAuthProxy.LastCAPIV2ServiceInstancesLatency}}"
+      maps: []
 
 variables:
 - name: logs_provider
