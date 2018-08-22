@@ -38,7 +38,7 @@ properties:
           output.
         - tags: An object that can only have string values. They will be
           passed as tags on the envelope.
-    default: ~
+    default: []
   gauges:
     description: |
         A array of Objects that have the following fields:
@@ -50,7 +50,7 @@ properties:
           output.
         - tags: An object that can only have string values. They will be
           passed as tags on the envelope.
-    default: ~
+    default: []
   maps:
     description: |
         A array of Objects that have the following fields:
@@ -64,4 +64,4 @@ properties:
           passed as tags on the envelope.
         Each entry in the map will be parsed into one gauge per key before it
         is forwarder onto the receiving log cache instance.
-    default: ~
+    default: []
