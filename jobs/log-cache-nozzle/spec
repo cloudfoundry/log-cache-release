@@ -38,3 +38,6 @@ properties:
   shard_id:
     description: "The sharding group name to use for egress from RLP"
     default: "log-cache"
+  selectors:
+    description: "A list of envelope types to read from RLP"
+    default: [log, gauge, counter, timer, event]
