@@ -30,7 +30,7 @@ properties:
     default: true
   counters:
     description: |
-        A array of Objects that have the following fields:
+        An array of Objects that have the following fields:
         - addr: address of the expvar endpoint
         - name: The output name of the Counter
         - source_id: The output sourceID of the Counter
@@ -41,7 +41,7 @@ properties:
     default: []
   gauges:
     description: |
-        A array of Objects that have the following fields:
+        An array of Objects that have the following fields:
         - addr: address of the expvar endpoint
         - name: The output name of the Counter
         - unit: The output unit of the Counter
@@ -53,7 +53,7 @@ properties:
     default: []
   maps:
     description: |
-        A array of Objects that have the following fields:
+        An array of Objects that have the following fields:
         - addr: address of the expvar endpoint
         - name: The output name of the Counter
         - source_id: The output sourceID of the Map
