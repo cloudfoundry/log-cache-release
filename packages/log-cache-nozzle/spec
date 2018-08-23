@@ -26,6 +26,7 @@ files:
 - code.cloudfoundry.org/log-cache/internal/store/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
 - code.cloudfoundry.org/rfc5424/*.go # gosub
+- github.com/blang/semver/*.go # gosub
 - github.com/cloudfoundry/gosigar/*.go # gosub
 - github.com/cloudfoundry/gosigar/sys/windows/*.go # gosub
 - github.com/cloudfoundry/gosigar/vendor/github.com/pkg/errors/*.go # gosub
