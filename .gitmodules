@@ -79,3 +79,9 @@
 [submodule "src/code.cloudfoundry.org/rfc5424"]
 	path = src/code.cloudfoundry.org/rfc5424
 	url = https://github.com/cloudfoundry-incubator/rfc5424
+[submodule "src/github.com/blang"]
+	path = src/github.com/blang
+	url = git@github.com:blang/semver
+[submodule "src/github.com/blang/semver"]
+	path = src/github.com/blang/semver
+	url = git@github.com:blang/semver

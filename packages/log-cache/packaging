@@ -1,4 +1,4 @@
-set -e -x
+set -ex
 
 mkdir -p ${BOSH_INSTALL_TARGET}/src
 cp -a . ${BOSH_INSTALL_TARGET}/src
@@ -7,7 +7,9 @@ export GOROOT=$(readlink -nf /var/vcap/packages/golang1.10.3)
 export GOPATH=$BOSH_INSTALL_TARGET
 export PATH=$GOROOT/bin:$PATH
 
-go build -o ${BOSH_INSTALL_TARGET}/log-cache code.cloudfoundry.org/log-cache/cmd/log-cache
+go build \
+  -o ${BOSH_INSTALL_TARGET}/log-cache \
+  code.cloudfoundry.org/log-cache/cmd/log-cache
 
 # clean up source artifacts
 rm -rf ${BOSH_INSTALL_TARGET}/src ${BOSH_INSTALL_TARGET}/pkg
