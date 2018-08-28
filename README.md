@@ -56,23 +56,21 @@ Log Cache deployed within Cloud Foundry reads from the Loggregator system and
 registers with the [GoRouter](https://github.com/cloudfoundry/gorouter) at
 `log-cache.<system-domain>` (e.g. for bosh-lite `log-cache.bosh-lite.com`).
 
-It can be deployed in CF Deployment with the provided [operations
-file](manifests/operations/deploy-in-cf.yml).
+As of `cf-deployment` version 3.x, Log Cache is included by default in CF.
 
-The following command will deploy Log Cache in CF.
+The following commands will deploy Log Cache in CF.
 
 ```
+bosh update-runtime-config \
+    ~/workspace/bosh-deployment/runtime-configs/dns.yml
+bosh update-cloud-config \
+    ~/workspace/cf-deployment/iaas-support/bosh-lite/cloud-config.yml
 bosh \
     --environment lite \
     --deployment cf \
     deploy ~/workspace/cf-deployment/cf-deployment.yml \
     --ops-file ~/workspace/cf-deployment/operations/bosh-lite.yml \
-    --ops-file ~/workspace/cf-deployment/operations/experimental/use-bosh-dns.yml \
-    --ops-file ~/workspace/cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml \
     --ops-file ~/workspace/cf-deployment/operations/use-compiled-releases.yml \
-    --ops-file ~/workspace/cf-deployment/operations/use-postgres.yml \
-    --ops-file ~/workspace/log-cache-release/manifests/operations/deploy-in-cf.yml \
-    --vars-store ~/workspace/cf-deployment/vars-store.yml \
     -v system_domain=bosh-lite.com
 ```
 
@@ -95,20 +93,20 @@ release.
 
 #### Reliability SLO
 Log cache depends on Loggregator and is expected to offer slightly lower reliability.
-This is primarly due to the ephimiral nature of the cache. Loss will occur during a 
+This is primarily due to the ephemeral nature of the cache. Loss will occur during a
 deployment. Outside of deployments a 99% reliability can be expected.
 
 #### Cache Duration & Scaling
-Log cache is horizontally scalabale and we recomend scaling based on the formula below.
-We have set a service level objective of 15 minutes with this scaling recomendation.
+Log cache is horizontally scalable and we recommend scaling based on the formula below.
+We have set a service level objective of 15 minutes with this scaling recommendation.
 ```
 Log Cache Nodes = Envelopes Per Second / 10,000
 ```
 
 Note - this is intentionally designed to match the scaling of the Log Router used in the
-Loggregator system for [colocation in cf-deployment][cf-deployment-ops] - that said more 
-recent testing with this colocation strategy has not met these SLO's. If targetting these
-SLO's is critical to your foundation we recommend using a log-cache instance group. 
+Loggregator system for [colocation in cf-deployment][cf-deployment-ops] - that said more
+recent testing with this colocation strategy has not met these SLOs. If targeting these
+SLOs is critical to your foundation we recommend using a log-cache instance group.
 
 
-[cf-deployment-ops]:        https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/use-log-cache.yml 
+[cf-deployment-ops]:        https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/use-log-cache.yml
