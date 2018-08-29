@@ -31,6 +31,10 @@ properties:
   store_size:
     description: "The number of envelopes to store in memory"
     default: 1000000
+  memory_limit_percent:
+    description: "Percentage of system memory to use for the cache"
+    default: 50
+
   health_addr:
     description: "The address for LogCache to bind a health endpoint"
     default: localhost:6060

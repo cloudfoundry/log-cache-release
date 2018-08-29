@@ -35,3 +35,6 @@ properties:
   max_per_source:
     description: "The store's memory size as number of envelopes for a specific sourceID"
     default: 20000
+  memory_limit_percent:
+    description: "Percentage of system memory to use for the cache"
+    default: 50
