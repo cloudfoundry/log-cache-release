@@ -13,6 +13,7 @@ export METRIC_HOST="${INSTANCE_CID:-}"
 export CA_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-expvar-forwarder/config/certs/log_cache.key"
+export DEFAULT_SOURCE_ID="<%= p('default_source_id') %>"
 export INTERVAL="<%= p('interval') %>"
 export COUNTERS_JSON='<%= p('counters').to_json %>'
 export GAUGES_JSON='<%= p('gauges').to_json %>'

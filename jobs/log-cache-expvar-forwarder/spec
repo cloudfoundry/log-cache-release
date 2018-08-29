@@ -20,6 +20,11 @@ consumes:
   type: log-cache
 
 properties:
+  default_source_id:
+    description: |
+      Source ID to use for reported metrics when none is provided. Also used
+      for version metrics.
+    default: log-cache
   interval:
     description: |
       How often the expvar-forwarder should scrape registered
