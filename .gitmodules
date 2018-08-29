@@ -73,12 +73,12 @@
 [submodule "src/github.com/zorkian/go-datadog-api"]
 	path = src/github.com/zorkian/go-datadog-api
 	url = https://github.com/zorkian/go-datadog-api
-[submodule "src/github.com/loggregator/prometheus"]
-	path = src/github.com/loggregator/prometheus
-	url = https://github.com/loggregator/prometheus
 [submodule "src/code.cloudfoundry.org/rfc5424"]
 	path = src/code.cloudfoundry.org/rfc5424
 	url = https://github.com/cloudfoundry-incubator/rfc5424
 [submodule "src/github.com/blang/semver"]
 	path = src/github.com/blang/semver
 	url = https://github.com/blang/semver
+[submodule "src/github.com/prometheus/prometheus"]
+	path = src/github.com/prometheus/prometheus
+	url = git@github.com:prometheus/prometheus.git
