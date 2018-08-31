@@ -19,6 +19,7 @@ files:
 - code.cloudfoundry.org/go-stream-aggregator/internal/traverser/*.go # gosub
 - code.cloudfoundry.org/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/group-reader/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/gateway/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/groups/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/promql/*.go # gosub

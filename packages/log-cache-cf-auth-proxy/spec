@@ -20,6 +20,7 @@ files:
 - code.cloudfoundry.org/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/auth/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/gateway/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/groups/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/promql/*.go # gosub
