@@ -10,12 +10,8 @@ export KEY_PATH="/var/vcap/jobs/log-cache-scheduler/config/certs/log_cache.key"
 sorted_cache_instances=link("log-cache").instances.sort_by {|i|i.address}
 cache_addrs=sorted_cache_instances.map{|i| "#{i.address}:#{link("log-cache").p('port')}"}
 
-sorted_group_instances=link("log-cache-group-reader").instances.sort_by {|i|i.address}
-group_addrs=sorted_group_instances.map{|i| "#{i.address}:#{link("log-cache-group-reader").p('port')}"}
-
 "
 export NODE_ADDRS=#{cache_addrs.join(",")}
-export GROUP_READER_NODE_ADDRS=#{group_addrs.join(",")}
 export COUNT=#{p('count')}
 export INTERVAL=#{p('interval')}
 "

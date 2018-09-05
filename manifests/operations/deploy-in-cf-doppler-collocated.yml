@@ -34,13 +34,6 @@
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
   value:
-    name: log-cache-group-reader
-    properties:
-      port: 8084
-    release: log-cache
-- type: replace
-  path: /instance_groups/name=doppler/jobs/-
-  value:
     consumes:
       reverse_log_proxy:
         deployment: cf

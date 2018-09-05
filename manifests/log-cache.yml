@@ -34,8 +34,6 @@ instance_groups:
   jobs:
   - name: log-cache-scheduler
     release: log-cache
-    consumes:
-      log-cache-group-reader: {from: log-cache-group-reader}
   - name: log-cache-expvar-forwarder
     release: log-cache
     consumes:
@@ -77,12 +75,6 @@ instance_groups:
         key: "((log_cache.private_key))"
   - name: log-cache-gateway
     release: log-cache
-  - name: log-cache-group-reader
-    release: log-cache
-    provides:
-      log-cache-group-reader: {shared: false}
-    properties:
-      port: 8084
   - name: log-cache-nozzle
     release: log-cache
     consumes:
