@@ -1,0 +1,7 @@
+<% unless link('metric-cache').p('disabled') %>
+check process metric-cache-gateway
+  with pidfile /var/vcap/sys/run/metric-cache-gateway/metric-cache-gateway.pid
+  start program "/var/vcap/jobs/metric-cache-gateway/bin/ctl start"
+  stop program "/var/vcap/jobs/metric-cache-gateway/bin/ctl stop"
+  group vcap
+<% end %>

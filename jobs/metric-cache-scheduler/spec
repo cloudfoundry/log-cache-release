@@ -1,0 +1,32 @@
+---
+name: metric-cache-scheduler
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  metric_cache.crt.erb: config/certs/metric_cache.crt
+  metric_cache.key.erb: config/certs/metric_cache.key
+
+packages:
+- log-cache-scheduler
+
+provides:
+- name: metric-cache-scheduler
+  type: metric-cache-scheduler
+
+consumes:
+- name: metric-cache
+  type: metric-cache
+
+properties:
+  interval:
+    description: "The interval at which the scheduler operates"
+    default: 15s
+  count:
+    description: "The number of ranges to schedule across the metric-ache cluster"
+    default: 100
+
+  health_addr:
+    description: "The address for metric-cache to bind a health endpoint"
+    default: localhost:6064

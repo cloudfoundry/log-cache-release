@@ -1,0 +1,7 @@
+<% unless link('metric-cache').p('disabled') %>
+check process metric-cache-expvar-forwarder
+  with pidfile /var/vcap/sys/run/metric-cache-expvar-forwarder/metric-cache-expvar-forwarder.pid
+  start program "/var/vcap/jobs/metric-cache-expvar-forwarder/bin/ctl start"
+  stop program "/var/vcap/jobs/metric-cache-expvar-forwarder/bin/ctl stop"
+  group vcap
+<% end %>

@@ -1,0 +1,5 @@
+export LOG_CACHE_ADDR="<%= "localhost:#{link('metric-cache').p('port')}" %>"
+export ADDR="<%= "#{p('gateway_addr')}" %>"
+export CA_PATH="/var/vcap/jobs/metric-cache-gateway/config/certs/ca.crt"
+export CERT_PATH="/var/vcap/jobs/metric-cache-gateway/config/certs/metric_cache.crt"
+export KEY_PATH="/var/vcap/jobs/metric-cache-gateway/config/certs/metric_cache.key"
