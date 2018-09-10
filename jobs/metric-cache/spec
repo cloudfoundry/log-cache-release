@@ -1,0 +1,51 @@
+---
+name: metric-cache
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+  ca.crt.erb: config/certs/ca.crt
+  metric_cache.crt.erb: config/certs/metric_cache.crt
+  metric_cache.key.erb: config/certs/metric_cache.key
+
+packages:
+- metric-cache
+
+provides:
+- name: metric-cache
+  type: metric-cache
+  properties:
+  - port
+  - tls
+  - disabled
+
+consumes:
+- name: metric-cache
+  type: metric-cache
+
+properties:
+  port:
+    description: "The port for the metric-cache to listen on"
+    default: 8080
+
+  store_size:
+    description: "The number of envelopes to store in memory"
+    default: 1000000
+  memory_limit_percent:
+    description: "Percentage of system memory to use for the cache"
+    default: 50
+
+  health_addr:
+    description: "The address for metric-cache to bind a health endpoint"
+    default: localhost:6060
+
+  tls.ca_cert:
+    description: "The Certificate Authority for metric-cache mutual TLS."
+  tls.cert:
+    description: "The client cert for metric-cache mutual TLS."
+  tls.key:
+    description: "The client private key for metric-cache mutual TLS."
+
+  disabled:
+    default: false
+    description: "Turns off metric-cache."
