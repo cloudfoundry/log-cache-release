@@ -1,7 +1,0 @@
-<% unless link('metric-cache').p('disabled') %>
-check process metric-cache-nozzle
-  with pidfile /var/vcap/sys/run/metric-cache-nozzle/metric-cache-nozzle.pid
-  start program "/var/vcap/jobs/metric-cache-nozzle/bin/ctl start"
-  stop program "/var/vcap/jobs/metric-cache-nozzle/bin/ctl stop"
-  group vcap
-<% end %>

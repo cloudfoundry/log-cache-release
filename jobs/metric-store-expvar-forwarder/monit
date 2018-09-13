@@ -1,0 +1,7 @@
+<% unless link('metric-store').p('disabled') %>
+check process metric-store-expvar-forwarder
+  with pidfile /var/vcap/sys/run/metric-store-expvar-forwarder/metric-store-expvar-forwarder.pid
+  start program "/var/vcap/jobs/metric-store-expvar-forwarder/bin/ctl start"
+  stop program "/var/vcap/jobs/metric-store-expvar-forwarder/bin/ctl stop"
+  group vcap
+<% end %>

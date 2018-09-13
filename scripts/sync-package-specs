@@ -44,6 +44,6 @@ sync_package log-cache-expvar-forwarder -app  code.cloudfoundry.org/log-cache/cm
 sync_package log-cache-cf-auth-proxy    -app  code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy &
 sync_package log-cache-scheduler        -app  code.cloudfoundry.org/log-cache/cmd/scheduler &
 sync_package log-cache-blackbox         -app  code.cloudfoundry.org/log-cache/cmd/blackbox-test &
-sync_package metric-cache               -app  code.cloudfoundry.org/log-cache/cmd/log-cache &
+sync_package metric-store               -app  code.cloudfoundry.org/log-cache/cmd/log-cache &
 
 wait

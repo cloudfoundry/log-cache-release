@@ -1,0 +1,72 @@
+---
+name: metric-store-expvar-forwarder
+
+templates:
+  ctl: bin/ctl
+  environment.sh.erb: bin/environment.sh
+  metric_store_ca.crt.erb: config/certs/metric_store_ca.crt
+  metric_store.crt.erb: config/certs/metric_store.crt
+  metric_store.key.erb: config/certs/metric_store.key
+
+packages:
+- log-cache-expvar-forwarder
+
+provides:
+- name: metric-store-expvar-forwarder
+  type: metric-store-expvar-forwarder
+
+consumes:
+- name: metric-store
+  type: metric-store
+
+properties:
+  default_source_id:
+    description: |
+      Source ID to use for reported metrics when none is provided. Also used
+      for version metrics.
+    default: metric-store
+  interval:
+    description: |
+      How often the expvar-forwarder should scrape registered
+      endpoints and report values.
+    default: 1m
+  log_metrics:
+    description: Write each metric from the endpoints to metric-store and stdout.
+    default: true
+  counters:
+    description: |
+        An array of Objects that have the following fields:
+        - addr: address of the expvar endpoint
+        - name: The output name of the Counter
+        - source_id: The output sourceID of the Counter
+        - template: The golang text/template to find the metric in the expvar
+          output.
+        - tags: An object that can only have string values. They will be
+          passed as tags on the envelope.
+    default: []
+  gauges:
+    description: |
+        An array of Objects that have the following fields:
+        - addr: address of the expvar endpoint
+        - name: The output name of the Counter
+        - unit: The output unit of the Counter
+        - source_id: The output sourceID of the Counter
+        - template: The golang text/template to find the metric in the expvar
+          output.
+        - tags: An object that can only have string values. They will be
+          passed as tags on the envelope.
+    default: []
+  maps:
+    description: |
+        An array of Objects that have the following fields:
+        - addr: address of the expvar endpoint
+        - name: The output name of the Counter
+        - source_id: The output sourceID of the Map
+        - template: The golang text/template to find the metric in the expvar
+          output. (Hint: you'll probably want to use a custom map formatter
+          such as the jsonMap)
+        - tags: An object that can only have string values. They will be
+          passed as tags on the envelope.
+        Each entry in the map will be parsed into one gauge per key before it
+        is forwarder onto the receiving metric-store instance.
+    default: []

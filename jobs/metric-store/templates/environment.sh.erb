@@ -1,0 +1,21 @@
+# Metric Cache
+export ADDR="<%= ":#{p('port')}" %>"
+export HEALTH_ADDR="<%= p('health_addr') %>"
+export STORE_SIZE="<%= p('store_size') %>"
+export MEMORY_LIMIT_PERCENT="<%= p('memory_limit_percent') %>"
+
+export CA_PATH="/var/vcap/jobs/metric-store/config/certs/metric_store_ca.crt"
+export CERT_PATH="/var/vcap/jobs/metric-store/config/certs/metric_store.crt"
+export KEY_PATH="/var/vcap/jobs/metric-store/config/certs/metric_store.key"
+
+# Clustered Configuration
+<%=
+sorted_instances=link("metric-store").instances.sort_by {|i|i.address}
+index=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
+addrs=sorted_instances.map{|i| "#{i.address}:#{p('port')}"}
+
+"
+export NODE_INDEX=#{index}
+export NODE_ADDRS=#{addrs.join(",")}
+"
+%>

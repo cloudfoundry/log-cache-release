@@ -1,7 +1,0 @@
-<% unless link('metric-cache').p('disabled') %>
-check process metric-cache-scheduler
-  with pidfile /var/vcap/sys/run/metric-cache-scheduler/metric-cache-scheduler.pid
-  start program "/var/vcap/jobs/metric-cache-scheduler/bin/ctl start"
-  stop program "/var/vcap/jobs/metric-cache-scheduler/bin/ctl stop"
-  group vcap
-<% end %>

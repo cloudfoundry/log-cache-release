@@ -1,0 +1,7 @@
+<% unless link('metric-store').p('disabled') %>
+check process metric-store-nozzle
+  with pidfile /var/vcap/sys/run/metric-store-nozzle/metric-store-nozzle.pid
+  start program "/var/vcap/jobs/metric-store-nozzle/bin/ctl start"
+  stop program "/var/vcap/jobs/metric-store-nozzle/bin/ctl stop"
+  group vcap
+<% end %>

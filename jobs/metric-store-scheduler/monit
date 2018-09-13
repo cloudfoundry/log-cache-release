@@ -1,0 +1,7 @@
+<% unless link('metric-store').p('disabled') %>
+check process metric-store-scheduler
+  with pidfile /var/vcap/sys/run/metric-store-scheduler/metric-store-scheduler.pid
+  start program "/var/vcap/jobs/metric-store-scheduler/bin/ctl start"
+  stop program "/var/vcap/jobs/metric-store-scheduler/bin/ctl stop"
+  group vcap
+<% end %>

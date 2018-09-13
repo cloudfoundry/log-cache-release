@@ -1,0 +1,7 @@
+<% unless link('metric-store').p('disabled') %>
+check process metric-store-cf-auth-proxy
+  with pidfile /var/vcap/sys/run/metric-store-cf-auth-proxy/metric-store-cf-auth-proxy.pid
+  start program "/var/vcap/jobs/metric-store-cf-auth-proxy/bin/ctl start"
+  stop program "/var/vcap/jobs/metric-store-cf-auth-proxy/bin/ctl stop"
+  group vcap
+<% end %>

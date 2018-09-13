@@ -1,7 +1,0 @@
-<% unless link('metric-cache').p('disabled') %>
-check process metric-cache-cf-auth-proxy
-  with pidfile /var/vcap/sys/run/metric-cache-cf-auth-proxy/metric-cache-cf-auth-proxy.pid
-  start program "/var/vcap/jobs/metric-cache-cf-auth-proxy/bin/ctl start"
-  stop program "/var/vcap/jobs/metric-cache-cf-auth-proxy/bin/ctl stop"
-  group vcap
-<% end %>
