@@ -44,6 +44,7 @@ files:
 - github.com/grpc-ecosystem/grpc-gateway/runtime/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/runtime/internal/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/utilities/*.go # gosub
+- github.com/prometheus/common/model/*.go # gosub
 - github.com/prometheus/prometheus/pkg/labels/*.go # gosub
 - github.com/prometheus/prometheus/pkg/timestamp/*.go # gosub
 - github.com/prometheus/prometheus/pkg/value/*.go # gosub
