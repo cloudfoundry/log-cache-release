@@ -85,3 +85,6 @@
 [submodule "src/github.com/Benjamintf1/unmarshalledmatchers"]
 	path = src/github.com/Benjamintf1/unmarshalledmatchers
 	url = https://github.com/Benjamintf1/unmarshalledmatchers
+[submodule "src/github.com/prometheus/common"]
+	path = src/github.com/prometheus/common
+	url = https://github.com/prometheus/common
