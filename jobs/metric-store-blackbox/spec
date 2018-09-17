@@ -1,0 +1,32 @@
+---
+name: metric-store-blackbox
+
+templates:
+  ctl: bin/ctl
+  metric_store_ca.crt.erb: config/certs/metric_store_ca.crt
+  metric_store.crt.erb: config/certs/metric_store.crt
+  metric_store.key.erb: config/certs/metric_store.key
+  environment.sh.erb: bin/environment.sh
+
+packages:
+- log-cache-blackbox
+
+consumes:
+- name: metric-store
+  type: metric-store
+
+properties:
+  run_interval:
+    description: "The interval between test runs"
+    default: 10m
+  datadog.api_key:
+    description: "The api key to use when emitting test results to Datadog"
+  datadog.tags:
+    description: "Tags that will be added to the emitted Datadog metrics as a
+comma separated list."
+    default: ""
+  datadog.origin_host:
+    description: "Hostname to be included on the emitted Datadog metrics"
+    default: ""
+  metric_store_host:
+    description: "BOSH DNS alias at which metric-store can be found"
