@@ -1,20 +1,27 @@
 # Blackbox Test
-export RUN_INTERVAL="<%= p('run_interval') %>"
+export EMISSION_INTERVAL="<%= p('emission_interval') %>"
+export SAMPLE_INTERVAL="<%= p('sample_interval') %>"
+export WINDOW_INTERVAL="<%= p('window_interval') %>"
+export SOURCE_ID="<%= p('source_id') %>"
 
 # Log Cache
 <%
-  logCacheAddr = link("log-cache").address
-  if_p("log_cache_host") do |logCacheHost|
-      logCacheAddr = logCacheHost
-  end
+  logCacheGrpcAddr = link("log-cache").address
+  logCacheGrpcPort = link("log-cache").p('port')
 %>
-export LOG_CACHE_ADDR="<%= "#{logCacheAddr}:#{link('log-cache').p('port')}" %>"
+export DATA_SOURCE_GRPC_ADDR="<%= "#{logCacheGrpcAddr}:#{logCacheGrpcPort}" %>"
 export CA_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache_ca.crt"
 export CERT_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.crt"
 export KEY_PATH="/var/vcap/jobs/log-cache-blackbox/config/certs/log_cache.key"
 
-# Datadog
-export DATADOG_API_KEY="<%= p('datadog.api_key') %>"
-export DATADOG_TAGS="<%= p('datadog.tags') %>"
-export DATADOG_ORIGIN_HOST="<%= p('datadog.origin_host') %>"
-
+<% if_p("cf_blackbox.enabled") do
+    systemDomain = link("cloud_controller").p("system_domain")
+%>
+    # CF Authentication
+    export CF_BLACKBOX_ENABLED=true
+    export DATA_SOURCE_HTTP_ADDR="<%= "https://log-cache.#{systemDomain}" %>"
+    export UAA_ADDR="<%= "https://uaa.#{systemDomain}" %>"
+    export CLIENT_ID="<%= p('cf_blackbox.client_id') %>"
+    export CLIENT_SECRET="<%= p('cf_blackbox.client_secret') %>"
+    export SKIP_TLS_VERIFY="<%= p('cf_blackbox.skip_tls_verify') %>"
+<% end %>

@@ -14,19 +14,30 @@ packages:
 consumes:
 - name: log-cache
   type: log-cache
+- name: cloud_controller
+  type: cloud_controller
+  optional: true
 
 properties:
-  run_interval:
-    description: "The interval between test runs"
+  emission_interval:
+    description: "The interval between emitted test metrics"
+    default: 1s
+  sample_interval:
+    description: "The interval between samples"
+    default: 1m
+  window_interval:
+    description: "The trailing interval over which to measure metric retrieval"
     default: 10m
-  datadog.api_key:
-    description: "The api key to use when emitting test results to Datadog"
-  datadog.tags:
-    description: "Tags that will be added to the emitted Datadog metrics as a
-comma separated list."
-    default: ""
-  datadog.origin_host:
-    description: "Hostname to be included on the emitted Datadog metrics"
-    default: ""
-  log_cache_host:
-    description: "BOSH DNS alias at which Log Cache can be found"
+  source_id:
+    description: "Source ID for metadata of both test and result metrics"
+    default: log-cache
+
+  cf_blackbox.enabled:
+    description: "Test HTTP egress which uses CF-based UAA authentication"
+    default: false
+  cf_blackbox.client_id:
+    description: "UAA client ID for egress testing - requires logs.admin scope"
+  cf_blackbox.client_secret:
+    description: "UAA client secret"
+  cf_blackbox.skip_tls_verify:
+    description: "Skip certificate validation when testing HTTP egress"
