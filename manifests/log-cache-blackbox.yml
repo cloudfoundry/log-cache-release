@@ -24,9 +24,6 @@ instance_groups:
   jobs:
   - name: log-cache-blackbox
     release: log-cache
-    properties:
-      datadog:
-        api_key: ((datadog_api_key))
     consumes:
       log-cache: {from: log-cache, deployment: default}
 
