@@ -41,3 +41,4 @@ properties:
     description: "UAA client secret"
   cf_blackbox.skip_tls_verify:
     description: "Skip certificate validation when testing HTTP egress"
+    default: false
