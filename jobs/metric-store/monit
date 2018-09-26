@@ -1,7 +1,0 @@
-<% unless link('metric-store').p('disabled') %>
-check process metric-store
-  with pidfile /var/vcap/sys/run/metric-store/metric-store.pid
-  start program "/var/vcap/jobs/metric-store/bin/ctl start"
-  stop program "/var/vcap/jobs/metric-store/bin/ctl stop"
-  group vcap
-<% end %>

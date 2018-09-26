@@ -1,7 +1,0 @@
-<% unless link('metric-store').p('disabled') %>
-check process metric-store-gateway
-  with pidfile /var/vcap/sys/run/metric-store-gateway/metric-store-gateway.pid
-  start program "/var/vcap/jobs/metric-store-gateway/bin/ctl start"
-  stop program "/var/vcap/jobs/metric-store-gateway/bin/ctl stop"
-  group vcap
-<% end %>

@@ -1,7 +1,0 @@
-<% unless link('metric-store').p('disabled') %>
-check process metric-store-blackbox
-  with pidfile /var/vcap/sys/run/metric-store-blackbox/metric-store-blackbox.pid
-  start program "/var/vcap/jobs/metric-store-blackbox/bin/ctl start"
-  stop program "/var/vcap/jobs/metric-store-blackbox/bin/ctl stop"
-  group vcap
-<% end %>
