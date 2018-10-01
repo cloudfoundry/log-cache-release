@@ -28,9 +28,6 @@ properties:
     description: "The port for the log-cache to listen on"
     default: 8080
 
-  store_size:
-    description: "The number of envelopes to store in memory"
-    default: 1000000
   memory_limit_percent:
     description: "Percentage of system memory to use for the cache"
     default: 50
