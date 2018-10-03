@@ -85,3 +85,12 @@
 [submodule "src/github.com/prometheus/common"]
 	path = src/github.com/prometheus/common
 	url = https://github.com/prometheus/common
+[submodule "src/golang.org/x/time"]
+	path = src/golang.org/x/time
+	url = https://github.com/golang/time
+[submodule "src/golang.org/x/sys"]
+	path = src/golang.org/x/sys
+	url = https://github.com/golang/sys
+[submodule "src/github.com/ghodss/yaml"]
+	path = src/github.com/ghodss/yaml
+	url = https://github.com/ghodss/yaml
