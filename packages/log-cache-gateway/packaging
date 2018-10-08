@@ -1,4 +1,4 @@
-set -e -x
+set -euxo pipefail
 
 mkdir -p ${BOSH_INSTALL_TARGET}/src
 cp -a . ${BOSH_INSTALL_TARGET}/src
@@ -7,7 +7,7 @@ export GOROOT=$(readlink -nf /var/vcap/packages/golang1.10.3)
 export GOPATH=$BOSH_INSTALL_TARGET
 export PATH=$GOROOT/bin:$PATH
 
-export VERSION=$(cat version)
+VERSION=$(cat version)
 go build \
   -o ${BOSH_INSTALL_TARGET}/log-cache-gateway \
   -ldflags "-X main.buildVersion=${VERSION}" \
