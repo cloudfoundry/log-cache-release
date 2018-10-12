@@ -23,10 +23,28 @@ src/github.com/vito/gosub
 
 # Bosh Deploys
 vars.yml
+deployment-vars.yml
 
 # Golang Tools
 src/github.com/client9/misspell
 src/github.com/kisielk/gotool
 src/github.com/mdempsky/unconvert
 src/golang.org/x/tools
-deployment-vars.yml
+
+# These are the result of running :GoInstallBinaries
+src/github.com/alecthomas/
+src/github.com/davidrjenni/
+src/github.com/derekparker/
+src/github.com/fatih/
+src/github.com/golang/lint/
+src/github.com/josharian/
+src/github.com/jstemmer/
+src/github.com/kisielk/
+src/github.com/klauspost/
+src/github.com/koron/
+src/github.com/mdempsky/
+src/github.com/rogpeppe/
+src/github.com/zmb3/
+src/golang.org/x/lint/
+src/honnef.co/
+
