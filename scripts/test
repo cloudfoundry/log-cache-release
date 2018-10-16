@@ -79,10 +79,29 @@ function run_cleaners {
 
 function run_unit {
     pushd $PROJECT_DIR/src/code.cloudfoundry.org/log-cache > /dev/null
-        print_checkpoint "Running Unit Tests"
+        TEST_OPTIONS="-ginkgo.randomizeAllSpecs -ginkgo.slowSpecThreshold 20"
+
+        # The race detector dramatically increases the runtime of certain tests, particularly
+        # those that cover the scheduler. As a result, we first run the tests with race detection
+        # enabled, but only consider actual data races as failures. We then run the test suite
+        # without race detection and assert on test correctness.
+        print_checkpoint "Checking for Data Races"
+        race_log=$(mktemp log_cache_race_log.XXXXXXXX --tmpdir)
+
         go test -race ./... \
-            -ginkgo.randomizeAllSpecs \
-            -ginkgo.slowSpecThreshold 20 \
+            ${TEST_OPTIONS} \
+            $@ 2>&1 > ${race_log} || true
+        if egrep 'DATA RACE|race detected' ${race_log}; then
+            cat ${race_log}
+            rm ${race_log}
+            return 1
+        fi
+        rm ${race_log}
+        echo "No races found"
+
+        print_checkpoint "Running Unit Tests"
+        go test ./... \
+            ${TEST_OPTIONS} \
             $@
         exit_code=$?
     popd > /dev/null
