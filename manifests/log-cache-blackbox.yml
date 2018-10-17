@@ -13,8 +13,6 @@ instance_groups:
 - name: log-cache-blackbox
   azs:
   - z1
-  - z2
-  - z3
   instances: 1
   persistent_disk_type: 5GB
   vm_type: minimal
