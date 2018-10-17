@@ -7,7 +7,7 @@
 %>
 ---
 processes:
-- name: log-cache-cf-blackbox
+- name: log-cache-blackbox
   executable: /var/vcap/packages/log-cache-blackbox/log-cache-blackbox
   env:
     # Blackbox Test
@@ -24,8 +24,8 @@ processes:
 
     # CF Authentication
     CF_BLACKBOX_ENABLED:   true
-    DATA_SOURCE_HTTP_ADDR: "<%= "https://log-cache.#{cc.systemDomain}" %>"
-    UAA_ADDR:        "<%= "https://uaa.#{cc.systemDomain}" %>"
+    DATA_SOURCE_HTTP_ADDR: "<%= "https://log-cache.#{cc.p('system_domain')}" %>"
+    UAA_ADDR:        "<%= "https://uaa.#{cc.p('system_domain')}" %>"
     CLIENT_ID:       "<%= p('cf_blackbox.client_id') %>"
     CLIENT_SECRET:   "<%= p('cf_blackbox.client_secret') %>"
     SKIP_TLS_VERIFY: "<%= p('cf_blackbox.skip_tls_verify') %>"
