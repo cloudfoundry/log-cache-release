@@ -8,6 +8,8 @@ stemcells:
 releases:
 - name: log-cache
   version: latest
+- name: bpm
+  version: latest
 
 instance_groups:
 - name: log-cache-blackbox
@@ -24,6 +26,8 @@ instance_groups:
     release: log-cache
     consumes:
       log-cache: {from: log-cache, deployment: default}
+  - name: bpm
+    release: bpm
 
 update:
   canaries: 10

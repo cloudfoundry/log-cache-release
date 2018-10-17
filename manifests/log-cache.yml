@@ -10,6 +10,8 @@ releases:
   version: latest
 - name: bosh-dns
   version: latest
+- name: bpm
+  version: latest
 
 addons:
 - name: bosh-dns
@@ -19,6 +21,13 @@ addons:
   jobs:
   - name: bosh-dns
     release: bosh-dns
+- name: bpm
+  include:
+    stemcell:
+    - os: ubuntu-xenial
+  jobs:
+  - name: bpm
+    release: bpm
 
 instance_groups:
 - name: log-cache-scheduler
