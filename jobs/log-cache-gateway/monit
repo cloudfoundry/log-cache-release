@@ -1,7 +1,5 @@
-<% unless link('log-cache').p('disabled') %>
 check process log-cache-gateway
-  with pidfile /var/vcap/sys/run/log-cache-gateway/log-cache-gateway.pid
-  start program "/var/vcap/jobs/log-cache-gateway/bin/ctl start"
-  stop program "/var/vcap/jobs/log-cache-gateway/bin/ctl stop"
+  with pidfile /var/vcap/sys/run/bpm/log-cache-gateway/log-cache-gateway.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start log-cache-gateway"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop log-cache-gateway"
   group vcap
-<% end %>

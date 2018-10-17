@@ -1,7 +1,5 @@
-<% unless link('log-cache').p('disabled') %>
 check process log-cache-expvar-forwarder
-  with pidfile /var/vcap/sys/run/log-cache-expvar-forwarder/log-cache-expvar-forwarder.pid
-  start program "/var/vcap/jobs/log-cache-expvar-forwarder/bin/ctl start"
-  stop program "/var/vcap/jobs/log-cache-expvar-forwarder/bin/ctl stop"
+  with pidfile /var/vcap/sys/run/bpm/log-cache-expvar-forwarder/log-cache-expvar-forwarder.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start log-cache-expvar-forwarder"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop log-cache-expvar-forwarder"
   group vcap
-<% end %>

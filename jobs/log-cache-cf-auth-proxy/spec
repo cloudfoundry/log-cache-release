@@ -1,8 +1,7 @@
 ---
 name: log-cache-cf-auth-proxy
 templates:
-  ctl: bin/ctl
-  environment.sh.erb: bin/environment.sh
+  bpm.yml.erb: config/bpm.yml
   cc_ca.crt.erb: config/certs/cc_ca.crt
   cc.crt.erb: config/certs/cc.crt
   cc.key.erb: config/certs/cc.key

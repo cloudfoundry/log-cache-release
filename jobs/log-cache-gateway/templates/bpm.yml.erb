@@ -1,0 +1,20 @@
+<%
+  jobDir = "/var/vcap/jobs/log-cache-gateway"
+  certDir = "#{jobDir}/config/certs"
+
+  lc = link("log-cache")
+%>
+---
+processes:
+- name: log-cache-gateway
+  executable: /var/vcap/packages/log-cache-gateway/log-cache-gateway
+  env:
+    # Log Cache
+    LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
+    ADDR:           "<%= p('gateway_addr') %>"
+    CA_PATH:        "<%= "#{certDir}/ca.crt" %>"
+    CERT_PATH:      "<%= "#{certDir}/log_cache.crt" %>"
+    KEY_PATH:       "<%= "#{certDir}/log_cache.key" %>"
+
+  limits:
+    open_files: 8192

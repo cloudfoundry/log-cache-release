@@ -1,0 +1,31 @@
+<%
+  jobDir = "/var/vcap/jobs/log-cache"
+  certDir = "#{jobDir}/config/certs"
+
+  lc = link("log-cache")
+
+  sorted_cache_instances = lc.instances.sort_by {|i| i.address}
+  cache_addrs = sorted_cache_instances.map {|i| "#{i.address}:#{p('port')}"}
+  index = sorted_cache_instances.index(
+      sorted_cache_instances.find {|i| i.id == spec.id}
+  )
+%>
+---
+processes:
+- name: log-cache
+  executable: /var/vcap/packages/log-cache/log-cache
+  env:
+    HEALTH_ADDR: "<%= p('health_addr') %>"
+    ADDR:        "<%= ":#{p('port')}" %>"
+    MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
+
+    CA_PATH:   "<%= "#{certDir}/ca.crt" %>"
+    CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"
+    KEY_PATH:  "<%= "#{certDir}/log_cache.key" %>"
+
+    # Cluster Configuration
+    NODE_INDEX: "<%= index %>"
+    NODE_ADDRS: "<%= cache_addrs.join(",") %>"
+
+  limits:
+    open_files: 8192

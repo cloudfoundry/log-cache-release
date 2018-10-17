@@ -1,0 +1,32 @@
+<%
+  jobDir = "/var/vcap/jobs/log-cache-nozzle"
+  certDir = "#{jobDir}/config/certs"
+
+  lc = link("log-cache")
+  rlp = link('reverse_log_proxy')
+%>
+---
+processes:
+- name: log-cache-nozzle
+  executable: /var/vcap/packages/log-cache-nozzle/log-cache-nozzle
+  env:
+    HEALTH_ADDR: "<%= p('health_addr') %>"
+
+    # Logs Provider
+    LOGS_PROVIDER_ADDR: "<%= "#{rlp.address}:#{rlp.p('reverse_log_proxy.egress.port')}" %>"
+    LOGS_PROVIDER_CA_FILE_PATH:   "<%= "#{certDir}/logs_provider_ca.crt" %>"
+    LOGS_PROVIDER_CERT_FILE_PATH: "<%= "#{certDir}/logs_provider.crt" %>"
+    LOGS_PROVIDER_KEY_FILE_PATH:  "<%= "#{certDir}/logs_provider.key" %>"
+
+    # Log Cache
+    LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
+    CA_PATH:        "<%= "#{certDir}/log_cache_ca.crt" %>"
+    CERT_PATH:      "<%= "#{certDir}/log_cache.crt" %>"
+    KEY_PATH:       "<%= "#{certDir}/log_cache.key" %>"
+    SHARD_ID:       "<%= p('shard_id') %>"
+    SELECTORS:      "<%= p('selectors').join(',') %>"
+
+  limits:
+    open_files: 8192
+
+

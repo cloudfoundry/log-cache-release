@@ -1,0 +1,34 @@
+<%
+  jobDir = "/var/vcap/jobs/log-cache-blackbox"
+  certDir = "#{jobDir}/config/certs"
+
+  lc = link("log-cache")
+  cc = link('cloud_controller')
+%>
+---
+processes:
+- name: log-cache-cf-blackbox
+  executable: /var/vcap/packages/log-cache-blackbox/log-cache-blackbox
+  env:
+    # Blackbox Test
+    EMISSION_INTERVAL: "<%= p('emission_interval') %>"
+    SAMPLE_INTERVAL:   "<%= p('sample_interval') %>"
+    WINDOW_INTERVAL:   "<%= p('window_interval') %>"
+    SOURCE_ID:         "<%= p('source_id') %>"
+
+    # Log Cache
+    DATA_SOURCE_GRPC_ADDR: "<%= "#{lc.address}:#{lc.p('port')}" %>"
+    CA_PATH:               "<%= "#{certDir}/log_cache_ca.crt" %>"
+    CERT_PATH:             "<%= "#{certDir}/log_cache.crt" %>"
+    KEY_PATH:              "<%= "#{certDir}/log_cache.key" %>"
+
+    # CF Authentication
+    CF_BLACKBOX_ENABLED:   true
+    DATA_SOURCE_HTTP_ADDR: "<%= "https://log-cache.#{cc.systemDomain}" %>"
+    UAA_ADDR:        "<%= "https://uaa.#{cc.systemDomain}" %>"
+    CLIENT_ID:       "<%= p('cf_blackbox.client_id') %>"
+    CLIENT_SECRET:   "<%= p('cf_blackbox.client_secret') %>"
+    SKIP_TLS_VERIFY: "<%= p('cf_blackbox.skip_tls_verify') %>"
+
+  limits:
+    open_files: 8192

@@ -1,0 +1,32 @@
+<%
+  jobDir = "/var/vcap/jobs/log-cache-cf-auth-proxy"
+  certDir = "#{jobDir}/config/certs"
+
+  gw = link('log-cache-gateway')
+  cc = link('cloud_controller')
+%>
+---
+processes:
+- name: log-cache-cf-auth-proxy
+  executable: /var/vcap/packages/log-cache-cf-auth-proxy/log-cache-cf-auth-proxy
+  env:
+    # Gateway
+    LOG_CACHE_GATEWAY_ADDR: "<%= "http://#{gw.p('gateway_addr')}" %>"
+    ADDR: "<%= ":#{p('proxy_port')}" %>"
+
+    # External ADDR is plaintext because it assumes go-router SSL termination.
+    CAPI_ADDR_EXTERNAL: "<%= "http://#{cc.address}:9022" %>"
+    CAPI_ADDR:          "<%= "https://#{cc.address}:9023" %>"
+    CAPI_CERT_PATH:     "<%= "#{certDir}/cc.crt" %>"
+    CAPI_KEY_PATH:      "<%= "#{certDir}/cc.key" %>"
+    CAPI_CA_PATH:       "<%= "#{certDir}/cc_ca.crt" %>"
+    CAPI_COMMON_NAME:   "<%= p('cc.common_name') %>"
+
+    UAA_ADDR:          "<%= p('uaa.internal_addr') %>"
+    UAA_CA_PATH:       "<%= "#{certDir}/uaa_ca.crt" %>"
+    UAA_CLIENT_ID:     "<%= p('uaa.client_id') %>"
+    UAA_CLIENT_SECRET: "<%= p('uaa.client_secret') %>"
+    SKIP_CERT_VERIFY:  "<%= p('skip_cert_verify') %>"
+
+  limits:
+    open_files: 8192
