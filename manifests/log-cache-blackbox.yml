@@ -2,7 +2,7 @@ name: log-cache-blackbox
 
 stemcells:
 - alias: default
-  os: ubuntu-trusty
+  os: ubuntu-xenial
   version: latest
 
 releases:
