@@ -2,7 +2,7 @@
 name: log-cache-gateway
 
 dependencies:
-- golang1.10.3
+- golang1.11.1
 
 files:
 - version
