@@ -3,8 +3,7 @@ Log Cache Release
 
 Log Cache Release is a [bosh](https://github.com/cloudfoundry/bosh) release
 for [Log Cache](https://code.cloudfoundry.org/log-cache). It provides
-an [experimental in memory caching layer](https://docs.google.com/document/d/1yhfl0EB_MkHkh4JdRZXGeQMx_BDMCuB-SpPuSrD3VOU/edit#) as a potential future
-alternative for `cf logs --recent` and container metrics retrieval.
+an [in memory caching layer](https://docs.google.com/document/d/1yhfl0EB_MkHkh4JdRZXGeQMx_BDMCuB-SpPuSrD3VOU/edit#) as a replacement for `cf logs --recent` and container metrics retrieval.
 
 ### Deploying Log Cache
 
@@ -87,9 +86,6 @@ If you would like to use a custom client, it requires the `uaa.resource` authori
 ```
 
 ### Operating Log Cache
-Log cache is currently an experimental release with plans for integrations starting
-in summer 2018. That said we have defined the following service level objectives for the
-release.
 
 #### Reliability SLO
 Log cache depends on Loggregator and is expected to offer slightly lower reliability.
@@ -108,5 +104,3 @@ Loggregator system for [colocation in cf-deployment][cf-deployment-ops] - that s
 recent testing with this colocation strategy has not met these SLOs. If targeting these
 SLOs is critical to your foundation we recommend using a log-cache instance group.
 
-
-[cf-deployment-ops]:        https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/use-log-cache.yml
