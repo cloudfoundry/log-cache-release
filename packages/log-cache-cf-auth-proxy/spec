@@ -8,11 +8,11 @@ files:
 - code.cloudfoundry.org/go-envstruct/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/pkg/auth/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/pkg/metrics/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/pkg/promql/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/pkg/proxy/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/pkg/tls/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/auth/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/promql/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/proxy/*.go # gosub
+- code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/client/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1/*.go # gosub
 - code.cloudfoundry.org/rfc5424/*.go # gosub
