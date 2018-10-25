@@ -31,7 +31,6 @@ files:
 - github.com/grpc-ecosystem/grpc-gateway/runtime/internal/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/utilities/*.go # gosub
 - github.com/prometheus/common/model/*.go # gosub
-- github.com/prometheus/prometheus/pkg/gate/*.go # gosub
 - github.com/prometheus/prometheus/pkg/labels/*.go # gosub
 - github.com/prometheus/prometheus/pkg/timestamp/*.go # gosub
 - github.com/prometheus/prometheus/pkg/value/*.go # gosub
@@ -55,7 +54,6 @@ files:
 - github.com/prometheus/prometheus/vendor/github.com/opentracing/opentracing-go/log/*.go # gosub
 - github.com/prometheus/prometheus/vendor/github.com/pkg/errors/*.go # gosub
 - github.com/prometheus/prometheus/vendor/github.com/prometheus/client_golang/prometheus/*.go # gosub
-- github.com/prometheus/prometheus/vendor/github.com/prometheus/client_golang/prometheus/internal/*.go # gosub
 - github.com/prometheus/prometheus/vendor/github.com/prometheus/client_model/go/*.go # gosub
 - github.com/prometheus/prometheus/vendor/github.com/prometheus/common/expfmt/*.go # gosub
 - github.com/prometheus/prometheus/vendor/github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg/*.go # gosub
