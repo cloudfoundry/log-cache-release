@@ -74,6 +74,8 @@ function run_cleaners {
     misspell -w "$log_cache_dir"
     echo running unconvert
     unconvert -v -apply "$log_cache_pkg/..."
+    echo running go vet
+    go vet "$log_cache_pkg/..."
     return 0
 }
 
