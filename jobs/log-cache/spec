@@ -35,10 +35,9 @@ properties:
     description: "The address for LogCache to bind a health endpoint"
     default: localhost:6060
 
-  prometheus:
-    query_timeout:
-      description: "The maximum allowed runtime for a single PromQL query. Smaller timeouts are recommended."
-      default: "10s"
+  promql.query_timeout:
+    description: "The maximum allowed runtime for a single PromQL query. Smaller timeouts are recommended."
+    default: "10s"
 
   tls.ca_cert:
     description: "The Certificate Authority for log cache mutual TLS."

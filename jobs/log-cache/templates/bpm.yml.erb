@@ -18,7 +18,7 @@ processes:
     HEALTH_ADDR: "<%= p('health_addr') %>"
     ADDR:        "<%= ":#{p('port')}" %>"
     MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
-    QUERY_TIMEOUT: "<%= p('prometheus.query_timeout') %>"
+    QUERY_TIMEOUT: "<%= p('promql.query_timeout') %>"
 
     CA_PATH:   "<%= "#{certDir}/ca.crt" %>"
     CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"
