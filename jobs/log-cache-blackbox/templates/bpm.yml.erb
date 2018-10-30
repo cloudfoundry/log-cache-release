@@ -23,7 +23,7 @@ processes:
     KEY_PATH:              "<%= "#{certDir}/log_cache.key" %>"
 
     # CF Authentication
-    CF_BLACKBOX_ENABLED:   true
+    CF_BLACKBOX_ENABLED:   "<%= p('cf_blackbox.enabled') %>"
     DATA_SOURCE_HTTP_ADDR: "<%= "https://log-cache.#{cc.p('system_domain')}" %>"
     UAA_ADDR:        "<%= "https://uaa.#{cc.p('system_domain')}" %>"
     CLIENT_ID:       "<%= p('cf_blackbox.client_id') %>"
