@@ -3,8 +3,6 @@ name: log-cache-cf-auth-proxy
 templates:
   bpm.yml.erb: config/bpm.yml
   cc_ca.crt.erb: config/certs/cc_ca.crt
-  cc.crt.erb: config/certs/cc.crt
-  cc.key.erb: config/certs/cc.key
   uaa_ca.crt.erb: config/certs/uaa_ca.crt
 
 packages:
