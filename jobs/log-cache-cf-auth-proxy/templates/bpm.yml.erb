@@ -14,11 +14,7 @@ processes:
     LOG_CACHE_GATEWAY_ADDR: "<%= "http://#{gw.p('gateway_addr')}" %>"
     ADDR: "<%= ":#{p('proxy_port')}" %>"
 
-    # External ADDR is plaintext because it assumes go-router SSL termination.
-    CAPI_ADDR_EXTERNAL: "<%= "http://#{cc.address}:9022" %>"
-    CAPI_ADDR:          "<%= "https://#{cc.address}:9023" %>"
-    CAPI_CERT_PATH:     "<%= "#{certDir}/cc.crt" %>"
-    CAPI_KEY_PATH:      "<%= "#{certDir}/cc.key" %>"
+    CAPI_ADDR_EXTERNAL: "<%= "https://#{cc.address}:9024" %>"
     CAPI_CA_PATH:       "<%= "#{certDir}/cc_ca.crt" %>"
     CAPI_COMMON_NAME:   "<%= p('cc.common_name') %>"
 
