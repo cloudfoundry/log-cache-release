@@ -114,17 +114,9 @@
         source_id: log-cache-cf-auth-proxy
         template: '{{.CFAuthProxy.LastCAPIV3AppsLatency}}'
       - addr: http://localhost:6065/debug/vars
-        name: last-capi-v2-list-service-instances-latency
+        name: last-capi-v3-list-service-instances-latency
         source_id: log-cache-cf-auth-proxy
-        template: '{{.CFAuthProxy.LastCAPIV2ListServiceInstancesLatency}}'
-      - addr: http://localhost:6065/debug/vars
-        name: last-capi-v4-log-access-latency
-        source_id: log-cache-cf-auth-proxy
-        template: '{{.CFAuthProxy.LastCAPIV4LogAccessLatency}}'
-      - addr: http://localhost:6065/debug/vars
-        name: last-capi-v2-service-instances-latency
-        source_id: log-cache-cf-auth-proxy
-        template: '{{.CFAuthProxy.LastCAPIV2ServiceInstancesLatency}}'
+        template: '{{.CFAuthProxy.LastCAPIV3ListServiceInstancesLatency}}'
     release: log-cache
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
