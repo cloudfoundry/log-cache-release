@@ -35,9 +35,12 @@ properties:
     description: "Test HTTP egress which uses CF-based UAA authentication"
     default: false
   cf_blackbox.client_id:
-    description: "UAA client ID for egress testing - requires logs.admin scope"
+    description: "UAA client ID for egress testing - requires logs.admin scope.
+      Required when cf_blackbox.enabled"
+    optional: true
   cf_blackbox.client_secret:
-    description: "UAA client secret"
+    description: "UAA client secret. Required when cf_blackbox.enabled"
+    optional: true
   cf_blackbox.skip_tls_verify:
     description: "Skip certificate validation when testing HTTP egress"
     default: false
