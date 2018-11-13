@@ -16,6 +16,8 @@ provides:
   type: log-cache-expvar-forwarder
 
 consumes:
+- name: log-cache
+  type: log-cache
 - name: loggregator
   type: loggregator
 
