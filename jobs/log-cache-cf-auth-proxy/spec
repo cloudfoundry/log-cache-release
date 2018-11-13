@@ -28,6 +28,8 @@ properties:
     default: false
   proxy_port:
     description: "The port for the cf-auth-proxy to listen on"
+  security_event_log:
+    description: "When provided, the path to a file where security events will be logged"
   cc.ca_cert:
     description: "The CA for the internal api"
   cc.common_name:

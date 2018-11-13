@@ -10,9 +10,12 @@ processes:
 - name: log-cache-cf-auth-proxy
   executable: /var/vcap/packages/log-cache-cf-auth-proxy/log-cache-cf-auth-proxy
   env:
-    # Gateway
     LOG_CACHE_GATEWAY_ADDR: "<%= "http://#{gw.p('gateway_addr')}" %>"
-    ADDR: "<%= ":#{p('proxy_port')}" %>"
+    ADDR:                   "<%= ":#{p('proxy_port')}" %>"
+    INTERNAL_IP:            "<%= spec.ip %>"
+    <% if_p('security_event_log') do |path| %>
+    SECURITY_EVENT_LOG:     "<%= path %>"
+    <% end %>
 
     CAPI_ADDR_EXTERNAL: "<%= "https://#{cc.address}:9024" %>"
     CAPI_CA_PATH:       "<%= "#{certDir}/cc_ca.crt" %>"
