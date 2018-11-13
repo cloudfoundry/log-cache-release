@@ -16,8 +16,8 @@ provides:
   type: log-cache-expvar-forwarder
 
 consumes:
-- name: loggregator_agent
-  type: loggregator_agent
+- name: loggregator
+  type: loggregator
 
 properties:
   default_source_id:
