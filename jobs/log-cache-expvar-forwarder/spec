@@ -4,9 +4,9 @@ name: log-cache-expvar-forwarder
 templates:
   bpm.yml.erb: config/bpm.yml
   run.sh: bin/run.sh
-  ca.crt.erb: config/certs/ca.crt
-  log_cache.crt.erb: config/certs/log_cache.crt
-  log_cache.key.erb: config/certs/log_cache.key
+  loggregator_ca.crt.erb: config/certs/loggregator_ca.crt
+  loggregator_agent.crt.erb: config/certs/loggregator_agent.crt
+  loggregator_agent.key.erb: config/certs/loggregator_agent.key
 
 packages:
 - log-cache-expvar-forwarder
@@ -16,8 +16,6 @@ provides:
   type: log-cache-expvar-forwarder
 
 consumes:
-- name: log-cache
-  type: log-cache
 - name: loggregator
   type: loggregator
 
@@ -72,3 +70,12 @@ properties:
         Each entry in the map will be parsed into one gauge per key before it
         is forwarder onto the receiving log cache instance.
     default: []
+
+  loggregator_agent:
+    tls:
+      ca_cert:
+        description: CA Cert signing the loggregator_agent certificates.
+      cert:
+        description: Certificate for communication with loggregator_agent.
+      key:
+        description: Private Key for communication with loggregator_agent.

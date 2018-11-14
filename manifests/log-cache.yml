@@ -46,8 +46,13 @@ instance_groups:
   - name: log-cache-expvar-forwarder
     release: log-cache
     consumes:
-      log-cache: {from: log-cache}
+      loggregator: {from: loggregator}
     properties:
+      loggregator_agent:
+        tls:
+          ca_cert: "((log_cache_to_loggregator_agent.ca))"
+          cert: "((log_cache_to_loggregator_agent.certificate))"
+          key: "((log_cache_to_loggregator_agent.private_key))"
       counters: []
       gauges: []
       maps:
@@ -91,12 +96,19 @@ instance_groups:
     properties:
       logs_provider:
         tls:
-          ca_cert: "((logs_provider.ca))"
-          cert: "((logs_provider.certificate))"
-          key: "((logs_provider.private_key))"
+          ca_cert: "((log_cache_to_logs_provider.ca))"
+          cert: "((log_cache_to_logs_provider.certificate))"
+          key: "((log_cache_to_logs_provider.private_key))"
   - name: log-cache-expvar-forwarder
     release: log-cache
+    consumes:
+      loggregator: {from: loggregator}
     properties:
+      loggregator_agent:
+        tls:
+          ca_cert: "((log_cache_to_loggregator_agent.ca))"
+          cert: "((log_cache_to_loggregator_agent.certificate))"
+          key: "((log_cache_to_loggregator_agent.private_key))"
       counters:
         # Log Cache
       - name: egress
@@ -166,14 +178,21 @@ instance_groups:
       maps: []
 
 variables:
-- name: logs_provider
+- name: log_cache_to_logs_provider
   type: certificate
   options:
     ca: loggregator_ca
     common_name: log-cache
     extended_key_usage:
     - client_auth
-    - server_auth
+- name: log_cache_to_loggregator_agent
+  type: certificate
+  options:
+    ca: loggregator_ca
+    common_name: log-cache
+    extended_key_usage:
+    - client_auth
+
 - name: log_cache_ca
   type: certificate
   options:

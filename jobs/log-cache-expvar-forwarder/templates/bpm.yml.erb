@@ -2,7 +2,6 @@
   jobDir = "/var/vcap/jobs/log-cache-expvar-forwarder"
   certDir = "#{jobDir}/config/certs"
 
-  lc = link("log-cache")
   lg = link("loggregator")
 %>
 ---
@@ -11,7 +10,6 @@ processes:
   executable: bin/run.sh
   env:
     AGENT_ADDR:         "localhost:<%= lg.p('metron_endpoint.grpc_port') %>"
-    INSTANCE_ADDR:      "<%= "#{spec.ip}:#{lc.p('port')}" %>"
     INSTANCE_ID:        "<%= spec.id %>"
     DEFAULT_SOURCE_ID:  "<%= p('default_source_id') %>"
     INTERVAL:           "<%= p('interval') %>"
