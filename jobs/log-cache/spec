@@ -28,7 +28,7 @@ properties:
     default: 8080
 
   memory_limit_percent:
-    description: "Percentage of system memory to use for the cache"
+    description: "Percentage of system memory to use for the cache. Must be an integer."
     default: 50
 
   health_addr:
