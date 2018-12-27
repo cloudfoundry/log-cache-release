@@ -27,6 +27,9 @@ properties:
   window_interval:
     description: "The trailing interval over which to measure metric retrieval"
     default: 10m
+  window_lag:
+    description: "How far in the past the measurement should be taken"
+    default: 1m
   source_id:
     description: "Source ID for metadata of both test and result metrics"
     default: log-cache
