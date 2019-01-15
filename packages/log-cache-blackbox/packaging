@@ -7,7 +7,7 @@ export GOROOT=$(readlink -nf /var/vcap/packages/golang1.11.4)
 export GOPATH=$BOSH_INSTALL_TARGET
 export PATH=$GOROOT/bin:$PATH
 
-go build -o ${BOSH_INSTALL_TARGET}/log-cache-blackbox code.cloudfoundry.org/log-cache/cmd/blackbox-test
+go build -o ${BOSH_INSTALL_TARGET}/log-cache-blackbox code.cloudfoundry.org/log-cache/cmd/blackbox
 
 # clean up source artifacts
 rm -rf ${BOSH_INSTALL_TARGET}/src ${BOSH_INSTALL_TARGET}/pkg
