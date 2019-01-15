@@ -43,6 +43,6 @@ sync_package log-cache-nozzle           -app code.cloudfoundry.org/log-cache/cmd
 sync_package log-cache-expvar-forwarder -app code.cloudfoundry.org/log-cache/cmd/expvar-forwarder &
 sync_package log-cache-cf-auth-proxy    -app code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy &
 sync_package log-cache-scheduler        -app code.cloudfoundry.org/log-cache/cmd/scheduler &
-sync_package log-cache-blackbox         -app code.cloudfoundry.org/log-cache/cmd/blackbox-test &
+sync_package log-cache-blackbox         -app code.cloudfoundry.org/log-cache/cmd/blackbox &
 
 wait
