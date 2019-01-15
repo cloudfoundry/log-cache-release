@@ -5,4 +5,4 @@ dependencies:
 - golang1.11.4
 
 files:
-- code.cloudfoundry.org/log-cache/cmd/blackbox/*.go # gosub
+- code.cloudfoundry.org/log-cache/cmd/blackbox-test/*.go # gosub
