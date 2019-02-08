@@ -17,7 +17,7 @@ processes:
     SECURITY_EVENT_LOG:     "<%= path %>"
     <% end %>
 
-    CAPI_ADDR_EXTERNAL: "<%= "https://#{cc.address}:9024" %>"
+    CAPI_ADDR:          "<%= "https://#{cc.address}:9024" %>"
     CAPI_CA_PATH:       "<%= "#{certDir}/cc_ca.crt" %>"
     CAPI_COMMON_NAME:   "<%= p('cc.common_name') %>"
 
