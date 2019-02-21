@@ -4,6 +4,8 @@ templates:
   bpm.yml.erb: config/bpm.yml
   cc_ca.crt.erb: config/certs/cc_ca.crt
   uaa_ca.crt.erb: config/certs/uaa_ca.crt
+  external.crt.erb: config/certs/external.crt
+  external.key.erb: config/certs/external.key
 
 packages:
 - log-cache-cf-auth-proxy
