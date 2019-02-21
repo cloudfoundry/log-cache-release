@@ -23,4 +23,4 @@ consumes:
 properties:
   gateway_addr:
     description: "The address for the log-cache-gateway to listen on"
-    default: ":8081"
+    default: "localhost:8081"
