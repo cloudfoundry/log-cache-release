@@ -13,6 +13,8 @@ processes:
     LOG_CACHE_GATEWAY_ADDR: "<%= "http://#{gw.p('gateway_addr')}" %>"
     ADDR:                   "<%= "localhost:#{p('proxy_port')}" %>"
     INTERNAL_IP:            "<%= spec.ip %>"
+    EXTERNAL_CERT:          "<%= p('external_cert') %>"
+    EXTERNAL_KEY:           "<%= p('external_key') %>"
     <% if_p('security_event_log') do |path| %>
     SECURITY_EVENT_LOG:     "<%= path %>"
     <% end %>

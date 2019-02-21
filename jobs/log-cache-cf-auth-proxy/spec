@@ -26,6 +26,10 @@ properties:
   skip_cert_verify:
     description: "Whether to accept invalid certs"
     default: false
+  external_cert:
+    description: "The TLS cert for the auth proxy"
+  external_key:
+    description: "The TLS key for the auth proxy"
   proxy_port:
     description: "The port for the cf-auth-proxy to listen on"
   security_event_log:
