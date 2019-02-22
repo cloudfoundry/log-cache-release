@@ -11,7 +11,7 @@ processes:
   executable: /var/vcap/packages/log-cache-cf-auth-proxy/log-cache-cf-auth-proxy
   env:
     LOG_CACHE_GATEWAY_ADDR: "<%= "http://#{gw.p('gateway_addr')}" %>"
-    ADDR:                   "<%= "localhost:#{p('proxy_port')}" %>"
+    ADDR:                   "<%= ":#{p('proxy_port')}" %>"
     INTERNAL_IP:            "<%= spec.ip %>"
     EXTERNAL_CERT:          "<%= "#{certDir}/external.crt" %>"
     EXTERNAL_KEY:           "<%= "#{certDir}/external.key" %>"
