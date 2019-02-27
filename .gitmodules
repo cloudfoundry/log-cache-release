@@ -94,3 +94,18 @@
 [submodule "src/github.com/ghodss/yaml"]
 	path = src/github.com/ghodss/yaml
 	url = https://github.com/ghodss/yaml
+[submodule "src/github.com/prometheus/client_golang"]
+	path = src/github.com/prometheus/client_golang
+	url = https://github.com/prometheus/client_golang.git
+[submodule "src/github.com/prometheus/client_model"]
+	path = src/github.com/prometheus/client_model
+	url = https://github.com/prometheus/client_model.git
+[submodule "src/github.com/beorn7/perks"]
+	path = src/github.com/beorn7/perks
+	url = https://github.com/beorn7/perks.git
+[submodule "src/github.com/matttproud/golang_protobuf_extensions"]
+	path = src/github.com/matttproud/golang_protobuf_extensions
+	url = https://github.com/matttproud/golang_protobuf_extensions.git
+[submodule "src/github.com/prometheus/procfs"]
+	path = src/github.com/prometheus/procfs
+	url = https://github.com/prometheus/procfs.git

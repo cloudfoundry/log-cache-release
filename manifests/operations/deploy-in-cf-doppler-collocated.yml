@@ -49,75 +49,10 @@
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
   value:
-    name: log-cache-expvar-forwarder
+    name: log-cache-prom-scraper
     properties:
-      counters:
-      - addr: http://localhost:6060/debug/vars
-        name: egress
-        source_id: log-cache
-        template: '{{.LogCache.Egress}}'
-      - addr: http://localhost:6060/debug/vars
-        name: ingress
-        source_id: log-cache
-        template: '{{.LogCache.Ingress}}'
-      - addr: http://localhost:6060/debug/vars
-        name: expired
-        source_id: log-cache
-        template: '{{.LogCache.Expired}}'
-      - addr: http://localhost:6060/debug/vars
-        name: dropped
-        source_id: log-cache
-        template: '{{.LogCache.Dropped}}'
-      - addr: http://localhost:6060/debug/vars
-        name: promql-timeout
-        source_id: log-cache
-        template: '{{.LogCache.PromQLTimeout}}'
-      - addr: http://localhost:6061/debug/vars
-        name: egress
-        source_id: log-cache-nozzle
-        template: '{{.Nozzle.Egress}}'
-      - addr: http://localhost:6061/debug/vars
-        name: ingress
-        source_id: log-cache-nozzle
-        template: '{{.Nozzle.Ingress}}'
-      - addr: http://localhost:6061/debug/vars
-        name: err
-        source_id: log-cache-nozzle
-        template: '{{.Nozzle.Err}}'
-      - addr: http://localhost:6061/debug/vars
-        name: dropped
-        source_id: log-cache-nozzle
-        template: '{{.Nozzle.Dropped}}'
-      gauges:
-      - addr: http://localhost:6060/debug/vars
-        name: cache-period
-        source_id: log-cache
-        template: '{{.LogCache.CachePeriod}}'
-      - addr: http://localhost:6060/debug/vars
-        name: store-size
-        source_id: log-cache
-        template: '{{.LogCache.StoreSize}}'
-      - addr: http://localhost:6060/debug/vars
-        name: total-system-memory
-        source_id: log-cache
-        template: '{{.LogCache.TotalSystemMemory}}'
-      - addr: http://localhost:6060/debug/vars
-        name: available-system-memory
-        source_id: log-cache
-        template: '{{.LogCache.AvailableSystemMemory}}'
-      - addr: http://localhost:6065/debug/vars
-        name: last-uaa-latency
-        source_id: log-cache-cf-auth-proxy
-        template: '{{.CFAuthProxy.LastUAALatency}}'
-      - addr: http://localhost:6065/debug/vars
-        name: last-capi-v3-apps-latency
-        source_id: log-cache-cf-auth-proxy
-        template: '{{.CFAuthProxy.LastCAPIV3AppsLatency}}'
-      - addr: http://localhost:6065/debug/vars
-        name: last-capi-v3-list-service-instances-latency
-        source_id: log-cache-cf-auth-proxy
-        template: '{{.CFAuthProxy.LastCAPIV3ListServiceInstancesLatency}}'
-    release: log-cache
+      metrics_urls: "http://localhost:6060/metrics,http://localhost:6061/metrics,http://localhost:6065/metrics"
+    release: loggregator-agent
 - type: replace
   path: /instance_groups/name=doppler/jobs/-
   value:

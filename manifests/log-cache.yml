@@ -8,6 +8,8 @@ stemcells:
 releases:
 - name: log-cache
   version: latest
+- name: loggregator-agent
+  version: latest
 - name: bosh-dns
   version: latest
 - name: bpm
@@ -43,27 +45,12 @@ instance_groups:
   jobs:
   - name: log-cache-scheduler
     release: log-cache
-  - name: log-cache-expvar-forwarder
-    release: log-cache
+  - name: log-cache-prom-scraper
+    release: loggregator-agent
     consumes:
-      loggregator: {from: loggregator}
+      loggregator: {from: loggregator, deployment: loggregator}
     properties:
-      loggregator_agent:
-        tls:
-          ca_cert: "((log_cache_to_loggregator_agent.ca))"
-          cert: "((log_cache_to_loggregator_agent.certificate))"
-          key: "((log_cache_to_loggregator_agent.private_key))"
-      counters: []
-      gauges: []
-      maps:
-      - name: worker-assignments
-        source_id: log-cache-scheduler
-        addr: http://localhost:6064/debug/vars
-        template: "{{.WorkerAssignments | jsonMap}}"
-      - name: worker-health
-        source_id: log-cache-scheduler
-        addr: http://localhost:6064/debug/vars
-        template: "{{.WorkerHealth | jsonMap}}"
+      metrics_urls: "http://localhost:6064/metrics"
 
 - name: log-cache
   azs:
@@ -99,83 +86,12 @@ instance_groups:
           ca_cert: "((log_cache_to_logs_provider.ca))"
           cert: "((log_cache_to_logs_provider.certificate))"
           key: "((log_cache_to_logs_provider.private_key))"
-  - name: log-cache-expvar-forwarder
-    release: log-cache
+  - name: log-cache-prom-scraper
+    release: loggregator-agent
     consumes:
-      loggregator: {from: loggregator}
+      loggregator: {from: loggregator, deployment: loggregator}
     properties:
-      loggregator_agent:
-        tls:
-          ca_cert: "((log_cache_to_loggregator_agent.ca))"
-          cert: "((log_cache_to_loggregator_agent.certificate))"
-          key: "((log_cache_to_loggregator_agent.private_key))"
-      counters:
-        # Log Cache
-      - name: egress
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.Egress}}"
-      - name: ingress
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.Ingress}}"
-      - name: expired
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.Expired}}"
-      - name: dropped
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.Dropped}}"
-      - name: promql-timeout
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.PromQLTimeout}}"
-
-        # Nozzle
-      - name: egress
-        source_id: log-cache-nozzle
-        addr: http://localhost:6061/debug/vars
-        template: "{{.Nozzle.Egress}}"
-      - name: ingress
-        source_id: log-cache-nozzle
-        addr: http://localhost:6061/debug/vars
-        template: "{{.Nozzle.Ingress}}"
-      - name: err
-        source_id: log-cache-nozzle
-        addr: http://localhost:6061/debug/vars
-        template: "{{.Nozzle.Err}}"
-      - name: dropped
-        source_id: log-cache-nozzle
-        addr: http://localhost:6061/debug/vars
-        template: "{{.Nozzle.Dropped}}"
-      gauges:
-        # Log Cache
-      - name: cache-period
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.CachePeriod}}"
-      - name: store-size
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.StoreSize}}"
-      - name: total-system-memory
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.TotalSystemMemory}}"
-      - name: available-system-memory
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.AvailableSystemMemory}}"
-      - name: promql-instant-query-time
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.PromQLInstantQueryTime}}"
-      - name: promql-range-query-time
-        source_id: log-cache
-        addr: http://localhost:6060/debug/vars
-        template: "{{.LogCache.PromQLRangeQueryTime}}"
-      maps: []
+      metrics_urls: "http://localhost:6060/metrics,http://localhost:6061/metrics,http://localhost:6065/metrics"
 
 variables:
 - name: log_cache_to_logs_provider
