@@ -21,6 +21,7 @@ files:
 - code.cloudfoundry.org/log-cache/pkg/marshaler/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1/*.go # gosub
 - code.cloudfoundry.org/rfc5424/*.go # gosub
+- github.com/beorn7/perks/quantile/*.go # gosub
 - github.com/blang/semver/*.go # gosub
 - github.com/cloudfoundry/gosigar/*.go # gosub
 - github.com/cloudfoundry/gosigar/sys/windows/*.go # gosub
@@ -42,7 +43,18 @@ files:
 - github.com/grpc-ecosystem/grpc-gateway/runtime/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/runtime/internal/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/utilities/*.go # gosub
+- github.com/matttproud/golang_protobuf_extensions/pbutil/*.go # gosub
+- github.com/prometheus/client_golang/prometheus/*.go # gosub
+- github.com/prometheus/client_golang/prometheus/internal/*.go # gosub
+- github.com/prometheus/client_model/go/*.go # gosub
+- github.com/prometheus/common/expfmt/*.go # gosub
+- github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg/*.go # gosub
 - github.com/prometheus/common/model/*.go # gosub
+- github.com/prometheus/procfs/*.go # gosub
+- github.com/prometheus/procfs/internal/util/*.go # gosub
+- github.com/prometheus/procfs/iostats/*.go # gosub
+- github.com/prometheus/procfs/nfs/*.go # gosub
+- github.com/prometheus/procfs/xfs/*.go # gosub
 - github.com/prometheus/prometheus/pkg/labels/*.go # gosub
 - github.com/prometheus/prometheus/pkg/timestamp/*.go # gosub
 - github.com/prometheus/prometheus/pkg/value/*.go # gosub
