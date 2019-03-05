@@ -46,6 +46,7 @@ files:
 - github.com/matttproud/golang_protobuf_extensions/pbutil/*.go # gosub
 - github.com/prometheus/client_golang/prometheus/*.go # gosub
 - github.com/prometheus/client_golang/prometheus/internal/*.go # gosub
+- github.com/prometheus/client_golang/prometheus/promhttp/*.go # gosub
 - github.com/prometheus/client_model/go/*.go # gosub
 - github.com/prometheus/common/expfmt/*.go # gosub
 - github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg/*.go # gosub
