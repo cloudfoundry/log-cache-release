@@ -1,0 +1,85 @@
+name: log-cache
+version: 2.0.3
+commit_hash: 724ccd0
+uncommitted_changes: false
+jobs:
+- name: log-cache
+  version: 0f45a05b26f67e2bb808eb9a98d8dac41bf99949a073f594d687698070bcbf3f
+  fingerprint: 0f45a05b26f67e2bb808eb9a98d8dac41bf99949a073f594d687698070bcbf3f
+  sha1: sha256:0c9c20f38cb7a7fa8b67e2e50649dee68908db188315d89d09722a4d1beb66d7
+- name: log-cache-blackbox
+  version: 7aab636eff02e502e3fffee7001711d0ca824d4e4ffd529a0bc8763915156e94
+  fingerprint: 7aab636eff02e502e3fffee7001711d0ca824d4e4ffd529a0bc8763915156e94
+  sha1: sha256:86a451b9d198a9b773a30a6c7f3b0365735384a6f98a877ff260b9e3d77e725c
+- name: log-cache-cf-auth-proxy
+  version: e96b9ab4cdc08bd24070abccfb97eeb8619e298b34f276b45affd48efd1a6424
+  fingerprint: e96b9ab4cdc08bd24070abccfb97eeb8619e298b34f276b45affd48efd1a6424
+  sha1: sha256:312951cd5211d04ce952ebc886f29c9f8fbf85a5bfb775fc7e79ceabce78d39c
+- name: log-cache-expvar-forwarder
+  version: c5c827d52e847dd19649da40387fbd47953e50f5a9962749e68b788fe7a175fb
+  fingerprint: c5c827d52e847dd19649da40387fbd47953e50f5a9962749e68b788fe7a175fb
+  sha1: sha256:df9ee77d0c02d712efd197a2966d0970ca0c8ca79c0ee9b09dc32fdd00e14c38
+- name: log-cache-gateway
+  version: 7c252b19b6c47b99154994278011a1af14d792aad85fd6891d075dd0f0b1eaf9
+  fingerprint: 7c252b19b6c47b99154994278011a1af14d792aad85fd6891d075dd0f0b1eaf9
+  sha1: sha256:f56ebd0192b25b8b33664cbd13706d6c2ab9751d78a34779a93e3b569ab39dc7
+- name: log-cache-nozzle
+  version: b8d7aa7a72eb05d7c97de91322ee13d1c8d89461b7d59002b5a68a7245c83c5e
+  fingerprint: b8d7aa7a72eb05d7c97de91322ee13d1c8d89461b7d59002b5a68a7245c83c5e
+  sha1: sha256:194f6e5a8a3eada6a3ebc1a097ece417bd84b82b66d9bfe708aa8af2b8d25650
+- name: log-cache-scheduler
+  version: 0f9e6d5661d1648963fd09e15f5407acb30e31600e4fd9e3424a14d38b6e0e2e
+  fingerprint: 0f9e6d5661d1648963fd09e15f5407acb30e31600e4fd9e3424a14d38b6e0e2e
+  sha1: sha256:0c7c8d2c234df2e8ee733c0ddab9e242044ef3c16ee65248b48c80b2195a05d0
+packages:
+- name: golang1.11.1
+  version: 7732c582917237d27151a5c99d75351dcd8f8c9cc9408fcf95f3584ed62a1423
+  fingerprint: 7732c582917237d27151a5c99d75351dcd8f8c9cc9408fcf95f3584ed62a1423
+  sha1: sha256:31dad8029932827e379bf7fe4cf9ebdaac0d1366eadc603a4f14ffadf0e32886
+  dependencies: []
+- name: log-cache
+  version: 724e3a3916f92751413f25de8e186ccc4023183d2e5c02bb83fddfe1b5593580
+  fingerprint: 724e3a3916f92751413f25de8e186ccc4023183d2e5c02bb83fddfe1b5593580
+  sha1: sha256:30be0f9ed8589b56a38abad9f954d229b465066685bd5900e727a93a1c981b9f
+  dependencies:
+  - golang1.11.1
+- name: log-cache-blackbox
+  version: a5847aae61c24705539c3d543890c9f2988025a253ff664c5edb83094e118c66
+  fingerprint: a5847aae61c24705539c3d543890c9f2988025a253ff664c5edb83094e118c66
+  sha1: sha256:05b711567fea9815ce14069fc8e48d00814f6310102a02ab51c24b2a6a52ee08
+  dependencies:
+  - golang1.11.1
+- name: log-cache-cf-auth-proxy
+  version: 11ea8af07ee6a3bf09d1ebb1e0faf3ea8f663fd1f0a6373f92d43b3a709e42e4
+  fingerprint: 11ea8af07ee6a3bf09d1ebb1e0faf3ea8f663fd1f0a6373f92d43b3a709e42e4
+  sha1: sha256:bfb24ac65de3b721f103ff07814b2eca5b5082693153777ac6a9dd909950dc26
+  dependencies:
+  - golang1.11.1
+- name: log-cache-expvar-forwarder
+  version: 1166b25dc049f0fed692c875038ec7dc155c142926a1039aa5ae04fca2174d3b
+  fingerprint: 1166b25dc049f0fed692c875038ec7dc155c142926a1039aa5ae04fca2174d3b
+  sha1: sha256:1f2d22723463e83e421eec90379fc163866ea971561352029689af8f33a29723
+  dependencies:
+  - golang1.11.1
+- name: log-cache-gateway
+  version: bdc23c608806c346fd57191bddca20d423912d1238a232f55445c025510d177d
+  fingerprint: bdc23c608806c346fd57191bddca20d423912d1238a232f55445c025510d177d
+  sha1: sha256:0692a74c1ebdfdbf33ee9d6c85a0ee67120af78fa8e8aa18cca72146d08436c5
+  dependencies:
+  - golang1.11.1
+- name: log-cache-nozzle
+  version: 74165a9a09f4972aec2cde6e8f4f7631b959ccc1b2b1bde4e524d9693b83abf8
+  fingerprint: 74165a9a09f4972aec2cde6e8f4f7631b959ccc1b2b1bde4e524d9693b83abf8
+  sha1: sha256:fb547326faf659e910e74840a1db37ffa5dfc3f78379d3aa3a56d2cd6a36b814
+  dependencies:
+  - golang1.11.1
+- name: log-cache-scheduler
+  version: 2bd84f9e0e967c19f8cda286025eabfaf05c64d5c4e267a0174aa08f467cfa24
+  fingerprint: 2bd84f9e0e967c19f8cda286025eabfaf05c64d5c4e267a0174aa08f467cfa24
+  sha1: sha256:8718cc24e4e4280469f02d4ad217fc3638c8f3b711f0c206cddf1b72c561846a
+  dependencies:
+  - golang1.11.1
+license:
+  version: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
+  fingerprint: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
+  sha1: sha256:2000a9108971515512266634e3df558eb6884951e0d5074d05b9a9c0e8115498
