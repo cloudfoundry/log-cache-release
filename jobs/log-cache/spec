@@ -34,6 +34,9 @@ properties:
   memory_limit_percent:
     description: "Percentage of system memory to use for the cache"
     default: 50
+  max_per_source:
+    description: "The maximum number of items stored in LogCache per source."
+    default: 100000
 
   health_addr:
     description: "The address for LogCache to bind a health endpoint"
