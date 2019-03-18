@@ -18,6 +18,7 @@ processes:
     HEALTH_ADDR: "<%= p('health_addr') %>"
     ADDR:        "<%= ":#{p('port')}" %>"
     MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
+    MAX_PER_SOURCE: "<%= p('max_per_source') %>"
     QUERY_TIMEOUT: "<%= p('promql.query_timeout') %>"
 
     CA_PATH:   "<%= "#{certDir}/ca.crt" %>"
