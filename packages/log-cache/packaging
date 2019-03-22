@@ -7,6 +7,9 @@ export GOROOT=$(readlink -nf /var/vcap/packages/golang1.12.1)
 export GOPATH=$BOSH_INSTALL_TARGET
 export PATH=$GOROOT/bin:$PATH
 
+mkdir -p cache
+export GOCACHE=$PWD/cache
+
 go build \
   -o ${BOSH_INSTALL_TARGET}/log-cache \
   code.cloudfoundry.org/log-cache/cmd/log-cache
