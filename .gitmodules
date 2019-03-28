@@ -109,3 +109,6 @@
 [submodule "src/github.com/prometheus/procfs"]
 	path = src/github.com/prometheus/procfs
 	url = https://github.com/prometheus/procfs.git
+[submodule "src/github.com/dvsekhvalnov/jose2go"]
+	path = src/github.com/dvsekhvalnov/jose2go
+	url = http://github.com/dvsekhvalnov/jose2go
