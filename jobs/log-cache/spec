@@ -6,6 +6,7 @@ templates:
   ca.crt.erb: config/certs/ca.crt
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
+  indicators.yml.erb: config/indicators.yml
 
 packages:
 - log-cache
