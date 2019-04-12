@@ -6,6 +6,8 @@ templates:
   ca.crt.erb: config/certs/ca.crt
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
+  proxy.crt.erb: config/certs/proxy.crt
+  proxy.key.erb: config/certs/proxy.key
 
 packages:
 - log-cache-gateway
@@ -24,3 +26,7 @@ properties:
   gateway_addr:
     description: "The address for the log-cache-gateway to listen on"
     default: "localhost:8081"
+  proxy_cert:
+    description: "The TLS cert for the proxy"
+  proxy_key:
+    description: "The TLS key for the proxy"

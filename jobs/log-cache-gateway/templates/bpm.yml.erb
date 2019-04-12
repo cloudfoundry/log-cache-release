@@ -10,11 +10,13 @@ processes:
   executable: /var/vcap/packages/log-cache-gateway/log-cache-gateway
   env:
     # Log Cache
-    LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
-    ADDR:           "<%= p('gateway_addr') %>"
-    CA_PATH:        "<%= "#{certDir}/ca.crt" %>"
-    CERT_PATH:      "<%= "#{certDir}/log_cache.crt" %>"
-    KEY_PATH:       "<%= "#{certDir}/log_cache.key" %>"
+    LOG_CACHE_ADDR:  "<%= "localhost:#{lc.p('port')}" %>"
+    ADDR:            "<%= p('gateway_addr') %>"
+    CA_PATH:         "<%= "#{certDir}/ca.crt" %>"
+    CERT_PATH:       "<%= "#{certDir}/log_cache.crt" %>"
+    KEY_PATH:        "<%= "#{certDir}/log_cache.key" %>"
+    PROXY_CERT_PATH: "<%= "#{certDir}/proxy.crt" %>"
+    PROXY_KEY_PATH:  "<%= "#{certDir}/proxy.key" %>"
 
   limits:
     open_files: 8192
