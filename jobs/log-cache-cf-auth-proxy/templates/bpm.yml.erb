@@ -15,6 +15,7 @@ processes:
     INTERNAL_IP:            "<%= spec.ip %>"
     EXTERNAL_CERT:          "<%= "#{certDir}/external.crt" %>"
     EXTERNAL_KEY:           "<%= "#{certDir}/external.key" %>"
+    PROXY_CA_PATH:          "<%= "#{certDir}/proxy_ca.crt" %>"
     <% if_p('security_event_log') do |path| %>
     SECURITY_EVENT_LOG:     "<%= path %>"
     <% end %>
