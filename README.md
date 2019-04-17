@@ -7,10 +7,10 @@ an [in memory caching layer](https://docs.google.com/document/d/1yhfl0EB_MkHkh4J
 
 ### Deploying Log Cache
 
-Log Cache can be deployed either as a standalone deployment or within
+Log Cache can be deployed within
 [Cloud Foundry](https://github.com/cloudfoundry/cf-deployment).
 
-In both cases Log Cache will have to know about Loggregator.
+Log Cache relies on Loggregator and reads data from the Reverse Log Proxy.
 
 #### Cloud Config
 
@@ -30,23 +30,6 @@ environment named `lite`.
 ```
 bosh create-release --force
 bosh -e lite upload-release --rebase
-```
-
-#### Standalone
-
-Standalone Log Cache only has to know where to find Loggregator. The
-Loggregator CA is named `loggregator_ca`. The given variables file should
-include the deployed Loggregator's CA.
-
-The following command will deploy a standalone Log Cache against a Loggregator
-that is deployed with a `loggregator-vars.yml` variables file.
-
-```
-bosh \
-    --environment lite \
-    --deployment log-cache deploy manifests/log-cache.yml \
-    --vars-store vars.yml \
-    --vars-file ~/workspace/loggregator-release/vars.yml
 ```
 
 #### Cloud Foundry
