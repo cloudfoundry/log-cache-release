@@ -24,6 +24,8 @@ src/github.com/vito/gosub
 # Bosh Deploys
 vars.yml
 deployment-vars.yml
+oss_sha
+css_sha
 
 # Golang Tools
 src/github.com/client9/misspell
