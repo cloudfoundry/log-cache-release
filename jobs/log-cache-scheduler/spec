@@ -6,6 +6,7 @@ templates:
   ca.crt.erb: config/certs/ca.crt
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
+  metric_port.yml.erb: config/metric_port.yml
 
 packages:
 - log-cache-scheduler
@@ -26,6 +27,6 @@ properties:
     description: "The number of ranges to schedule across the Log Cache cluster"
     default: 100
 
-  health_addr:
-    description: "The address for LogCache to bind a health endpoint"
-    default: localhost:6064
+  health_port:
+    description: "The port for the scheduler to bind a health endpoint"
+    default: 6064

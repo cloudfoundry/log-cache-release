@@ -12,7 +12,7 @@ processes:
 - name: log-cache-scheduler
   executable: /var/vcap/packages/log-cache-scheduler/log-cache-scheduler
   env:
-    HEALTH_ADDR: "<%= p('health_addr') %>"
+    HEALTH_PORT: "<%= p('health_port') %>"
 
     CA_PATH:   "<%= "#{certDir}/ca.crt" %>"
     CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"

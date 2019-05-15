@@ -10,7 +10,7 @@ processes:
 - name: log-cache-nozzle
   executable: /var/vcap/packages/log-cache-nozzle/log-cache-nozzle
   env:
-    HEALTH_ADDR: "<%= p('health_addr') %>"
+    HEALTH_PORT: "<%= p('health_port') %>"
 
     # Logs Provider
     LOGS_PROVIDER_ADDR: "<%= "#{rlp.address}:#{rlp.p('reverse_log_proxy.egress.port')}" %>"

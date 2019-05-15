@@ -8,6 +8,7 @@ templates:
   log_cache.key.erb: config/certs/log_cache.key
   proxy.crt.erb: config/certs/proxy.crt
   proxy.key.erb: config/certs/proxy.key
+  metric_port.yml.erb: config/metric_port.yml
 
 packages:
 - log-cache-gateway
@@ -23,6 +24,9 @@ consumes:
   type: log-cache
 
 properties:
+  health_port:
+    description: "The port for the gateway to bind a health endpoint"
+    default: 6063
   gateway_addr:
     description: "The address for the log-cache-gateway to listen on"
     default: "localhost:8081"

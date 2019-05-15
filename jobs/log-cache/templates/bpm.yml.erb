@@ -15,7 +15,7 @@ processes:
 - name: log-cache
   executable: /var/vcap/packages/log-cache/log-cache
   env:
-    HEALTH_ADDR: "<%= p('health_addr') %>"
+    HEALTH_PORT: "<%= p('health_port') %>"
     ADDR:        "<%= ":#{p('port')}" %>"
     MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
     MAX_PER_SOURCE: "<%= p('max_per_source') %>"

@@ -12,6 +12,7 @@ processes:
     # Log Cache
     LOG_CACHE_ADDR:  "<%= "localhost:#{lc.p('port')}" %>"
     ADDR:            "<%= p('gateway_addr') %>"
+    HEALTH_PORT:     "<%= p('health_port') %>"
     CA_PATH:         "<%= "#{certDir}/ca.crt" %>"
     CERT_PATH:       "<%= "#{certDir}/log_cache.crt" %>"
     KEY_PATH:        "<%= "#{certDir}/log_cache.key" %>"

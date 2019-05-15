@@ -7,6 +7,7 @@ templates:
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
   indicators.yml.erb: config/indicators.yml
+  metric_port.yml.erb: config/metric_port.yml
 
 packages:
 - log-cache
@@ -36,9 +37,9 @@ properties:
     description: "The maximum number of items stored in LogCache per source."
     default: 100000
 
-  health_addr:
-    description: "The address for LogCache to bind a health endpoint"
-    default: localhost:6060
+  health_port:
+    description: "The port for LogCache to bind a health endpoint"
+    default: 6060
 
   promql.query_timeout:
     description: "The maximum allowed runtime for a single PromQL query. Smaller timeouts are recommended."
