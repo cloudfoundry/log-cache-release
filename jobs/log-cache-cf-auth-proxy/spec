@@ -44,6 +44,12 @@ properties:
     description: "When provided, the path to a file where security events will be logged"
   proxy_ca_cert:
     description: "The CA used to sign the certificates that the reverse proxy uses to talk to the gateway"
+  token_pruning_interval:
+    description: "The interval at which expired tokens are purged from the cache"
+    default: 60s
+  cache_expiration_interval:
+    description: "The expiration lifetime assigned to new cache entries"
+    default: 60s
   cc.ca_cert:
     description: "The CA for the internal api"
   cc.common_name:
