@@ -10,14 +10,16 @@ processes:
 - name: log-cache-cf-auth-proxy
   executable: /var/vcap/packages/log-cache-cf-auth-proxy/log-cache-cf-auth-proxy
   env:
-    LOG_CACHE_GATEWAY_ADDR: "<%= "http://#{gw.p('gateway_addr')}" %>"
-    ADDR:                   "<%= ":#{p('proxy_port')}" %>"
-    INTERNAL_IP:            "<%= spec.ip %>"
-    EXTERNAL_CERT:          "<%= "#{certDir}/external.crt" %>"
-    EXTERNAL_KEY:           "<%= "#{certDir}/external.key" %>"
+    LOG_CACHE_GATEWAY_ADDR:    "<%= "http://#{gw.p('gateway_addr')}" %>"
+    ADDR:                      "<%= ":#{p('proxy_port')}" %>"
+    INTERNAL_IP:               "<%= spec.ip %>"
+    EXTERNAL_CERT:             "<%= "#{certDir}/external.crt" %>"
+    EXTERNAL_KEY:              "<%= "#{certDir}/external.key" %>"
     <% if_p('security_event_log') do |path| %>
-    SECURITY_EVENT_LOG:     "<%= path %>"
+    SECURITY_EVENT_LOG:        "<%= path %>"
     <% end %>
+    TOKEN_PRUNING_INTERVAL:    "<%= p('token_pruning_interval') %>"
+    CACHE_EXPIRATION_INTERVAL: "<%= p('cache_expiration_interval') %>"
 
     CAPI_ADDR:          "<%= "https://#{cc.address}:9024" %>"
     CAPI_CA_PATH:       "<%= "#{certDir}/cc_ca.crt" %>"

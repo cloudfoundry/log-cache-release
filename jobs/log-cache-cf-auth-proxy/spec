@@ -36,6 +36,12 @@ properties:
     description: "The port for the cf-auth-proxy to listen on"
   security_event_log:
     description: "When provided, the path to a file where security events will be logged"
+  token_pruning_interval:
+    description: "The interval at which expired tokens are purged from the cache"
+    default: 60s
+  cache_expiration_interval:
+    description: "The expiration lifetime assigned to new cache entries"
+    default: 60s
   cc.ca_cert:
     description: "The CA for the internal api"
   cc.common_name:
