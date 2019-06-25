@@ -1,5 +1,5 @@
 ---
-name: log-cache-nozzle
+name: log-cache-syslog-server
 
 dependencies:
 - golang1.12.4
