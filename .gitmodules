@@ -112,3 +112,6 @@
 [submodule "src/github.com/dvsekhvalnov/jose2go"]
 	path = src/github.com/dvsekhvalnov/jose2go
 	url = http://github.com/dvsekhvalnov/jose2go
+[submodule "src/github.com/shirou/gopsutil"]
+	path = src/github.com/shirou/gopsutil
+	url = https://github.com/shirou/gopsutil
