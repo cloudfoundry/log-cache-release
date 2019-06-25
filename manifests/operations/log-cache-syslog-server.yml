@@ -1,0 +1,21 @@
+---
+- type: replace
+  path: /instance_groups/name=doppler/jobs/name=log-cache-syslog-server?
+  value:
+    release: log-cache
+    name: log-cache-syslog-server
+    properties:
+      tls:
+        cert: "((log_cache_syslog_tls.certificate))"
+        key: "((log_cache_syslog_tls.private_key))"
+
+- type: replace
+  path: /variables/-
+  value:
+    name: log_cache_syslog_tls
+    type: certificate
+    options:
+      ca: loggregator_ca
+      common_name: log-cache-syslog
+      extended_key_usage:
+      - server_auth
