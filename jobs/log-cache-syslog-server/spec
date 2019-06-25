@@ -1,0 +1,30 @@
+---
+name: log-cache-syslog-server
+
+templates:
+  bpm.yml.erb: config/bpm.yml
+  ca.crt.erb: config/certs/ca.crt
+  log_cache.crt.erb: config/certs/log_cache.crt
+  log_cache.key.erb: config/certs/log_cache.key
+
+packages:
+- log-cache-syslog-server
+
+consumes:
+- name: log-cache
+  type: log-cache
+
+properties:
+  tls.cert:
+    description: "TLS certificate for the Syslog Server connection"
+  tls.key:
+    description: "TLS key for the Syslog Server connection"
+  health_port:
+    description: "The port for the Syslog Server to bind a health endpoint"
+    default: 6066
+  syslog_port:
+    description: "The port for the Syslog Server"
+    default: 6067
+  syslog_idle_timeout:
+    description: "Timeout for the Syslog Server connection"
+    default: "2m"

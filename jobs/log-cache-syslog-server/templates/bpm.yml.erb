@@ -1,0 +1,21 @@
+<%
+  jobDir = "/var/vcap/jobs/log-cache-syslog-server"
+  certDir = "#{jobDir}/config/certs"
+
+  lc = link("log-cache")
+%>
+---
+processes:
+- name: log-cache-syslog-server
+  executable: /var/vcap/packages/log-cache-syslog-server/log-cache-syslog-server
+  env:
+    HEALTH_PORT: "<%= p('health_port') %>"
+    SYSLOG_PORT: "<%= p('syslog_port') %>"
+    SYSLOG_IDLE_TIMEOUT: "<%= p('syslog_idle_timeout') %>"
+
+    LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
+    SYSLOG_TLS_CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"
+    SYSLOG_TLS_KEY_PATH: "<%= "#{certDir}/log_cache.key" %>"
+
+  limits:
+    open_files: 8192
