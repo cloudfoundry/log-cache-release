@@ -3,8 +3,11 @@ name: log-cache-syslog-server
 
 templates:
   bpm.yml.erb: config/bpm.yml
+  log_cache_ca.crt.erb: config/certs/log_cache_ca.crt
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
+  syslog.crt.erb: config/certs/syslog.crt
+  syslog.key.erb: config/certs/syslog.key
 
 packages:
 - log-cache-syslog-server

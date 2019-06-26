@@ -5,6 +5,7 @@ dependencies:
 - golang1.12.4
 
 files:
+- github.com/influxdata/go-syslog/**/*
 - code.cloudfoundry.org/go-batching/*.go # gosub
 - code.cloudfoundry.org/go-diodes/*.go # gosub
 - code.cloudfoundry.org/go-envstruct/*.go # gosub
@@ -33,9 +34,6 @@ files:
 - github.com/grpc-ecosystem/grpc-gateway/runtime/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/runtime/internal/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/utilities/*.go # gosub
-- github.com/influxdata/go-syslog/*.go # gosub
-- github.com/influxdata/go-syslog/octetcounting/*.go # gosub
-- github.com/influxdata/go-syslog/rfc5424/*.go # gosub
 - github.com/matttproud/golang_protobuf_extensions/pbutil/*.go # gosub
 - github.com/prometheus/client_golang/prometheus/*.go # gosub
 - github.com/prometheus/client_golang/prometheus/internal/*.go # gosub

@@ -13,9 +13,12 @@ processes:
     SYSLOG_PORT: "<%= p('syslog_port') %>"
     SYSLOG_IDLE_TIMEOUT: "<%= p('syslog_idle_timeout') %>"
 
-    LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
-    SYSLOG_TLS_CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"
-    SYSLOG_TLS_KEY_PATH: "<%= "#{certDir}/log_cache.key" %>"
+    SYSLOG_TLS_CERT_PATH: "<%= "#{certDir}/syslog.crt" %>"
+    SYSLOG_TLS_KEY_PATH: "<%= "#{certDir}/syslog.key" %>"
 
+    LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
+    CA_PATH:        "<%= "#{certDir}/log_cache_ca.crt" %>"
+    CERT_PATH:      "<%= "#{certDir}/log_cache.crt" %>"
+    KEY_PATH:       "<%= "#{certDir}/log_cache.key" %>"
   limits:
     open_files: 8192
