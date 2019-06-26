@@ -1,5 +1,11 @@
 ---
 - type: replace
+  path: /releases/name=log-cache
+  value:
+    name: log-cache
+    version: latest
+
+- type: replace
   path: /instance_groups/name=doppler/jobs/name=log-cache-syslog-server?
   value:
     release: log-cache
