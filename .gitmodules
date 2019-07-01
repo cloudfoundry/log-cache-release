@@ -118,3 +118,6 @@
 [submodule "src/github.com/influxdata/go-syslog"]
 	path = src/github.com/influxdata/go-syslog
 	url = https://github.com/influxdata/go-syslog
+[submodule "src/github.com/shirou/gopsutil"]
+	path = src/github.com/shirou/gopsutil
+	url = https://github.com/shirou/gopsutil
