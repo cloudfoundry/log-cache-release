@@ -34,6 +34,9 @@ files:
 - github.com/grpc-ecosystem/grpc-gateway/runtime/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/runtime/internal/*.go # gosub
 - github.com/grpc-ecosystem/grpc-gateway/utilities/*.go # gosub
+- github.com/influxdata/go-syslog/*.go # gosub
+- github.com/influxdata/go-syslog/octetcounting/*.go # gosub
+- github.com/influxdata/go-syslog/rfc5424/*.go # gosub
 - github.com/matttproud/golang_protobuf_extensions/pbutil/*.go # gosub
 - github.com/prometheus/client_golang/prometheus/*.go # gosub
 - github.com/prometheus/client_golang/prometheus/internal/*.go # gosub

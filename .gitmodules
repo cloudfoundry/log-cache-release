@@ -121,3 +121,9 @@
 [submodule "src/github.com/shirou/gopsutil"]
 	path = src/github.com/shirou/gopsutil
 	url = https://github.com/shirou/gopsutil
+[submodule "src/github.com/StackExchange/wmi"]
+	path = src/github.com/StackExchange/wmi
+	url = https://github.com/StackExchange/wmi
+[submodule "src/github.com/shirou/w32"]
+	path = src/github.com/shirou/w32
+	url = https://github.com/shirou/w32
