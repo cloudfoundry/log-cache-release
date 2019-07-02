@@ -25,3 +25,6 @@
       common_name: log-cache-syslog
       extended_key_usage:
       - server_auth
+
+- type: remove
+  path: /instance_groups/name=doppler/jobs/name=log-cache-nozzle?
