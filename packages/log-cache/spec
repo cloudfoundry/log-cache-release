@@ -19,7 +19,6 @@ files:
 - code.cloudfoundry.org/log-cache/internal/routing/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/client/*.go # gosub
-- code.cloudfoundry.org/log-cache/pkg/ingress/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/marshaler/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1/*.go # gosub
 - code.cloudfoundry.org/rfc5424/*.go # gosub
