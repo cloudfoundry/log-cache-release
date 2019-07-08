@@ -6,11 +6,11 @@ dependencies:
 
 files:
 - code.cloudfoundry.org/go-envstruct/*.go # gosub
+- code.cloudfoundry.org/go-loggregator/metrics/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/cf-auth-proxy/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/auth/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/cfauthproxy/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/promql/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/tls/*.go # gosub
 - code.cloudfoundry.org/log-cache/pkg/client/*.go # gosub

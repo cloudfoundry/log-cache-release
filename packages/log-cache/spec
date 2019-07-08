@@ -9,11 +9,11 @@ files:
 - code.cloudfoundry.org/go-batching/*.go # gosub
 - code.cloudfoundry.org/go-diodes/*.go # gosub
 - code.cloudfoundry.org/go-envstruct/*.go # gosub
+- code.cloudfoundry.org/go-loggregator/metrics/*.go # gosub
 - code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2/*.go # gosub
 - code.cloudfoundry.org/log-cache/cmd/log-cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/cache/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/cache/store/*.go # gosub
-- code.cloudfoundry.org/log-cache/internal/metrics/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/promql/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/promql/data_reader/*.go # gosub
 - code.cloudfoundry.org/log-cache/internal/routing/*.go # gosub

@@ -15,6 +15,8 @@ files:
 - code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1/*.go # gosub
 - code.cloudfoundry.org/rfc5424/*.go # gosub
 - github.com/StackExchange/wmi/*.go # gosub
+- github.com/go-ole/go-ole/*.go # gosub
+- github.com/go-ole/go-ole/oleutil/*.go # gosub
 - github.com/golang/protobuf/jsonpb/*.go # gosub
 - github.com/golang/protobuf/proto/*.go # gosub
 - github.com/golang/protobuf/protoc-gen-go/descriptor/*.go # gosub
