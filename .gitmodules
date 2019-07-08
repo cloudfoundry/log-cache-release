@@ -127,3 +127,6 @@
 [submodule "src/github.com/shirou/w32"]
 	path = src/github.com/shirou/w32
 	url = https://github.com/shirou/w32
+[submodule "src/github.com/go-ole/go-ole"]
+	path = src/github.com/go-ole/go-ole
+	url = https://github.com/go-ole/go-ole
