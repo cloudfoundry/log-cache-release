@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package logcache.v1;
+
+import "v2/envelope.proto";
+import "google/api/annotations.proto";
+
+// The egress service is used to read data from the LogCache system.
+service Egress {
+    rpc Read(ReadRequest) returns (ReadResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/read/{source_id=**}"
+        };
+    }
+    rpc Meta(MetaRequest) returns (MetaResponse){
+        option (google.api.http) = {
+            get: "/api/v1/meta"
+        };
+    }
+}
+
+message ReadRequest {
+    string source_id = 1;
+    int64 start_time = 2;
+    int64 end_time = 3;
+    int64 limit = 4;
+    repeated EnvelopeType envelope_types = 5;
+    bool descending = 6;
+    string name_filter = 7;
+}
+
+enum EnvelopeType {
+    ANY = 0;
+    LOG = 1;
+    COUNTER = 2;
+    GAUGE = 3;
+    TIMER = 4;
+    EVENT = 5;
+}
+
+message ReadResponse {
+    loggregator.v2.EnvelopeBatch envelopes = 1;
+}
+
+message MetaRequest {
+    bool local_only = 1;
+}
+
+message MetaResponse {
+    map<string, MetaInfo> meta = 1;
+}
+
+message MetaInfo {
+    int64 count = 1;
+    int64 expired = 2;
+    int64 oldest_timestamp = 3;
+    int64 newest_timestamp = 4;
+}
