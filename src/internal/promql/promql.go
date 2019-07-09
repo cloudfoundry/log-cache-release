@@ -50,8 +50,8 @@ func New(
 		log:               log,
 		queryTimeout:      queryTimeout,
 		failureCounter:    m.NewCounter("log_cache_promql_timeout"),
-		instantQueryTimer: m.NewGauge("log_cache_promql_instant_query_time", metrics.WithMetricTags(map[string]string{"unit":"milliseconds"})),
-		rangeQueryTimer:   m.NewGauge("log_cache_promql_range_query_time", metrics.WithMetricTags(map[string]string{"unit":"milliseconds"})),
+		instantQueryTimer: m.NewGauge("log_cache_promql_instant_query_time", metrics.WithMetricTags(map[string]string{"unit": "milliseconds"})),
+		rangeQueryTimer:   m.NewGauge("log_cache_promql_range_query_time", metrics.WithMetricTags(map[string]string{"unit": "milliseconds"})),
 		result:            1,
 	}
 
@@ -71,8 +71,11 @@ func (q *PromQL) InstantQuery(ctx context.Context, req *logcache_v1.PromQL_Insta
 		// manually.
 		errf: func(e error) { closureErr = e },
 	}
-
-	queryable := promql.NewEngine(nil, nil, 10, q.queryTimeout)
+	queryable := promql.NewEngine(promql.EngineOpts{
+		MaxConcurrent: 10,
+		MaxSamples:    50000000,
+		Timeout:       q.queryTimeout,
+	})
 
 	var requestTime time.Time
 	var err error
@@ -191,7 +194,11 @@ func (q *PromQL) RangeQuery(ctx context.Context, req *logcache_v1.PromQL_RangeQu
 		// manually.
 		errf: func(e error) { closureErr = e },
 	}
-	queryable := promql.NewEngine(nil, nil, 10, q.queryTimeout)
+	queryable := promql.NewEngine(promql.EngineOpts{
+		MaxConcurrent: 10,
+		MaxSamples:    50000000,
+		Timeout:       q.queryTimeout,
+	})
 
 	step, err := ParseStep(req.Step)
 	if err != nil {
@@ -296,7 +303,7 @@ type LogCacheQuerier struct {
 	errf       func(error)
 }
 
-func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Matcher) (storage.SeriesSet, error) {
+func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Matcher) (storage.SeriesSet, storage.Warnings, error) {
 	var (
 		metric string
 		ls     []labels.Label
@@ -320,7 +327,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 	if len(sourceIDs) == 0 {
 		err := fmt.Errorf("Metric '%s' does not have a 'source_id' label.", metric)
 		l.errf(err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	builder := newSeriesBuilder()
@@ -340,7 +347,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 
 		if err != nil {
 			l.errf(err)
-			return nil, err
+			return nil, nil, err
 		}
 
 		for _, e := range envelopeBatch.GetEnvelopes().GetBatch() {
@@ -394,7 +401,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 		}
 	}
 
-	return builder.buildSeriesSet(), nil
+	return builder.buildSeriesSet(), nil, nil
 }
 
 func checkMapForSanitizedMetricName(gauge *loggregator_v2.Gauge, metric string) *loggregator_v2.GaugeValue {
@@ -437,7 +444,11 @@ func (l *LogCacheQuerier) hasLabels(tags map[string]string, ls []labels.Label) b
 	return true
 }
 
-func (l *LogCacheQuerier) LabelValues(name string) ([]string, error) {
+func (l *LogCacheQuerier) LabelValues(name string) ([]string, storage.Warnings, error) {
+	panic("not implemented")
+}
+
+func (l *LogCacheQuerier) LabelNames() ([]string, storage.Warnings, error) {
 	panic("not implemented")
 }
 

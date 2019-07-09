@@ -22,7 +22,12 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
+	"github.com/prometheus/tsdb/encoding"
+	tsdb_errors "github.com/prometheus/tsdb/errors"
+	"github.com/prometheus/tsdb/fileutil"
 )
 
 const tombstoneFilename = "tombstones"
@@ -49,61 +54,76 @@ type TombstoneReader interface {
 	Close() error
 }
 
-func writeTombstoneFile(dir string, tr TombstoneReader) error {
+func writeTombstoneFile(logger log.Logger, dir string, tr TombstoneReader) (int64, error) {
 	path := filepath.Join(dir, tombstoneFilename)
 	tmp := path + ".tmp"
 	hash := newCRC32()
+	var size int
 
 	f, err := os.Create(tmp)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func() {
 		if f != nil {
-			f.Close()
+			if err := f.Close(); err != nil {
+				level.Error(logger).Log("msg", "close tmp file", "err", err.Error())
+			}
+		}
+		if err := os.RemoveAll(tmp); err != nil {
+			level.Error(logger).Log("msg", "remove tmp file", "err", err.Error())
 		}
 	}()
 
-	buf := encbuf{b: make([]byte, 3*binary.MaxVarintLen64)}
-	buf.reset()
+	buf := encoding.Encbuf{B: make([]byte, 3*binary.MaxVarintLen64)}
+	buf.Reset()
 	// Write the meta.
-	buf.putBE32(MagicTombstone)
-	buf.putByte(tombstoneFormatV1)
-	_, err = f.Write(buf.get())
+	buf.PutBE32(MagicTombstone)
+	buf.PutByte(tombstoneFormatV1)
+	n, err := f.Write(buf.Get())
 	if err != nil {
-		return err
+		return 0, err
 	}
+	size += n
 
 	mw := io.MultiWriter(f, hash)
 
 	if err := tr.Iter(func(ref uint64, ivs Intervals) error {
 		for _, iv := range ivs {
-			buf.reset()
+			buf.Reset()
 
-			buf.putUvarint64(ref)
-			buf.putVarint64(iv.Mint)
-			buf.putVarint64(iv.Maxt)
+			buf.PutUvarint64(ref)
+			buf.PutVarint64(iv.Mint)
+			buf.PutVarint64(iv.Maxt)
 
-			_, err = mw.Write(buf.get())
+			n, err = mw.Write(buf.Get())
 			if err != nil {
 				return err
 			}
+			size += n
 		}
 		return nil
 	}); err != nil {
-		return fmt.Errorf("error writing tombstones: %v", err)
+		return 0, fmt.Errorf("error writing tombstones: %v", err)
 	}
 
-	_, err = f.Write(hash.Sum(nil))
+	n, err = f.Write(hash.Sum(nil))
 	if err != nil {
-		return err
+		return 0, err
+	}
+	size += n
+
+	var merr tsdb_errors.MultiError
+	if merr.Add(f.Sync()); merr.Err() != nil {
+		merr.Add(f.Close())
+		return 0, merr.Err()
 	}
 
 	if err = f.Close(); err != nil {
-		return err
+		return 0, err
 	}
 	f = nil
-	return renameFile(tmp, path)
+	return int64(size), fileutil.Replace(tmp, path)
 }
 
 // Stone holds the information on the posting and time-range
@@ -113,53 +133,53 @@ type Stone struct {
 	intervals Intervals
 }
 
-func readTombstones(dir string) (TombstoneReader, error) {
+func readTombstones(dir string) (TombstoneReader, int64, error) {
 	b, err := ioutil.ReadFile(filepath.Join(dir, tombstoneFilename))
 	if os.IsNotExist(err) {
-		return newMemTombstones(), nil
+		return newMemTombstones(), 0, nil
 	} else if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	if len(b) < 5 {
-		return nil, errors.Wrap(errInvalidSize, "tombstones header")
+		return nil, 0, errors.Wrap(encoding.ErrInvalidSize, "tombstones header")
 	}
 
-	d := &decbuf{b: b[:len(b)-4]} // 4 for the checksum.
-	if mg := d.be32(); mg != MagicTombstone {
-		return nil, fmt.Errorf("invalid magic number %x", mg)
+	d := &encoding.Decbuf{B: b[:len(b)-4]} // 4 for the checksum.
+	if mg := d.Be32(); mg != MagicTombstone {
+		return nil, 0, fmt.Errorf("invalid magic number %x", mg)
 	}
-	if flag := d.byte(); flag != tombstoneFormatV1 {
-		return nil, fmt.Errorf("invalid tombstone format %x", flag)
+	if flag := d.Byte(); flag != tombstoneFormatV1 {
+		return nil, 0, fmt.Errorf("invalid tombstone format %x", flag)
 	}
 
-	if d.err() != nil {
-		return nil, d.err()
+	if d.Err() != nil {
+		return nil, 0, d.Err()
 	}
 
 	// Verify checksum.
 	hash := newCRC32()
-	if _, err := hash.Write(d.get()); err != nil {
-		return nil, errors.Wrap(err, "write to hash")
+	if _, err := hash.Write(d.Get()); err != nil {
+		return nil, 0, errors.Wrap(err, "write to hash")
 	}
 	if binary.BigEndian.Uint32(b[len(b)-4:]) != hash.Sum32() {
-		return nil, errors.New("checksum did not match")
+		return nil, 0, errors.New("checksum did not match")
 	}
 
 	stonesMap := newMemTombstones()
 
-	for d.len() > 0 {
-		k := d.uvarint64()
-		mint := d.varint64()
-		maxt := d.varint64()
-		if d.err() != nil {
-			return nil, d.err()
+	for d.Len() > 0 {
+		k := d.Uvarint64()
+		mint := d.Varint64()
+		maxt := d.Varint64()
+		if d.Err() != nil {
+			return nil, 0, d.Err()
 		}
 
 		stonesMap.addInterval(k, Interval{mint, maxt})
 	}
 
-	return stonesMap, nil
+	return stonesMap, int64(len(b)), nil
 }
 
 type memTombstones struct {

@@ -77,9 +77,8 @@ func copyFile(src, dest string) error {
 // returns relative paths to all files and empty directories.
 func readDirs(src string) ([]string, error) {
 	var files []string
-	var err error
 
-	err = filepath.Walk(src, func(path string, f os.FileInfo, err error) error {
+	err := filepath.Walk(src, func(path string, f os.FileInfo, err error) error {
 		relativePath := strings.TrimPrefix(path, src)
 		if len(relativePath) > 0 {
 			files = append(files, relativePath)
@@ -119,7 +118,7 @@ func Rename(from, to string) error {
 		return err
 	}
 
-	if err = Fsync(pdir); err != nil {
+	if err = pdir.Sync(); err != nil {
 		pdir.Close()
 		return err
 	}
@@ -129,9 +128,19 @@ func Rename(from, to string) error {
 // Replace moves a file or directory to a new location and deletes any previous data.
 // It is not atomic.
 func Replace(from, to string) error {
-	if err := os.RemoveAll(to); err != nil {
-		return err
+	// Remove destination only if it is a dir otherwise leave it to os.Rename
+	// as it replaces the destination file and is atomic.
+	{
+		f, err := os.Stat(to)
+		if !os.IsNotExist(err) {
+			if err == nil && f.IsDir() {
+				if err := os.RemoveAll(to); err != nil {
+					return err
+				}
+			}
+		}
 	}
+
 	if err := os.Rename(from, to); err != nil {
 		return err
 	}
@@ -142,7 +151,7 @@ func Replace(from, to string) error {
 		return err
 	}
 
-	if err = Fsync(pdir); err != nil {
+	if err = pdir.Sync(); err != nil {
 		pdir.Close()
 		return err
 	}

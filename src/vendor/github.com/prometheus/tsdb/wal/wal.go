@@ -29,13 +29,14 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/tsdb/fileutil"
 )
 
 const (
-	defaultSegmentSize = 128 * 1024 * 1024 // 128 MB
+	DefaultSegmentSize = 128 * 1024 * 1024 // 128 MB
 	pageSize           = 32 * 1024         // 32KB
 	recordHeaderSize   = 7
 )
@@ -159,27 +160,31 @@ type WAL struct {
 	logger      log.Logger
 	segmentSize int
 	mtx         sync.RWMutex
-	segment     *Segment // active segment
-	donePages   int      // pages written to the segment
-	page        *page    // active page
+	segment     *Segment // Active segment.
+	donePages   int      // Pages written to the segment.
+	page        *page    // Active page.
 	stopc       chan chan struct{}
 	actorc      chan func()
+	closed      bool // To allow calling Close() more than once without blocking.
+	compress    bool
+	snappyBuf   []byte
 
 	fsyncDuration   prometheus.Summary
 	pageFlushes     prometheus.Counter
 	pageCompletions prometheus.Counter
 	truncateFail    prometheus.Counter
 	truncateTotal   prometheus.Counter
+	currentSegment  prometheus.Gauge
 }
 
 // New returns a new WAL over the given directory.
-func New(logger log.Logger, reg prometheus.Registerer, dir string) (*WAL, error) {
-	return NewSize(logger, reg, dir, defaultSegmentSize)
+func New(logger log.Logger, reg prometheus.Registerer, dir string, compress bool) (*WAL, error) {
+	return NewSize(logger, reg, dir, DefaultSegmentSize, compress)
 }
 
 // NewSize returns a new WAL over the given directory.
 // New segments are created with the specified size.
-func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSize int) (*WAL, error) {
+func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSize int, compress bool) (*WAL, error) {
 	if segmentSize%pageSize != 0 {
 		return nil, errors.New("invalid segment size")
 	}
@@ -196,10 +201,12 @@ func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSi
 		page:        &page{},
 		actorc:      make(chan func(), 100),
 		stopc:       make(chan chan struct{}),
+		compress:    compress,
 	}
 	w.fsyncDuration = prometheus.NewSummary(prometheus.SummaryOpts{
-		Name: "prometheus_tsdb_wal_fsync_duration_seconds",
-		Help: "Duration of WAL fsync.",
+		Name:       "prometheus_tsdb_wal_fsync_duration_seconds",
+		Help:       "Duration of WAL fsync.",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	})
 	w.pageFlushes = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "prometheus_tsdb_wal_page_flushes_total",
@@ -217,33 +224,42 @@ func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSi
 		Name: "prometheus_tsdb_wal_truncations_total",
 		Help: "Total number of WAL truncations attempted.",
 	})
+	w.currentSegment = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "prometheus_tsdb_wal_segment_current",
+		Help: "WAL segment index that TSDB is currently writing to.",
+	})
 	if reg != nil {
-		reg.MustRegister(w.fsyncDuration, w.pageFlushes, w.pageCompletions, w.truncateFail, w.truncateTotal)
+		reg.MustRegister(w.fsyncDuration, w.pageFlushes, w.pageCompletions, w.truncateFail, w.truncateTotal, w.currentSegment)
 	}
 
 	_, j, err := w.Segments()
+	// Index of the Segment we want to open and write to.
+	writeSegmentIndex := 0
 	if err != nil {
 		return nil, errors.Wrap(err, "get segment range")
 	}
-	// Fresh dir, no segments yet.
-	if j == -1 {
-		if w.segment, err = CreateSegment(w.dir, 0); err != nil {
-			return nil, err
-		}
-	} else {
-		if w.segment, err = OpenWriteSegment(logger, w.dir, j); err != nil {
-			return nil, err
-		}
-		// Correctly initialize donePages.
-		stat, err := w.segment.Stat()
-		if err != nil {
-			return nil, err
-		}
-		w.donePages = int(stat.Size() / pageSize)
+	// If some segments already exist create one with a higher index than the last segment.
+	if j != -1 {
+		writeSegmentIndex = j + 1
 	}
+
+	segment, err := CreateSegment(w.dir, writeSegmentIndex)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := w.setSegment(segment); err != nil {
+		return nil, err
+	}
+
 	go w.run()
 
 	return w, nil
+}
+
+// CompressionEnabled returns if compression is enabled on this WAL.
+func (w *WAL) CompressionEnabled() bool {
+	return w.compress
 }
 
 // Dir returns the directory of the WAL.
@@ -295,12 +311,9 @@ func (w *WAL) Repair(origErr error) error {
 	if err != nil {
 		return errors.Wrap(err, "list segments")
 	}
-	level.Warn(w.logger).Log("msg", "deleting all segments behind corruption", "segment", cerr.Segment)
+	level.Warn(w.logger).Log("msg", "deleting all segments newer than corrupted segment", "segment", cerr.Segment)
 
 	for _, s := range segs {
-		if s.index <= cerr.Segment {
-			continue
-		}
 		if w.segment.i == s.index {
 			// The active segment needs to be removed,
 			// close it first (Windows!). Can be closed safely
@@ -309,6 +322,9 @@ func (w *WAL) Repair(origErr error) error {
 			if err := w.segment.Close(); err != nil {
 				return errors.Wrap(err, "close active segment")
 			}
+		}
+		if s.index <= cerr.Segment {
+			continue
 		}
 		if err := os.Remove(filepath.Join(w.dir, s.name)); err != nil {
 			return errors.Wrapf(err, "delete segment:%v", s.index)
@@ -330,7 +346,9 @@ func (w *WAL) Repair(origErr error) error {
 	if err != nil {
 		return err
 	}
-	w.segment = s
+	if err := w.setSegment(s); err != nil {
+		return err
+	}
 
 	f, err := os.Open(tmpfn)
 	if err != nil {
@@ -351,6 +369,9 @@ func (w *WAL) Repair(origErr error) error {
 	}
 	// We expect an error here from r.Err(), so nothing to handle.
 
+	// We need to pad to the end of the last page in the repaired segment
+	w.flushPage(true)
+
 	// We explicitly close even when there is a defer for Windows to be
 	// able to delete it. The defer is in place to close it in-case there
 	// are errors above.
@@ -360,12 +381,33 @@ func (w *WAL) Repair(origErr error) error {
 	if err := os.Remove(tmpfn); err != nil {
 		return errors.Wrap(err, "delete corrupted segment")
 	}
+
+	// Explicitly close the the segment we just repaired to avoid issues with Windows.
+	s.Close()
+
+	// We always want to start writing to a new Segment rather than an existing
+	// Segment, which is handled by NewSize, but earlier in Repair we're deleting
+	// all segments that come after the corrupted Segment. Recreate a new Segment here.
+	s, err = CreateSegment(w.dir, cerr.Segment+1)
+	if err != nil {
+		return err
+	}
+	if err := w.setSegment(s); err != nil {
+		return err
+	}
 	return nil
 }
 
 // SegmentName builds a segment name for the directory.
 func SegmentName(dir string, i int) string {
 	return filepath.Join(dir, fmt.Sprintf("%08d", i))
+}
+
+// NextSegment creates the next segment and closes the previous one.
+func (w *WAL) NextSegment() error {
+	w.mtx.Lock()
+	defer w.mtx.Unlock()
+	return w.nextSegment()
 }
 
 // nextSegment creates the next segment and closes the previous one.
@@ -381,8 +423,9 @@ func (w *WAL) nextSegment() error {
 		return errors.Wrap(err, "create new segment file")
 	}
 	prev := w.segment
-	w.segment = next
-	w.donePages = 0
+	if err := w.setSegment(next); err != nil {
+		return err
+	}
 
 	// Don't block further writes by fsyncing the last segment.
 	w.actorc <- func() {
@@ -396,6 +439,19 @@ func (w *WAL) nextSegment() error {
 	return nil
 }
 
+func (w *WAL) setSegment(segment *Segment) error {
+	w.segment = segment
+
+	// Correctly initialize donePages.
+	stat, err := segment.Stat()
+	if err != nil {
+		return err
+	}
+	w.donePages = int(stat.Size() / pageSize)
+	w.currentSegment.Set(float64(segment.Index()))
+	return nil
+}
+
 // flushPage writes the new contents of the page to disk. If no more records will fit into
 // the page, the remaining bytes will be set to zero and a new page will be started.
 // If clear is true, this is enforced regardless of how many bytes are left in the page.
@@ -405,10 +461,10 @@ func (w *WAL) flushPage(clear bool) error {
 	p := w.page
 	clear = clear || p.full()
 
-	// No more data will fit into the page. Enqueue and clear it.
+	// No more data will fit into the page or an implicit clear.
+	// Enqueue and clear it.
 	if clear {
 		p.alloc = pageSize // Write till end of page.
-		w.pageCompletions.Inc()
 	}
 	n, err := w.segment.Write(p.buf[p.flushed:p.alloc])
 	if err != nil {
@@ -424,9 +480,18 @@ func (w *WAL) flushPage(clear bool) error {
 		p.alloc = 0
 		p.flushed = 0
 		w.donePages++
+		w.pageCompletions.Inc()
 	}
 	return nil
 }
+
+// First Byte of header format:
+// [ 4 bits unallocated] [1 bit snappy compression flag] [ 3 bit record type ]
+
+const (
+	snappyMask  = 1 << 3
+	recTypeMask = snappyMask - 1
+)
 
 type recType uint8
 
@@ -437,6 +502,10 @@ const (
 	recMiddle   recType = 3 // Middle fragments of a record.
 	recLast     recType = 4 // Final fragment of a record.
 )
+
+func recTypeFromHeader(header byte) recType {
+	return recType(header & recTypeMask)
+}
 
 func (t recType) String() string {
 	switch t {
@@ -474,10 +543,18 @@ func (w *WAL) Log(recs ...[]byte) error {
 	return nil
 }
 
-// log writes rec to the log and forces a flush of the current page if its
-// the final record of a batch, the record is bigger than the page size or
-// the current page is full.
+// log writes rec to the log and forces a flush of the current page if:
+// - the final record of a batch
+// - the record is bigger than the page size
+// - the current page is full.
 func (w *WAL) log(rec []byte, final bool) error {
+	// When the last page flush failed the page will remain full.
+	// When the page is full, need to flush it before trying to add more records to it.
+	if w.page.full() {
+		if err := w.flushPage(true); err != nil {
+			return err
+		}
+	}
 	// If the record is too big to fit within the active page in the current
 	// segment, terminate the active segment and advance to the next one.
 	// This ensures that records do not cross segment boundaries.
@@ -487,6 +564,19 @@ func (w *WAL) log(rec []byte, final bool) error {
 	if len(rec) > left {
 		if err := w.nextSegment(); err != nil {
 			return err
+		}
+	}
+
+	compressed := false
+	if w.compress && len(rec) > 0 {
+		// The snappy library uses `len` to calculate if we need a new buffer.
+		// In order to allocate as few buffers as possible make the length
+		// equal to the capacity.
+		w.snappyBuf = w.snappyBuf[:cap(w.snappyBuf)]
+		w.snappyBuf = snappy.Encode(w.snappyBuf, rec)
+		if len(w.snappyBuf) < len(rec) {
+			rec = w.snappyBuf
+			compressed = true
 		}
 	}
 
@@ -512,6 +602,9 @@ func (w *WAL) log(rec []byte, final bool) error {
 			typ = recFirst
 		default:
 			typ = recMiddle
+		}
+		if compressed {
+			typ |= snappyMask
 		}
 
 		buf[0] = byte(typ)
@@ -574,7 +667,7 @@ func (w *WAL) Truncate(i int) (err error) {
 
 func (w *WAL) fsync(f *Segment) error {
 	start := time.Now()
-	err := fileutil.Fsync(f.File)
+	err := f.File.Sync()
 	w.fsyncDuration.Observe(time.Since(start).Seconds())
 	return err
 }
@@ -583,6 +676,10 @@ func (w *WAL) fsync(f *Segment) error {
 func (w *WAL) Close() (err error) {
 	w.mtx.Lock()
 	defer w.mtx.Unlock()
+
+	if w.closed {
+		return errors.New("wal already closed")
+	}
 
 	// Flush the last page and zero out all its remaining size.
 	// We must not flush an empty page as it would falsely signal
@@ -603,7 +700,7 @@ func (w *WAL) Close() (err error) {
 	if err := w.segment.Close(); err != nil {
 		level.Error(w.logger).Log("msg", "close previous segment", "err", err)
 	}
-
+	w.closed = true
 	return nil
 }
 
@@ -671,25 +768,25 @@ func NewSegmentsRangeReader(sr ...SegmentRange) (io.ReadCloser, error) {
 			segs = append(segs, s)
 		}
 	}
-	return newSegmentBufReader(segs...), nil
+	return NewSegmentBufReader(segs...), nil
 }
 
 // segmentBufReader is a buffered reader that reads in multiples of pages.
 // The main purpose is that we are able to track segment and offset for
-// corruption reporting.
+// corruption reporting.  We have to be careful not to increment curr too
+// early, as it is used by Reader.Err() to tell Repair which segment is corrupt.
+// As such we pad the end of non-page align segments with zeros.
 type segmentBufReader struct {
 	buf  *bufio.Reader
 	segs []*Segment
-	cur  int
-	off  int
-	more bool
+	cur  int // Index into segs.
+	off  int // Offset of read data into current segment.
 }
 
-func newSegmentBufReader(segs ...*Segment) *segmentBufReader {
+func NewSegmentBufReader(segs ...*Segment) *segmentBufReader {
 	return &segmentBufReader{
-		buf:  bufio.NewReaderSize(nil, 16*pageSize),
+		buf:  bufio.NewReaderSize(segs[0], 16*pageSize),
 		segs: segs,
-		cur:  -1,
 	}
 }
 
@@ -702,206 +799,38 @@ func (r *segmentBufReader) Close() (err error) {
 	return err
 }
 
+// Read implements io.Reader.
 func (r *segmentBufReader) Read(b []byte) (n int, err error) {
-	if !r.more {
-		if r.cur+1 >= len(r.segs) {
-			return 0, io.EOF
-		}
-		r.cur++
-		r.off = 0
-		r.more = true
-		r.buf.Reset(r.segs[r.cur])
-	}
 	n, err = r.buf.Read(b)
 	r.off += n
-	if err != io.EOF {
+
+	// If we succeeded, or hit a non-EOF, we can stop.
+	if err == nil || err != io.EOF {
 		return n, err
 	}
-	// Just return what we read so far, but don't signal EOF.
-	// Only unset more so we don't invalidate the current segment and
-	// offset before the next read.
-	r.more = false
+
+	// We hit EOF; fake out zero padding at the end of short segments, so we
+	// don't increment curr too early and report the wrong segment as corrupt.
+	if r.off%pageSize != 0 {
+		i := 0
+		for ; n+i < len(b) && (r.off+i)%pageSize != 0; i++ {
+			b[n+i] = 0
+		}
+
+		// Return early, even if we didn't fill b.
+		r.off += i
+		return n + i, nil
+	}
+
+	// There is no more deta left in the curr segment and there are no more
+	// segments left.  Return EOF.
+	if r.cur+1 >= len(r.segs) {
+		return n, io.EOF
+	}
+
+	// Move to next segment.
+	r.cur++
+	r.off = 0
+	r.buf.Reset(r.segs[r.cur])
 	return n, nil
-}
-
-// Reader reads WAL records from an io.Reader.
-type Reader struct {
-	rdr       io.Reader
-	err       error
-	rec       []byte
-	buf       [pageSize]byte
-	total     int64   // Total bytes processed.
-	curRecTyp recType // Used for checking that the last record is not torn.
-}
-
-// NewReader returns a new reader.
-func NewReader(r io.Reader) *Reader {
-	return &Reader{rdr: r}
-}
-
-// Next advances the reader to the next records and returns true if it exists.
-// It must not be called again after it returned false.
-func (r *Reader) Next() bool {
-	err := r.next()
-	if errors.Cause(err) == io.EOF {
-		// The last WAL segment record shouldn't be torn(should be full or last).
-		// The last record would be torn after a crash just before
-		// the last record part could be persisted to disk.
-		if recType(r.curRecTyp) == recFirst || recType(r.curRecTyp) == recMiddle {
-			r.err = errors.New("last record is torn")
-		}
-		return false
-	}
-	r.err = err
-	return r.err == nil
-}
-
-func (r *Reader) next() (err error) {
-	// We have to use r.buf since allocating byte arrays here fails escape
-	// analysis and ends up on the heap, even though it seemingly should not.
-	hdr := r.buf[:recordHeaderSize]
-	buf := r.buf[recordHeaderSize:]
-
-	r.rec = r.rec[:0]
-
-	i := 0
-	for {
-		if _, err = io.ReadFull(r.rdr, hdr[:1]); err != nil {
-			return errors.Wrap(err, "read first header byte")
-		}
-		r.total++
-		r.curRecTyp = recType(hdr[0])
-
-		// Gobble up zero bytes.
-		if r.curRecTyp == recPageTerm {
-			// recPageTerm is a single byte that indicates the rest of the page is padded.
-			// If it's the first byte in a page, buf is too small and
-			// needs to be resized to fit pageSize-1 bytes.
-			buf = r.buf[1:]
-
-			// We are pedantic and check whether the zeros are actually up
-			// to a page boundary.
-			// It's not strictly necessary but may catch sketchy state early.
-			k := pageSize - (r.total % pageSize)
-			if k == pageSize {
-				continue // Initial 0 byte was last page byte.
-			}
-			n, err := io.ReadFull(r.rdr, buf[:k])
-			if err != nil {
-				return errors.Wrap(err, "read remaining zeros")
-			}
-			r.total += int64(n)
-
-			for _, c := range buf[:k] {
-				if c != 0 {
-					return errors.New("unexpected non-zero byte in padded page")
-				}
-			}
-			continue
-		}
-		n, err := io.ReadFull(r.rdr, hdr[1:])
-		if err != nil {
-			return errors.Wrap(err, "read remaining header")
-		}
-		r.total += int64(n)
-
-		var (
-			length = binary.BigEndian.Uint16(hdr[1:])
-			crc    = binary.BigEndian.Uint32(hdr[3:])
-		)
-
-		if length > pageSize-recordHeaderSize {
-			return errors.Errorf("invalid record size %d", length)
-		}
-		n, err = io.ReadFull(r.rdr, buf[:length])
-		if err != nil {
-			return err
-		}
-		r.total += int64(n)
-
-		if n != int(length) {
-			return errors.Errorf("invalid size: expected %d, got %d", length, n)
-		}
-		if c := crc32.Checksum(buf[:length], castagnoliTable); c != crc {
-			return errors.Errorf("unexpected checksum %x, expected %x", c, crc)
-		}
-		r.rec = append(r.rec, buf[:length]...)
-
-		switch r.curRecTyp {
-		case recFull:
-			if i != 0 {
-				return errors.New("unexpected full record")
-			}
-			return nil
-		case recFirst:
-			if i != 0 {
-				return errors.New("unexpected first record")
-			}
-		case recMiddle:
-			if i == 0 {
-				return errors.New("unexpected middle record")
-			}
-		case recLast:
-			if i == 0 {
-				return errors.New("unexpected last record")
-			}
-			return nil
-		default:
-			return errors.Errorf("unexpected record type %d", r.curRecTyp)
-		}
-		// Only increment i for non-zero records since we use it
-		// to determine valid content record sequences.
-		i++
-	}
-}
-
-// Err returns the last encountered error wrapped in a corruption error.
-// If the reader does not allow to infer a segment index and offset, a total
-// offset in the reader stream will be provided.
-func (r *Reader) Err() error {
-	if r.err == nil {
-		return nil
-	}
-	if b, ok := r.rdr.(*segmentBufReader); ok {
-		return &CorruptionErr{
-			Err:     r.err,
-			Dir:     b.segs[b.cur].Dir(),
-			Segment: b.segs[b.cur].Index(),
-			Offset:  int64(b.off),
-		}
-	}
-	return &CorruptionErr{
-		Err:     r.err,
-		Segment: -1,
-		Offset:  r.total,
-	}
-}
-
-// Record returns the current record. The returned byte slice is only
-// valid until the next call to Next.
-func (r *Reader) Record() []byte {
-	return r.rec
-}
-
-// Segment returns the current segment being read.
-func (r *Reader) Segment() int {
-	if b, ok := r.rdr.(*segmentBufReader); ok {
-		return b.segs[b.cur].Index()
-	}
-	return -1
-}
-
-// Offset returns the current position of the segment being read.
-func (r *Reader) Offset() int64 {
-	if b, ok := r.rdr.(*segmentBufReader); ok {
-		return int64(b.off)
-	}
-	return r.total
-}
-
-func min(i, j int) int {
-	if i < j {
-		return i
-	}
-	return j
 }
