@@ -4,4 +4,8 @@ export GOROOT=$(readlink -nf /var/vcap/packages/golang1.12.4)
 export PATH=$GOROOT/bin:$PATH
 export HOME=/var/vcap
 
-go build -mod=vendor -o ${BOSH_INSTALL_TARGET}/log-cache-gateway ./cmd/gateway
+VERSION=$(cat version)
+go build -mod=vendor \
+  -o ${BOSH_INSTALL_TARGET}/log-cache-gateway \
+  -ldflags "-X main.buildVersion=${VERSION}" \
+  ./cmd/gateway
