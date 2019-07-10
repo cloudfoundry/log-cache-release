@@ -32,7 +32,9 @@ var _ = Describe("Log Cache Blackbox™", func() {
 
 		Eventually(tc.logCache.numEmittedRequests).Should(BeNumerically(">", 1))
 
+		tc.logCache.Lock()
 		batch := tc.logCache.requests[0].GetEnvelopes().GetBatch()[0]
+		tc.logCache.Unlock()
 		Expect(batch.GetTimestamp()).To(BeNumerically("~", startTime, int64(time.Second)))
 		Expect(batch.GetSourceId()).To(Equal("source-1"))
 
