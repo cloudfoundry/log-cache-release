@@ -11,3 +11,4 @@ files:
 - vendor/**/*
 - go.mod
 - go.sum
+- version
