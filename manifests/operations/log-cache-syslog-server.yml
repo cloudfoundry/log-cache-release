@@ -1,6 +1,6 @@
 ---
 - type: replace
-  path: /releases/name=log-cache
+  path: /releases/name=log-cache?
   value:
     name: log-cache
     version: latest
