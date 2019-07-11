@@ -15,6 +15,7 @@ code.cloudfoundry.org/go-orchestrator
 code.cloudfoundry.org/rfc5424
 # code.cloudfoundry.org/tlsconfig v0.0.0-20190419002020-eb9396db5a71
 code.cloudfoundry.org/tlsconfig
+code.cloudfoundry.org/tlsconfig/certtest
 # github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 github.com/Benjamintf1/unmarshalledmatchers
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
@@ -174,6 +175,8 @@ github.com/shirou/gopsutil/mem
 github.com/shirou/gopsutil/net
 # github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4
 github.com/shirou/w32
+# github.com/square/certstrap v1.1.2-0.20181030173000-b612375892a7
+github.com/square/certstrap/pkix
 # golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 golang.org/x/net/context
 golang.org/x/net/trace

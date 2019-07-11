@@ -37,9 +37,9 @@ var _ = Describe("LogCache", func() {
 	BeforeEach(func() {
 		var err error
 		tlsConfig, err = sharedtls.NewMutualTLSConfig(
-			testing.Cert("log-cache-ca.crt"),
-			testing.Cert("log-cache.crt"),
-			testing.Cert("log-cache.key"),
+			testing.LogCacheTestCerts.CA(),
+			testing.LogCacheTestCerts.Cert("log-cache"),
+			testing.LogCacheTestCerts.Key("log-cache"),
 			"log-cache",
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -469,9 +469,9 @@ var _ = Describe("LogCache", func() {
 
 func writeEnvelopes(addr string, es []*loggregator_v2.Envelope) {
 	tlsConfig, err := testing.NewTLSConfig(
-		testing.Cert("log-cache-ca.crt"),
-		testing.Cert("log-cache.crt"),
-		testing.Cert("log-cache.key"),
+		testing.LogCacheTestCerts.CA(),
+		testing.LogCacheTestCerts.Cert("log-cache"),
+		testing.LogCacheTestCerts.Key("log-cache"),
 		"log-cache",
 	)
 	if err != nil {

@@ -40,8 +40,8 @@ var _ = Describe("Syslog", func() {
 			loggr,
 			logCache,
 			spyMetrics,
-			testing.Cert("log-cache.crt"),
-			testing.Cert("log-cache.key"),
+			testing.LogCacheTestCerts.Cert("log-cache"),
+			testing.LogCacheTestCerts.Key("log-cache"),
 			syslog.WithServerPort(0),
 		)
 
@@ -58,8 +58,8 @@ var _ = Describe("Syslog", func() {
 			loggr,
 			logCache,
 			spyMetrics,
-			testing.Cert("log-cache.crt"),
-			testing.Cert("log-cache.key"),
+			testing.LogCacheTestCerts.Cert("log-cache"),
+			testing.LogCacheTestCerts.Key("log-cache"),
 			syslog.WithServerPort(0),
 			syslog.WithIdleTimeout(100*time.Millisecond),
 		)
@@ -86,8 +86,8 @@ var _ = Describe("Syslog", func() {
 			loggr,
 			logCache,
 			spyMetrics,
-			testing.Cert("log-cache.crt"),
-			testing.Cert("log-cache.key"),
+			testing.LogCacheTestCerts.Cert("log-cache"),
+			testing.LogCacheTestCerts.Key("log-cache"),
 			syslog.WithServerPort(0),
 			syslog.WithIdleTimeout(100*time.Millisecond),
 		)
@@ -444,8 +444,8 @@ func (s *spyLogCacheClient) envelopes() []*loggregator_v2.Envelope {
 func buildClientTLSConfig(maxVersion, cipherSuite uint16) *tls.Config {
 	tlsConf, err := tlsconfig.Build(
 		tlsconfig.WithIdentityFromFile(
-			testing.Cert("log-cache.crt"),
-			testing.Cert("log-cache.key"),
+			testing.LogCacheTestCerts.Cert("log-cache"),
+			testing.LogCacheTestCerts.Key("log-cache"),
 		),
 	).Client()
 	Expect(err).ToNot(HaveOccurred())
