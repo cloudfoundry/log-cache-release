@@ -112,3 +112,9 @@
 [submodule "src/github.com/dvsekhvalnov/jose2go"]
 	path = src/github.com/dvsekhvalnov/jose2go
 	url = http://github.com/dvsekhvalnov/jose2go
+[submodule "src/code.cloudfoundry.org/tlsconfig"]
+	path = src/code.cloudfoundry.org/tlsconfig
+	url = https://github.com/cloudfoundry/tlsconfig
+[submodule "src/github.com/square/certstrap"]
+	path = src/github.com/square/certstrap
+	url = https://github.com/square/certstrap
