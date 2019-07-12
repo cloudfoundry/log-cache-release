@@ -94,3 +94,9 @@
 [submodule "src/github.com/ghodss/yaml"]
 	path = src/github.com/ghodss/yaml
 	url = https://github.com/ghodss/yaml
+[submodule "src/code.cloudfoundry.org/tlsconfig"]
+	path = src/code.cloudfoundry.org/tlsconfig
+	url = https://github.com/cloudfoundry/tlsconfig
+[submodule "src/github.com/square/certstrap"]
+	path = src/github.com/square/certstrap
+	url = https://github.com/square/certstrap
