@@ -133,6 +133,7 @@ func (s *Server) parseListener(res *syslog.Result) {
 	env, err := s.convertToEnvelope(msg)
 	if err != nil {
 		s.invalidIngress.Add(1)
+		s.loggr.Printf("unable to convert syslog message to envelope: %s", err)
 		return
 	}
 
