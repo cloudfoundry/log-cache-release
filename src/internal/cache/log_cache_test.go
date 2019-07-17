@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
-	"math"
 	"time"
 
 	"google.golang.org/grpc"
@@ -29,7 +28,6 @@ var _ = Describe("LogCache", func() {
 		tlsConfig *tls.Config
 		peer      *testing.SpyLogCache
 		cache     *LogCache
-		oc        rpc.OrchestrationClient
 
 		spyMetrics *testhelpers.SpyMetricsRegistry
 	)
@@ -60,36 +58,6 @@ var _ = Describe("LogCache", func() {
 			),
 		)
 		cache.Start()
-
-		conn, err := grpc.Dial(
-			cache.Addr(),
-			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
-		)
-		Expect(err).ToNot(HaveOccurred())
-
-		oc = rpc.NewOrchestrationClient(conn)
-
-		_, err = oc.SetRanges(context.Background(), &rpc.SetRangesRequest{
-			Ranges: map[string]*rpc.Ranges{
-				cache.Addr(): {
-					Ranges: []*rpc.Range{
-						{
-							Start: 0,
-							End:   9223372036854775807,
-						},
-					},
-				},
-				peerAddr: {
-					Ranges: []*rpc.Range{
-						{
-							Start: 9223372036854775808,
-							End:   math.MaxUint64,
-						},
-					},
-				},
-			},
-		})
-		Expect(err).ToNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
@@ -177,12 +145,12 @@ var _ = Describe("LogCache", func() {
 
 	It("returns tail of data filtered by source ID", func() {
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
-			// source-0 hashes to 7700738999732113484 (route to node 0)
-			{Timestamp: 1, SourceId: "source-0"},
-			// source-1 hashes to 15704273932878139171 (route to node 1)
-			{Timestamp: 2, SourceId: "source-1"},
-			{Timestamp: 3, SourceId: "source-0"},
-			{Timestamp: 4, SourceId: "source-0"},
+			// src-zero hashes to 6727955504463301110 (route to node 0)
+			{Timestamp: 1, SourceId: "src-zero"},
+			// other-src hashes to 2416040688038506749 (route to node 1)
+			{Timestamp: 2, SourceId: "other-src"},
+			{Timestamp: 3, SourceId: "src-zero"},
+			{Timestamp: 4, SourceId: "src-zero"},
 		})
 
 		conn, err := grpc.Dial(cache.Addr(),
@@ -195,7 +163,7 @@ var _ = Describe("LogCache", func() {
 		var es []*loggregator_v2.Envelope
 		f := func() error {
 			resp, err := client.Read(context.Background(), &rpc.ReadRequest{
-				SourceId:   "source-0",
+				SourceId:   "src-zero",
 				Descending: true,
 				Limit:      2,
 			})
@@ -213,9 +181,9 @@ var _ = Describe("LogCache", func() {
 		Eventually(f).Should(BeNil())
 
 		Expect(es[0].Timestamp).To(Equal(int64(4)))
-		Expect(es[0].SourceId).To(Equal("source-0"))
+		Expect(es[0].SourceId).To(Equal("src-zero"))
 		Expect(es[1].Timestamp).To(Equal(int64(3)))
-		Expect(es[1].SourceId).To(Equal("source-0"))
+		Expect(es[1].SourceId).To(Equal("src-zero"))
 
 		Eventually(func() float64 {
 			return spyMetrics.GetMetricValue("log_cache_ingress", nil)
@@ -229,10 +197,10 @@ var _ = Describe("LogCache", func() {
 	It("queries data via PromQL Instant Queries", func() {
 		now := time.Now()
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
-			// source-0 hashes to 7700738999732113484 (route to node 0)
+			// src-zero hashes to 6727955504463301110 (route to node 0)
 			{
 				Timestamp: now.Add(-2 * time.Second).UnixNano(),
-				SourceId:  "source-0",
+				SourceId:  "src-zero",
 				Message: &loggregator_v2.Envelope_Counter{
 					Counter: &loggregator_v2.Counter{
 						Name:  "metric",
@@ -251,7 +219,7 @@ var _ = Describe("LogCache", func() {
 
 		f := func() error {
 			resp, err := client.InstantQuery(context.Background(), &rpc.PromQL_InstantQueryRequest{
-				Query: `metric{source_id="source-0"}`,
+				Query: `metric{source_id="src-zero"}`,
 				Time:  testing.FormatTimeWithDecimalMillis(now),
 			})
 			if err != nil {
@@ -270,10 +238,10 @@ var _ = Describe("LogCache", func() {
 	It("queries data via PromQL Range Queries", func() {
 		now := time.Now()
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
-			// source-0 hashes to 7700738999732113484 (route to node 0)
+			// src-zero hashes to 6727955504463301110 (route to node 0)
 			{
 				Timestamp: now.Add(-2 * time.Second).UnixNano(),
-				SourceId:  "source-0",
+				SourceId:  "src-zero",
 				Message: &loggregator_v2.Envelope_Counter{
 					Counter: &loggregator_v2.Counter{
 						Name:  "metric",
@@ -292,7 +260,7 @@ var _ = Describe("LogCache", func() {
 
 		f := func() error {
 			resp, err := client.RangeQuery(context.Background(), &rpc.PromQL_RangeQueryRequest{
-				Query: `metric{source_id="source-0"}`,
+				Query: `metric{source_id="src-zero"}`,
 				Start: testing.FormatTimeWithDecimalMillis(now.Add(-time.Minute)),
 				End:   testing.FormatTimeWithDecimalMillis(now),
 				Step:  "1m",
@@ -309,40 +277,13 @@ var _ = Describe("LogCache", func() {
 		Eventually(f).Should(BeNil())
 	})
 
-	It("uses the routes from the scheduler", func() {
-		_, err := oc.SetRanges(context.Background(), &rpc.SetRangesRequest{
-			Ranges: map[string]*rpc.Ranges{
-				cache.Addr(): {
-					Ranges: []*rpc.Range{
-						{
-							Start: 0,
-							End:   math.MaxUint64,
-						},
-					},
-				},
-			},
-		})
-		Expect(err).ToNot(HaveOccurred())
-
-		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
-			{Timestamp: 1, SourceId: "source-0"},
-			{Timestamp: 2, SourceId: "source-1"},
-			{Timestamp: 3, SourceId: "source-0"},
-			{Timestamp: 4, SourceId: "source-0"},
-		})
-
-		Eventually(func() float64 {
-			return spyMetrics.GetMetricValue("log_cache_ingress", nil)
-		}).Should(Equal(4.0))
-	})
-
 	It("routes envelopes to peers", func() {
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
-			// source-0 hashes to 7700738999732113484 (route to node 0)
-			{Timestamp: 1, SourceId: "source-0"},
-			// source-1 hashes to 15704273932878139171 (route to node 1)
-			{Timestamp: 2, SourceId: "source-1"},
-			{Timestamp: 3, SourceId: "source-1"},
+			// src-zero hashes to 6727955504463301110 (route to node 0)
+			{Timestamp: 1, SourceId: "src-zero"},
+			// other-src hashes to 2416040688038506749 (route to node 1)
+			{Timestamp: 2, SourceId: "other-src"},
+			{Timestamp: 3, SourceId: "other-src"},
 		})
 
 		Eventually(peer.GetEnvelopes).Should(HaveLen(2))
@@ -352,9 +293,9 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("accepts envelopes from peers", func() {
-		// source-0 hashes to 7700738999732113484 (route to node 0)
+		// src-zero hashes to 6727955504463301110 (route to node 0)
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
-			{SourceId: "source-0", Timestamp: 1},
+			{SourceId: "src-zero", Timestamp: 1},
 		})
 
 		conn, err := grpc.Dial(cache.Addr(),
@@ -367,7 +308,7 @@ var _ = Describe("LogCache", func() {
 		var es []*loggregator_v2.Envelope
 		f := func() error {
 			resp, err := client.Read(context.Background(), &rpc.ReadRequest{
-				SourceId: "source-0",
+				SourceId: "src-zero",
 			})
 			if err != nil {
 				return err
@@ -383,11 +324,11 @@ var _ = Describe("LogCache", func() {
 		Eventually(f).Should(BeNil())
 
 		Expect(es[0].Timestamp).To(Equal(int64(1)))
-		Expect(es[0].SourceId).To(Equal("source-0"))
+		Expect(es[0].SourceId).To(Equal("src-zero"))
 	})
 
 	It("routes query requests to peers", func() {
-		peer.ReadEnvelopes["source-1"] = func() []*loggregator_v2.Envelope {
+		peer.ReadEnvelopes["other-src"] = func() []*loggregator_v2.Envelope {
 			return []*loggregator_v2.Envelope{
 				{Timestamp: 99},
 				{Timestamp: 101},
@@ -401,9 +342,9 @@ var _ = Describe("LogCache", func() {
 		defer conn.Close()
 		client := rpc.NewEgressClient(conn)
 
-		// source-1 hashes to 15704273932878139171 (route to node 1)
+		// other-src hashes to 2416040688038506749 (route to node 1)
 		resp, err := client.Read(context.Background(), &rpc.ReadRequest{
-			SourceId:      "source-1",
+			SourceId:      "other-src",
 			StartTime:     99,
 			EndTime:       101,
 			EnvelopeTypes: []rpc.EnvelopeType{rpc.EnvelopeType_LOG},
@@ -413,7 +354,7 @@ var _ = Describe("LogCache", func() {
 
 		Eventually(peer.GetReadRequests).Should(HaveLen(1))
 		req := peer.GetReadRequests()[0]
-		Expect(req.SourceId).To(Equal("source-1"))
+		Expect(req.SourceId).To(Equal("other-src"))
 		Expect(req.StartTime).To(Equal(int64(99)))
 		Expect(req.EndTime).To(Equal(int64(101)))
 		Expect(req.EnvelopeTypes).To(ConsistOf(rpc.EnvelopeType_LOG))
@@ -421,7 +362,7 @@ var _ = Describe("LogCache", func() {
 
 	It("returns all meta information", func() {
 		peer.MetaResponses = map[string]*rpc.MetaInfo{
-			"source-1": {
+			"other-src": {
 				Count:           1,
 				Expired:         2,
 				OldestTimestamp: 3,
@@ -440,7 +381,7 @@ var _ = Describe("LogCache", func() {
 		sendRequest := &rpc.SendRequest{
 			Envelopes: &loggregator_v2.EnvelopeBatch{
 				Batch: []*loggregator_v2.Envelope{
-					{SourceId: "source-0"},
+					{SourceId: "src-zero"},
 				},
 			},
 		}
@@ -454,10 +395,10 @@ var _ = Describe("LogCache", func() {
 
 			return resp.Meta
 		}).Should(And(
-			HaveKeyWithValue("source-0", &rpc.MetaInfo{
+			HaveKeyWithValue("src-zero", &rpc.MetaInfo{
 				Count: 1,
 			}),
-			HaveKeyWithValue("source-1", &rpc.MetaInfo{
+			HaveKeyWithValue("other-src", &rpc.MetaInfo{
 				Count:           1,
 				Expired:         2,
 				OldestTimestamp: 3,

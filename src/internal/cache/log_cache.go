@@ -2,7 +2,6 @@ package cache
 
 import (
 	"code.cloudfoundry.org/go-loggregator/metrics"
-	"hash/crc64"
 	"log"
 	"net"
 	"strconv"
@@ -137,16 +136,6 @@ func WithClustered(nodeIndex int, nodeAddrs []string, opts ...grpc.DialOption) L
 	}
 }
 
-// WithExternalAddr returns a LogCacheOption that sets
-// address the scheduler will refer to the given node as. This is required
-// when the set address won't match what the scheduler will refer to the node
-// as (e.g. :0). Defaults to the resulting address from the listener.
-func WithExternalAddr(addr string) LogCacheOption {
-	return func(c *LogCache) {
-		c.extAddr = addr
-	}
-}
-
 // Start starts the LogCache. It has an internal go-routine that it creates
 // and therefore does not block.
 func (c *LogCache) Start() {
@@ -163,11 +152,6 @@ func (c *LogCache) Close() error {
 }
 
 func (c *LogCache) setupRouting(s *store.Store) {
-	tableECMA := crc64.MakeTable(crc64.ECMA)
-	hasher := func(s string) uint64 {
-		return crc64.Checksum([]byte(s), tableECMA)
-	}
-
 	// gRPC
 	lis, err := net.Listen("tcp", c.addr)
 	if err != nil {
@@ -180,8 +164,10 @@ func (c *LogCache) setupRouting(s *store.Store) {
 		c.extAddr = c.lis.Addr().String()
 	}
 
-	lookup := routing.NewRoutingTable(c.nodeAddrs, hasher)
-	orchestratorAgent := routing.NewOrchestratorAgent(lookup)
+	lookup, err := routing.NewRoutingTable(c.nodeAddrs, 1)
+	if err != nil {
+		log.Fatalf("failed to build routing table: %s", err)
+	}
 
 	var (
 		ingressClients []logcache_v1.IngressClient
@@ -243,7 +229,6 @@ func (c *LogCache) setupRouting(s *store.Store) {
 	go func() {
 		logcache_v1.RegisterIngressServer(c.server, ingressReverseProxy)
 		logcache_v1.RegisterEgressServer(c.server, egressReverseProxy)
-		logcache_v1.RegisterOrchestrationServer(c.server, orchestratorAgent)
 		logcache_v1.RegisterPromQLQuerierServer(c.server, promQL)
 		if err := c.server.Serve(lis); err != nil && atomic.LoadInt64(&c.closing) == 0 {
 			c.log.Fatalf("failed to serve gRPC ingress server: %s %#v", err, err)

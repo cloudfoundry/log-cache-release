@@ -9,7 +9,6 @@ import (
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/internal/cache"
-	"code.cloudfoundry.org/log-cache/internal/scheduler"
 	"code.cloudfoundry.org/log-cache/pkg/client"
 	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"google.golang.org/grpc"
@@ -23,7 +22,6 @@ var _ = Describe("LogCache", func() {
 		lc_addrs     []string
 		node1        *cache.LogCache
 		node2        *cache.LogCache
-		lc_scheduler *scheduler.Scheduler
 		lc_client    *client.Client
 
 		// run is used to set varying port numbers
@@ -55,14 +53,8 @@ var _ = Describe("LogCache", func() {
 			cache.WithClustered(1, lc_addrs, grpc.WithInsecure()),
 		)
 
-		lc_scheduler = scheduler.NewScheduler(
-			lc_addrs,
-			scheduler.WithSchedulerInterval(50*time.Millisecond),
-		)
-
 		node1.Start()
 		node2.Start()
-		lc_scheduler.Start()
 
 		lc_client = client.NewClient(lc_addrs[0], client.WithViaGRPC(grpc.WithInsecure()))
 	})

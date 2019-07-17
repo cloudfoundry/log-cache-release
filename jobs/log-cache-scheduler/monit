@@ -1,5 +1,0 @@
-check process log-cache-scheduler
-  with pidfile /var/vcap/sys/run/bpm/log-cache-scheduler/log-cache-scheduler.pid
-  start program "/var/vcap/jobs/bpm/bin/bpm start log-cache-scheduler"
-  stop program "/var/vcap/jobs/bpm/bin/bpm stop log-cache-scheduler"
-  group vcap

@@ -7,15 +7,14 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3
 	code.cloudfoundry.org/go-envstruct v1.4.0
 	code.cloudfoundry.org/go-loggregator v0.0.0-20190703173227-cb8042882a5a
-	code.cloudfoundry.org/go-orchestrator v0.0.0-20190624211724-65321ce94b51
 	code.cloudfoundry.org/tlsconfig v0.0.0-20190710180242-462f72de1106
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
-	github.com/apoydence/onpar v0.0.0-20190519213022-ee068f8ea4d1 // indirect
+	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea // indirect
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/cloudfoundry-incubator/go-orchestrator v0.0.0-20190624211724-65321ce94b51 // indirect
+	github.com/cespare/xxhash v1.1.0
 	github.com/cloudfoundry/gosigar v1.1.0
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/emirpasic/gods v1.12.0
@@ -27,7 +26,6 @@ require (
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
-	github.com/poy/onpar v0.0.0-20190519213022-ee068f8ea4d1 // indirect
 	github.com/prometheus/client_golang v1.0.0
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
 	github.com/prometheus/common v0.6.0
