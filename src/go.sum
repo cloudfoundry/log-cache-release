@@ -6,8 +6,8 @@ code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3 h1:oHsfl5Aain
 code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3/go.mod h1:Jzi+ccHgo/V/PLQUaQ6hnZcC1c4BS790gx21LRRui4g=
 code.cloudfoundry.org/go-envstruct v1.4.0 h1:bDwwwxIZdvYdB5udkTnmaOrRjQeE61XcvDHmAUmg2hk=
 code.cloudfoundry.org/go-envstruct v1.4.0/go.mod h1:/Mr9WxQueWKylLYSZaPbiQlmzzZNbButXn08qM03Vfk=
-code.cloudfoundry.org/go-loggregator v0.0.0-20190703173227-cb8042882a5a h1:qWv3wttxG4UaGCtpE7sjNsQmlY6yzdXaSCJy5tLTxAg=
-code.cloudfoundry.org/go-loggregator v0.0.0-20190703173227-cb8042882a5a/go.mod h1:CGHPKn+vUMqxudtExhsbkC0n4EZoFf9AlW9QgYH2xk8=
+code.cloudfoundry.org/go-loggregator v7.6.0+incompatible h1:e/0hErsxFIrC2dNCXYsDJxIY717WS1o3+b8Pg5jok9s=
+code.cloudfoundry.org/go-loggregator v7.6.0+incompatible/go.mod h1:xP5V2YhyhPFoVZsQ8my/fRTh8iWSZFi+k41g67zaCNE=
 code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a h1:8rqv2w8xEceNwckcF5ONeRt0qBHlh5bnNfFnYTrZbxs=
 code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a/go.mod h1:tkZo8GtzBjySJ7USvxm4E36lNQw1D3xM6oKHGqdaAJ4=
 code.cloudfoundry.org/tlsconfig v0.0.0-20190710180242-462f72de1106 h1:F36x++Jh2aWiBK++W9wI97SJuprnROicHiV0HtdSOzc=
@@ -293,8 +293,8 @@ github.com/prometheus/procfs v0.0.2/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsT
 github.com/prometheus/procfs v0.0.3 h1:CTwfnzjQ+8dS6MhHHu4YswVAD99sL2wjPqP+VkURmKE=
 github.com/prometheus/procfs v0.0.3/go.mod h1:4A/X28fw3Fc593LaREMrKMqOKvUAntwMDaekg4FpcdQ=
 github.com/prometheus/prometheus v0.0.0-20180315085919-58e2a31db8de/go.mod h1:oAIUtOny2rjMX0OWN5vPR5/q/twIROJvdqnQKDdil/s=
-github.com/prometheus/prometheus v2.11.0+incompatible h1:OdoYcM0NRUqoEJ8Mh8ViqezhBfdw/A9cC4sDaZRuqvg=
-github.com/prometheus/prometheus v2.11.0+incompatible/go.mod h1:11Mk7Gzjuke9GloQr0K9Rltwvz4fGeuU7/YlzqcHCPE=
+github.com/prometheus/prometheus v0.0.0-20190709094220-4ef66003d985 h1:u9Q/sEMKDrElOc5IBazv4uUL6HMTO/Olzm5OIM1jx7k=
+github.com/prometheus/prometheus v0.0.0-20190709094220-4ef66003d985/go.mod h1:11Mk7Gzjuke9GloQr0K9Rltwvz4fGeuU7/YlzqcHCPE=
 github.com/prometheus/tsdb v0.9.1 h1:IWaAmWkYlgG7/S4iw4IpAQt5Y35QaZM6/GsZ7GsjAuk=
 github.com/prometheus/tsdb v0.9.1/go.mod h1:oi49uRhEe9dPUTlS3JRZOwJuVi6tmh10QSgwXEyGCt4=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=

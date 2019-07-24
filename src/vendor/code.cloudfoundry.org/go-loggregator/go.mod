@@ -18,6 +18,8 @@ require (
 	github.com/onsi/gomega v1.5.0
 	github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 // indirect
 	github.com/prometheus/client_golang v1.0.0
+	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
+	github.com/prometheus/common v0.4.1
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	google.golang.org/grpc v1.21.1
 	launchpad.net/gocheck v0.0.0-20140225173054-000000000087 // indirect
