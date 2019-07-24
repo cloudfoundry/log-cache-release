@@ -30,7 +30,7 @@ require (
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
 	github.com/prometheus/common v0.6.0
 	github.com/prometheus/procfs v0.0.3 // indirect
-	github.com/prometheus/prometheus v0.0.0-20190709094220-4ef66003d985
+	github.com/prometheus/prometheus v2.11.0+incompatible // pinned
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
