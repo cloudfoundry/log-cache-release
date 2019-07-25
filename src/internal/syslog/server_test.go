@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-const defaultLogMessage = "89 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - - just a test\n"
+const defaultLogMessage = `112 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [tags@47450 key="value"] just a test` + "\n"
 
 var _ = Describe("Syslog", func() {
 	var (
@@ -137,6 +137,7 @@ var _ = Describe("Syslog", func() {
 			&loggregator_v2.Envelope{
 				Tags: map[string]string{
 					"source_type": "APP",
+					"key": "value",
 				},
 				InstanceId: "2",
 				Timestamp:  12345000,
@@ -156,7 +157,7 @@ var _ = Describe("Syslog", func() {
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = fmt.Fprint(conn, buildSyslog(fmt.Sprintf(counterDataFormat, "some-counter", "99", "1")))
+		_, err = fmt.Fprint(conn, buildSyslogWithTags(fmt.Sprintf(counterDataFormat, "some-counter", "99", "1"), `key="value"`))
 		Expect(err).ToNot(HaveOccurred())
 
 		Eventually(logCache.envelopes).Should(ContainElement(
@@ -164,6 +165,9 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
+				Tags: map[string]string{
+					"key": "value",
+				},
 				Message: &loggregator_v2.Envelope_Counter{
 					Counter: &loggregator_v2.Counter{
 						Name:  "some-counter",
@@ -189,6 +193,7 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
+				Tags: map[string]string{},
 				Message: &loggregator_v2.Envelope_Gauge{
 					Gauge: &loggregator_v2.Gauge{
 						Metrics: map[string]*loggregator_v2.GaugeValue{
@@ -213,6 +218,7 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
+				Tags: map[string]string{},
 				Message: &loggregator_v2.Envelope_Event{
 					Event: &loggregator_v2.Event{
 						Title: "event-title",
@@ -236,6 +242,7 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
+				Tags: map[string]string{},
 				Message: &loggregator_v2.Envelope_Timer{
 					Timer: &loggregator_v2.Timer{
 						Name:  "some-name",
@@ -402,6 +409,11 @@ var _ = Describe("Syslog", func() {
 
 func buildSyslog(structuredData string) string {
 	msg := fmt.Sprintf("<14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [1] - [%s] \n", structuredData)
+	return fmt.Sprintf("%d %s", len(msg), msg)
+}
+
+func buildSyslogWithTags(structuredData, tags string) string {
+	msg := fmt.Sprintf("<14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [1] - [%s][tags@47450 %s] \n", structuredData, tags)
 	return fmt.Sprintf("%d %s", len(msg), msg)
 }
 

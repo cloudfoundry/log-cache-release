@@ -169,37 +169,58 @@ func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope
 		SourceId:   *sourceID,
 		Timestamp:  msg.Timestamp().UnixNano(),
 		InstanceId: instanceId,
+		Tags:       map[string]string{},
 	}
 
 	if msg.StructuredData() != nil {
 		for envType, payload := range *msg.StructuredData() {
-			switch {
-			case strings.HasPrefix(envType, "counter"):
-				return convertCounter(env, payload)
-			case strings.HasPrefix(envType, "gauge"):
-				return convertGauge(env, payload)
-			case strings.HasPrefix(envType, "event"):
-				return convertEvent(env, payload)
-			case strings.HasPrefix(envType, "timer"):
-				return convertTimer(env, payload)
-			default:
-				return nil, fmt.Errorf("unknown envelope type for structured data: %#v", msg.StructuredData())
+			var err error
+			env, err = convertStructuredData(env, envType, payload)
+			if err != nil {
+				return nil, err
 			}
 		}
 	}
 
-	if msg.Message() == nil {
+	if env.GetMessage() == nil && msg.Message() != nil {
+		env = s.convertMessage(env, msg, sourceType)
+	}
+
+	if env.GetMessage() == nil {
 		return nil, fmt.Errorf("missing message data in syslog message")
 	}
 
+	return env, nil
+}
+
+func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg syslog.Message, sourceType string) *loggregator_v2.Envelope {
 	env.Message = &loggregator_v2.Envelope_Log{
 		Log: &loggregator_v2.Log{
 			Payload: []byte(strings.TrimSpace(*msg.Message())),
 			Type:    s.typeFromPriority(int(*msg.Priority())),
 		},
 	}
-	env.Tags = map[string]string{"source_type": sourceType}
-	return env, nil
+
+	env.Tags["source_type"] = sourceType
+
+	return env
+}
+
+func convertStructuredData(env *loggregator_v2.Envelope, envType string, payload map[string]string) (*loggregator_v2.Envelope, error) {
+	switch {
+	case strings.HasPrefix(envType, "counter"):
+		return convertCounter(env, payload)
+	case strings.HasPrefix(envType, "gauge"):
+		return convertGauge(env, payload)
+	case strings.HasPrefix(envType, "event"):
+		return convertEvent(env, payload)
+	case strings.HasPrefix(envType, "timer"):
+		return convertTimer(env, payload)
+	case strings.HasPrefix(envType, "tags"):
+		return convertTags(env, payload), nil
+	default:
+		return nil, fmt.Errorf(`unknown envelope type for structured data: [%s="%#v"]`, envType, payload)
+	}
 }
 
 func convertTimer(env *loggregator_v2.Envelope, msg map[string]string) (*loggregator_v2.Envelope, error) {
@@ -215,7 +236,7 @@ func convertTimer(env *loggregator_v2.Envelope, msg map[string]string) (*loggreg
 
 	env.Message = &loggregator_v2.Envelope_Timer{
 		Timer: &loggregator_v2.Timer{
-			Name: msg["name"],
+			Name:  msg["name"],
 			Start: start,
 			Stop:  stop,
 		},
@@ -228,7 +249,7 @@ func convertEvent(env *loggregator_v2.Envelope, msg map[string]string) (*loggreg
 	env.Message = &loggregator_v2.Envelope_Event{
 		Event: &loggregator_v2.Event{
 			Title: msg["title"],
-			Body: msg["body"],
+			Body:  msg["body"],
 		},
 	}
 
@@ -274,6 +295,17 @@ func convertGauge(env *loggregator_v2.Envelope, msg map[string]string) (*loggreg
 		},
 	}
 	return env, nil
+}
+
+func convertTags(env *loggregator_v2.Envelope, msg map[string]string) *loggregator_v2.Envelope {
+	if env.Tags == nil {
+		env.Tags = map[string]string{}
+	}
+	for k, v := range msg {
+		env.Tags[k] = v
+	}
+
+	return env
 }
 
 func (s *Server) typeFromPriority(priority int) loggregator_v2.Log_Type {

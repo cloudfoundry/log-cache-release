@@ -42,10 +42,8 @@ func NewRoutingTable(addrs []string, replicationFactor uint) (*RoutingTable, err
 // Lookup takes a item, hash it and determine what node(s) it should be
 // routed to.
 func (t *RoutingTable) Lookup(item string) []int {
-
 	hashValue := xxhash.Sum64String(item)
 
-	println(hashValue)
 	node := t.hasher.Hash(hashValue)
 
 	var result []int
