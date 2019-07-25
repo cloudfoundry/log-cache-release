@@ -2,7 +2,7 @@
 name: log-cache-syslog-server
 
 dependencies:
-- golang1.12.4
+- golang-1-linux
 
 files:
 - cmd/syslog-server/**/*.go
