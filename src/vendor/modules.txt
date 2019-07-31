@@ -22,7 +22,7 @@ github.com/StackExchange/wmi
 github.com/alecthomas/units
 # github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 github.com/benbjohnson/jmphash
-# github.com/beorn7/perks v1.0.0
+# github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
@@ -190,7 +190,7 @@ golang.org/x/net/html
 golang.org/x/net/html/atom
 # golang.org/x/sync v0.0.0-20190423024810-112230192c58
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e
+# golang.org/x/sys v0.0.0-20190730183949-1393eb018365
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
