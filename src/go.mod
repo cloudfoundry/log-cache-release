@@ -35,6 +35,6 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
 	golang.org/x/text v0.3.2 // indirect
-	google.golang.org/genproto v0.0.0-20190716160619-c506a9f90610
+	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64
 	google.golang.org/grpc v1.22.1
 )
