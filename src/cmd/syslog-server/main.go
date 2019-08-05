@@ -37,7 +37,6 @@ func main() {
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
 	m := metrics.NewRegistry(loggr)
 
-	egressDropped := m.NewCounter("egress_dropped")
 	conn, err := grpc.Dial(
 		cfg.LogCacheAddr,
 		grpc.WithTransportCredentials(
@@ -47,9 +46,13 @@ func main() {
 
 	client := logcache_v1.NewIngressClient(conn)
 
+	egressDropped := m.NewCounter("egress_dropped")
+	sendFailures := m.NewCounter("log_cache_send_failure", metrics.WithMetricTags(
+		map[string]string{"sender": "batched_ingress_client"},
+	))
 	server := syslog.NewServer(
 		loggr,
-		routing.NewBatchedIngressClient(BATCH_CHANNEL_SIZE, BATCH_FLUSH_INTERVAL, client, egressDropped, loggr),
+		routing.NewBatchedIngressClient(BATCH_CHANNEL_SIZE, BATCH_FLUSH_INTERVAL, client, egressDropped, sendFailures, loggr),
 		m,
 		cfg.SyslogTLSCertPath,
 		cfg.SyslogTLSKeyPath,

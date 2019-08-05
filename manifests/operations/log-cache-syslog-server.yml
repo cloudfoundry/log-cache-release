@@ -16,7 +16,7 @@
         key: "((log_cache_syslog_tls.private_key))"
 
 - type: replace
-  path: /variables/-
+  path: /variables/name=log_cache_syslog_tls?
   value:
     name: log_cache_syslog_tls
     type: certificate

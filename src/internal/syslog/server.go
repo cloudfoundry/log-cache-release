@@ -24,13 +24,16 @@ type Server struct {
 	sync.Mutex
 	port           int
 	l              net.Listener
-	loggr          *log.Logger
-	ingress        metrics.Counter
-	invalidIngress metrics.Counter
 	logCache       logcache_v1.IngressClient
 	syslogCert     string
 	syslogKey      string
 	idleTimeout    time.Duration
+
+	ingress        metrics.Counter
+	invalidIngress metrics.Counter
+	sendFailure    metrics.Counter
+
+	loggr          *log.Logger
 }
 
 type MetricsRegistry interface {
@@ -61,6 +64,7 @@ func NewServer(
 
 	s.ingress = metrics.NewCounter("ingress")
 	s.invalidIngress = metrics.NewCounter("invalid_ingress")
+	s.sendFailure = metrics.NewCounter("log_cache_send_failure")
 
 	return s
 }
@@ -147,6 +151,7 @@ func (s *Server) parseListener(res *syslog.Result) {
 	)
 	if err != nil {
 		s.loggr.Println("syslog server dropped messages to log cache")
+		s.sendFailure.Add(1)
 		return
 	}
 

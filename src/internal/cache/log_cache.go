@@ -193,6 +193,10 @@ func (c *LogCache) setupRouting(s *store.Store) {
 				c.metrics.NewCounter("ingress_dropped", metrics.WithMetricTags(map[string]string{
 					"nodeIndex": strconv.Itoa(i),
 				})),
+				c.metrics.NewCounter("log_cache_send_failures", metrics.WithMetricTags(map[string]string{
+					"nodeIndex": strconv.Itoa(i),
+					"sender": "batched_ingress_client",
+				})),
 				c.log,
 			)
 

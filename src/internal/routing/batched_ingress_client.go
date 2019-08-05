@@ -18,10 +18,11 @@ import (
 type BatchedIngressClient struct {
 	c rpc.IngressClient
 
-	buffer   *diodes.OneToOne
-	size     int
-	interval time.Duration
-	log      *log.Logger
+	buffer            *diodes.OneToOne
+	size              int
+	interval          time.Duration
+	log               *log.Logger
+	sendFailureMetric metrics.Counter
 }
 
 // NewBatchedIngressClient returns a new BatchedIngressClient.
@@ -29,18 +30,20 @@ func NewBatchedIngressClient(
 	size int,
 	interval time.Duration,
 	c rpc.IngressClient,
-	incDroppedMetric metrics.Counter,
+	droppedMetric metrics.Counter,
+	sendFailureMetric metrics.Counter,
 	log *log.Logger,
 ) *BatchedIngressClient {
 	b := &BatchedIngressClient{
-		c:        c,
-		size:     size,
-		interval: interval,
-		log:      log,
+		c:                 c,
+		size:              size,
+		interval:          interval,
+		log:               log,
+		sendFailureMetric: sendFailureMetric,
 
 		buffer: diodes.NewOneToOne(10000, diodes.AlertFunc(func(dropped int) {
 			log.Printf("dropped %d envelopes", dropped)
-			incDroppedMetric.Add(float64(dropped))
+			droppedMetric.Add(float64(dropped))
 		})),
 	}
 
@@ -84,6 +87,7 @@ func (b *BatchedIngressClient) write(batch []interface{}) {
 	})
 
 	if err != nil {
-		b.log.Printf("failed to write envelope: %s", err)
+		b.log.Printf("failed to write %d envelopes: %s", len(e), err)
+		b.sendFailureMetric.Add(1)
 	}
 }
