@@ -50,9 +50,18 @@ func main() {
 	sendFailures := m.NewCounter("log_cache_send_failure", metrics.WithMetricTags(
 		map[string]string{"sender": "batched_ingress_client"},
 	))
+	logCacheClient := routing.NewBatchedIngressClient(
+		BATCH_CHANNEL_SIZE,
+		BATCH_FLUSH_INTERVAL,
+		client,
+		egressDropped,
+		sendFailures,
+		loggr,
+		routing.WithLocalOnlyDisabled,
+	)
 	server := syslog.NewServer(
 		loggr,
-		routing.NewBatchedIngressClient(BATCH_CHANNEL_SIZE, BATCH_FLUSH_INTERVAL, client, egressDropped, sendFailures, loggr),
+		logCacheClient,
 		m,
 		cfg.SyslogTLSCertPath,
 		cfg.SyslogTLSKeyPath,

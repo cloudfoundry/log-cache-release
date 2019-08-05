@@ -23,6 +23,14 @@ type BatchedIngressClient struct {
 	interval          time.Duration
 	log               *log.Logger
 	sendFailureMetric metrics.Counter
+
+	localOnly bool
+}
+
+type BatchedIngressClientOption func(b *BatchedIngressClient)
+
+func WithLocalOnlyDisabled(b *BatchedIngressClient) {
+	b.localOnly = false
 }
 
 // NewBatchedIngressClient returns a new BatchedIngressClient.
@@ -33,6 +41,7 @@ func NewBatchedIngressClient(
 	droppedMetric metrics.Counter,
 	sendFailureMetric metrics.Counter,
 	log *log.Logger,
+	opts ...BatchedIngressClientOption,
 ) *BatchedIngressClient {
 	b := &BatchedIngressClient{
 		c:                 c,
@@ -40,11 +49,16 @@ func NewBatchedIngressClient(
 		interval:          interval,
 		log:               log,
 		sendFailureMetric: sendFailureMetric,
+		localOnly:         true,
 
 		buffer: diodes.NewOneToOne(10000, diodes.AlertFunc(func(dropped int) {
 			log.Printf("dropped %d envelopes", dropped)
 			droppedMetric.Add(float64(dropped))
 		})),
+	}
+
+	for _, opt := range opts {
+		opt(b)
 	}
 
 	go b.start()
@@ -82,7 +96,7 @@ func (b *BatchedIngressClient) write(batch []interface{}) {
 
 	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 	_, err := b.c.Send(ctx, &rpc.SendRequest{
-		LocalOnly: true,
+		LocalOnly: b.localOnly,
 		Envelopes: &loggregator_v2.EnvelopeBatch{Batch: e},
 	})
 
