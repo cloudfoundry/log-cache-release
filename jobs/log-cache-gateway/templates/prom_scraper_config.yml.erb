@@ -1,0 +1,4 @@
+---
+port: <%= p('health_port') %>
+source_id: <%= spec.job.name %>
+instance_id: <%= spec.id || spec.index.to_s %>

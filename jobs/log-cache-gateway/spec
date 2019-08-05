@@ -8,7 +8,7 @@ templates:
   log_cache.key.erb: config/certs/log_cache.key
   proxy.crt.erb: config/certs/proxy.crt
   proxy.key.erb: config/certs/proxy.key
-  metric_port.yml.erb: config/metric_port.yml
+  prom_scraper_config.yml.erb: config/prom_scraper_config.yml
 
 packages:
 - log-cache-gateway

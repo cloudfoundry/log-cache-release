@@ -8,6 +8,7 @@ templates:
   log_cache.key.erb: config/certs/log_cache.key
   syslog.crt.erb: config/certs/syslog.crt
   syslog.key.erb: config/certs/syslog.key
+  prom_scraper_config.yml.erb: config/prom_scraper_config.yml
 
 packages:
 - log-cache-syslog-server
