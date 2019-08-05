@@ -45,7 +45,7 @@ type ServerOption func(s *Server)
 func NewServer(
 	loggr *log.Logger,
 	logCache logcache_v1.IngressClient,
-	metrics MetricsRegistry,
+	m MetricsRegistry,
 	cert string,
 	key string,
 	opts ...ServerOption,
@@ -62,9 +62,11 @@ func NewServer(
 		o(s)
 	}
 
-	s.ingress = metrics.NewCounter("ingress")
-	s.invalidIngress = metrics.NewCounter("invalid_ingress")
-	s.sendFailure = metrics.NewCounter("log_cache_send_failure")
+	s.ingress = m.NewCounter("ingress")
+	s.invalidIngress = m.NewCounter("invalid_ingress")
+	s.sendFailure = m.NewCounter("log_cache_send_failure", metrics.WithMetricTags(map[string]string{
+		"sender": "syslog_server",
+	}))
 
 	return s
 }
