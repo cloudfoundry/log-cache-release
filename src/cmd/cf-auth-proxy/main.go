@@ -35,7 +35,7 @@ func main() {
 	}
 	envstruct.WriteReport(cfg)
 
-	metrics := metrics.NewRegistry(loggr)
+	metrics := metrics.NewRegistry(loggr, metrics.WithDefaultTags(map[string]string{"job": "cf-auth-proxy"}))
 
 	uaaClient := auth.NewUAAClient(
 		cfg.UAA.Addr,

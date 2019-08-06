@@ -35,7 +35,7 @@ func main() {
 	envstruct.WriteReport(cfg)
 
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
-	m := metrics.NewRegistry(loggr)
+	m := metrics.NewRegistry(loggr, metrics.WithDefaultTags(map[string]string{"job": "log-cache-syslog-server"}))
 
 	conn, err := grpc.Dial(
 		cfg.LogCacheAddr,

@@ -29,7 +29,7 @@ func main() {
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	m := metrics.NewRegistry(logger)
+	m := metrics.NewRegistry(logger, metrics.WithDefaultTags(map[string]string{"job": "log-cache"}))
 	uptimeFn := m.NewGauge(
 		"log_cache_uptime",
 		metrics.WithMetricTags(map[string]string{
