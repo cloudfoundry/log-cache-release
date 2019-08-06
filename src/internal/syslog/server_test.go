@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-const defaultLogMessage = `112 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [tags@47450 key="value"] just a test` + "\n"
+const defaultLogMessage = `145 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [tags@47450 key="value" source_type="actual-source-type"] just a test` + "\n"
 
 var _ = Describe("Syslog", func() {
 	var (
@@ -136,8 +136,35 @@ var _ = Describe("Syslog", func() {
 		Eventually(logCache.envelopes).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				Tags: map[string]string{
-					"source_type": "APP",
-					"key": "value",
+					"source_type": "actual-source-type",
+					"key":         "value",
+				},
+				InstanceId: "2",
+				Timestamp:  12345000,
+				SourceId:   "test-app-id",
+				Message: &loggregator_v2.Envelope_Log{
+					Log: &loggregator_v2.Log{
+						Payload: []byte("just a test"),
+						Type:    loggregator_v2.Log_OUT,
+					},
+				},
+			},
+		))
+	})
+
+	It("sends log messages to log cache", func() {
+		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
+		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
+		Expect(err).ToNot(HaveOccurred())
+
+		_, err = fmt.Fprint(conn, defaultLogMessage)
+		Expect(err).ToNot(HaveOccurred())
+
+		Eventually(logCache.envelopes).Should(ContainElement(
+			&loggregator_v2.Envelope{
+				Tags: map[string]string{
+					"source_type": "actual-source-type",
+					"key":         "value",
 				},
 				InstanceId: "2",
 				Timestamp:  12345000,
@@ -193,7 +220,7 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
-				Tags: map[string]string{},
+				Tags:       map[string]string{},
 				Message: &loggregator_v2.Envelope_Gauge{
 					Gauge: &loggregator_v2.Gauge{
 						Metrics: map[string]*loggregator_v2.GaugeValue{
@@ -218,7 +245,7 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
-				Tags: map[string]string{},
+				Tags:       map[string]string{},
 				Message: &loggregator_v2.Envelope_Event{
 					Event: &loggregator_v2.Event{
 						Title: "event-title",
@@ -242,7 +269,7 @@ var _ = Describe("Syslog", func() {
 				InstanceId: "1",
 				Timestamp:  12345000,
 				SourceId:   "test-app-id",
-				Tags: map[string]string{},
+				Tags:       map[string]string{},
 				Message: &loggregator_v2.Envelope_Timer{
 					Timer: &loggregator_v2.Timer{
 						Name:  "some-name",

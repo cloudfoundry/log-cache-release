@@ -166,7 +166,7 @@ func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope
 		return nil, fmt.Errorf("missing proc ID in syslog message")
 	}
 
-	sourceType, instanceId := s.sourceTypeInstIdFromPID(*procID)
+	instanceId := s.instanceIdFromPID(*procID)
 	sourceID := msg.Appname()
 	if sourceID == nil {
 		return nil, fmt.Errorf("missing app name in syslog message")
@@ -190,7 +190,7 @@ func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope
 	}
 
 	if env.GetMessage() == nil && msg.Message() != nil {
-		env = s.convertMessage(env, msg, sourceType)
+		env = s.convertMessage(env, msg)
 	}
 
 	if env.GetMessage() == nil {
@@ -200,15 +200,13 @@ func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope
 	return env, nil
 }
 
-func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg syslog.Message, sourceType string) *loggregator_v2.Envelope {
+func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg syslog.Message) *loggregator_v2.Envelope {
 	env.Message = &loggregator_v2.Envelope_Log{
 		Log: &loggregator_v2.Log{
 			Payload: []byte(strings.TrimSpace(*msg.Message())),
 			Type:    s.typeFromPriority(int(*msg.Priority())),
 		},
 	}
-
-	env.Tags["source_type"] = sourceType
 
 	return env
 }
@@ -323,15 +321,12 @@ func (s *Server) typeFromPriority(priority int) loggregator_v2.Log_Type {
 	return loggregator_v2.Log_OUT
 }
 
-func (s *Server) sourceTypeInstIdFromPID(pid string) (sourceType, instanceId string) {
+func (s *Server) instanceIdFromPID(pid string)  string {
 	pid = strings.Trim(pid, "[]")
 
 	pidToks := strings.Split(pid, "/")
-	sourceType = pidToks[0]
 
-	instanceId = pidToks[len(pidToks)-1]
-
-	return
+	return pidToks[len(pidToks)-1]
 }
 
 func (s *Server) Addr() string {
