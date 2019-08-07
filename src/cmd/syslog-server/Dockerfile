@@ -26,7 +26,6 @@ RUN cd /log-cache-src && go build \
     -a \
     -installsuffix nocgo \
     -o /srv/syslog-server \
-    -mod=readonly \
     -mod=vendor \
     ./cmd/syslog-server
 

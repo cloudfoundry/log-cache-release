@@ -26,7 +26,6 @@ RUN cd /log-cache-src && go build \
     -a \
     -installsuffix nocgo \
     -o /srv/log-cache-gateway \
-    -mod=readonly \
     -mod=vendor \
     ./cmd/gateway
 
