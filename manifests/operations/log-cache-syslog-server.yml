@@ -32,3 +32,10 @@
 - type: replace
   path: /addons/name=loggr-syslog-agent/jobs/name=loggr-syslog-agent/properties/non_app_drains?
   value: "syslog-tls://doppler.service.cf.internal:6067"
+
+# This can be removed when CAPI PR to handle container metrics from multiple envelopes is merged/released
+- type: replace
+  path: /releases/name=capi
+  value:
+    name: capi
+    version: latest
