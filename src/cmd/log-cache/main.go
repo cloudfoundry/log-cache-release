@@ -2,14 +2,14 @@ package main
 
 import (
 	"code.cloudfoundry.org/go-loggregator/metrics"
-	"fmt"
 	"log"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	envstruct "code.cloudfoundry.org/go-envstruct"
+	"code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/cache"
 	"google.golang.org/grpc"
 )
@@ -29,7 +29,16 @@ func main() {
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	m := metrics.NewRegistry(logger, metrics.WithDefaultTags(map[string]string{"job": "log-cache"}))
+	m := metrics.NewRegistry(
+		logger,
+		metrics.WithDefaultTags(map[string]string{"job": "log_cache"}),
+		metrics.WithTLSServer(
+			int(cfg.MetricsServer.Port),
+			cfg.MetricsServer.CertFile,
+			cfg.MetricsServer.KeyFile,
+			cfg.MetricsServer.CAFile,
+		),
+	)
 	uptimeFn := m.NewGauge(
 		"log_cache_uptime",
 		metrics.WithMetricTags(map[string]string{
@@ -62,7 +71,11 @@ func main() {
 	)
 
 	cache.Start()
+	waitForTermination()
+}
 
-	// health endpoints (pprof and prometheus)
-	log.Printf("Health: %s", http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.HealthPort), nil))
+func waitForTermination() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
+	<-c
 }

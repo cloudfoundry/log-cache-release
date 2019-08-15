@@ -38,7 +38,7 @@ var _ = Describe("LogCache", func() {
 		}
 
 		logger := log.New(GinkgoWriter, "", 0)
-		m := metrics.NewRegistry(logger, metrics.WithDefaultTags(map[string]string{"job": "log-cache-end-to-end"}))
+		m := metrics.NewRegistry(logger, metrics.WithDefaultTags(map[string]string{"job": "log_cache_end_to_end"}))
 		node1 = cache.New(
 			m,
 			logger,

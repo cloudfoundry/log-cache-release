@@ -5,9 +5,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/routing"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
-	"fmt"
 	"log"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"time"
@@ -35,7 +33,16 @@ func main() {
 	envstruct.WriteReport(cfg)
 
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
-	m := metrics.NewRegistry(loggr, metrics.WithDefaultTags(map[string]string{"job": "log-cache-syslog-server"}))
+	m := metrics.NewRegistry(
+		loggr,
+		metrics.WithDefaultTags(map[string]string{"job": "log_cache_syslog_server"}),
+		metrics.WithTLSServer(
+			int(cfg.MetricsServer.Port),
+			cfg.MetricsServer.CertFile,
+			cfg.MetricsServer.KeyFile,
+			cfg.MetricsServer.CAFile,
+		),
+	)
 
 	conn, err := grpc.Dial(
 		cfg.LogCacheAddr,
@@ -69,8 +76,5 @@ func main() {
 		syslog.WithIdleTimeout(cfg.SyslogIdleTimeout),
 	)
 
-	go server.Start()
-
-	// health endpoints (pprof and prometheus)
-	log.Printf("Health: %s", http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.HealthPort), nil))
+	server.Start()
 }

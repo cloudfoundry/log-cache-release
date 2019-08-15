@@ -15,7 +15,6 @@ processes:
 - name: log-cache
   executable: /var/vcap/packages/log-cache/log-cache
   env:
-    HEALTH_PORT: "<%= p('health_port') %>"
     ADDR:        "<%= ":#{p('port')}" %>"
     MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
     MAX_PER_SOURCE: "<%= p('max_per_source') %>"
@@ -28,6 +27,11 @@ processes:
     # Cluster Configuration
     NODE_INDEX: "<%= index %>"
     NODE_ADDRS: "<%= cache_addrs.join(",") %>"
+
+    METRICS_PORT: <%= p("metrics.port") %>
+    METRICS_CA_FILE_PATH: "<%= certDir %>/metrics_ca.crt"
+    METRICS_CERT_FILE_PATH: "<%= certDir %>/metrics.crt"
+    METRICS_KEY_FILE_PATH: "<%= certDir %>/metrics.key"
 
   limits:
     open_files: 8192

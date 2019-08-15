@@ -12,12 +12,15 @@ processes:
     # Log Cache
     LOG_CACHE_ADDR:  "<%= "localhost:#{lc.p('port')}" %>"
     ADDR:            "<%= p('gateway_addr') %>"
-    HEALTH_PORT:     "<%= p('health_port') %>"
     CA_PATH:         "<%= "#{certDir}/ca.crt" %>"
     CERT_PATH:       "<%= "#{certDir}/log_cache.crt" %>"
     KEY_PATH:        "<%= "#{certDir}/log_cache.key" %>"
     PROXY_CERT_PATH: "<%= "#{certDir}/proxy.crt" %>"
     PROXY_KEY_PATH:  "<%= "#{certDir}/proxy.key" %>"
 
+    METRICS_PORT: <%= p("metrics.port") %>
+    METRICS_CA_FILE_PATH: "<%= certDir %>/metrics_ca.crt"
+    METRICS_CERT_FILE_PATH: "<%= certDir %>/metrics.crt"
+    METRICS_KEY_FILE_PATH: "<%= certDir %>/metrics.key"
   limits:
     open_files: 8192

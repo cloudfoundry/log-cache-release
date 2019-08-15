@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"code.cloudfoundry.org/go-loggregator/metrics"
 	"log"
 	"os"
 
-	"net/http"
 	_ "net/http/pprof"
 
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
@@ -23,16 +22,25 @@ func main() {
 		log.Fatalf("invalid configuration: %s", err)
 	}
 
+	metrics.NewRegistry(
+		log.New(os.Stderr, "[METRICS] ", log.LstdFlags),
+		metrics.WithDefaultTags(map[string]string{"job": "cf_auth_proxy"}),
+		metrics.WithTLSServer(
+			int(cfg.MetricsServer.Port),
+			cfg.MetricsServer.CertFile,
+			cfg.MetricsServer.KeyFile,
+			cfg.MetricsServer.CAFile,
+		),
+	)
+
 	gateway := NewGateway(cfg.LogCacheAddr, cfg.Addr, cfg.ProxyCertPath, cfg.ProxyKeyPath,
 		WithGatewayLogger(log.New(os.Stderr, "[GATEWAY] ", log.LstdFlags)),
 		WithGatewayLogCacheDialOpts(
 			grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
 		),
 		WithGatewayVersion(cfg.Version),
+		WithGatewayBlock(),
 	)
 
 	gateway.Start()
-
-	// health endpoints (pprof)
-	log.Printf("Health: %s", http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.HealthPort), nil))
 }

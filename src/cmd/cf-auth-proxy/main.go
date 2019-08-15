@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.cloudfoundry.org/go-loggregator/metrics"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -14,7 +13,7 @@ import (
 
 	"crypto/x509"
 
-	envstruct "code.cloudfoundry.org/go-envstruct"
+	"code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
 	"code.cloudfoundry.org/log-cache/internal/promql"
@@ -35,7 +34,16 @@ func main() {
 	}
 	envstruct.WriteReport(cfg)
 
-	metrics := metrics.NewRegistry(loggr, metrics.WithDefaultTags(map[string]string{"job": "cf-auth-proxy"}))
+	metrics := metrics.NewRegistry(
+		loggr,
+		metrics.WithDefaultTags(map[string]string{"job": "cf_auth_proxy"}),
+		metrics.WithTLSServer(
+			int(cfg.MetricsServer.Port),
+			cfg.MetricsServer.CertFile,
+			cfg.MetricsServer.KeyFile,
+			cfg.MetricsServer.CAFile,
+		),
+	)
 
 	uaaClient := auth.NewUAAClient(
 		cfg.UAA.Addr,
@@ -98,6 +106,7 @@ func main() {
 		cfg.KeyPath,
 		proxyCACertPool,
 		WithAuthMiddleware(middlewareProvider.Middleware),
+		WithCFAuthProxyBlock(),
 	)
 
 	if cfg.SecurityEventLog != "" {
@@ -121,9 +130,6 @@ func main() {
 	}
 
 	proxy.Start()
-
-	// health endpoints (pprof and prometheus)
-	loggr.Printf("Health: %s", http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.HealthPort), nil))
 }
 
 func buildUAAClient(cfg *Config, loggr *log.Logger) *http.Client {

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"code.cloudfoundry.org/log-cache/internal/config"
 	"time"
 
-	envstruct "code.cloudfoundry.org/go-envstruct"
+	"code.cloudfoundry.org/go-envstruct"
 )
 
 type CAPI struct {
@@ -23,7 +24,6 @@ type Config struct {
 	LogCacheGatewayAddr     string        `env:"LOG_CACHE_GATEWAY_ADDR, required, report"`
 	Addr                    string        `env:"ADDR, required, report"`
 	InternalIP              string        `env:"INTERNAL_IP, report"`
-	HealthPort              int           `env:"HEALTH_PORT, report"`
 	CertPath                string        `env:"EXTERNAL_CERT, required, report"`
 	KeyPath                 string        `env:"EXTERNAL_KEY, required, report"`
 	SkipCertVerify          bool          `env:"SKIP_CERT_VERIFY, report"`
@@ -32,8 +32,9 @@ type Config struct {
 	TokenPruningInterval    time.Duration `env:"TOKEN_PRUNING_INTERVAL, report"`
 	CacheExpirationInterval time.Duration `env:"CACHE_EXPIRATION_INTERVAL, report"`
 
-	CAPI CAPI
-	UAA  UAA
+	CAPI          CAPI
+	UAA           UAA
+	MetricsServer config.MetricsServer
 }
 
 func LoadConfig() (*Config, error) {
@@ -41,10 +42,12 @@ func LoadConfig() (*Config, error) {
 		SkipCertVerify:          false,
 		Addr:                    ":8083",
 		InternalIP:              "0.0.0.0",
-		HealthPort:              6065,
 		LogCacheGatewayAddr:     "localhost:8081",
 		TokenPruningInterval:    time.Minute,
 		CacheExpirationInterval: time.Minute,
+		MetricsServer: config.MetricsServer{
+			Port: 6065,
+		},
 	}
 
 	err := envstruct.Load(&cfg)

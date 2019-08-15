@@ -14,6 +14,11 @@
       tls:
         cert: "((log_cache_syslog_tls.certificate))"
         key: "((log_cache_syslog_tls.private_key))"
+      metrics:
+        ca_cert: "((log_cache_syslog_server_metrics_tls.ca))"
+        cert: "((log_cache_syslog_server_metrics_tls.certificate))"
+        key: "((log_cache_syslog_server_metrics_tls.private_key))"
+        server_name: log_cache_syslog_server_metrics
 
 - type: replace
   path: /variables/name=log_cache_syslog_tls?
@@ -23,6 +28,17 @@
     options:
       ca: loggregator_ca
       common_name: log-cache-syslog
+      extended_key_usage:
+      - server_auth
+
+- type: replace
+  path: /variables/name=log_cache_syslog_server_metrics_tls?
+  value:
+    name: log_cache_syslog_server_metrics_tls
+    type: certificate
+    options:
+      ca: metric_scraper_ca
+      common_name: log_cache_syslog_server_metrics
       extended_key_usage:
       - server_auth
 

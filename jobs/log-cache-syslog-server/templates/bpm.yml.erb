@@ -9,7 +9,6 @@ processes:
 - name: log-cache-syslog-server
   executable: /var/vcap/packages/log-cache-syslog-server/log-cache-syslog-server
   env:
-    HEALTH_PORT: "<%= p('health_port') %>"
     SYSLOG_PORT: "<%= p('syslog_port') %>"
     SYSLOG_IDLE_TIMEOUT: "<%= p('syslog_idle_timeout') %>"
 
@@ -20,5 +19,10 @@ processes:
     CA_PATH:        "<%= "#{certDir}/log_cache_ca.crt" %>"
     CERT_PATH:      "<%= "#{certDir}/log_cache.crt" %>"
     KEY_PATH:       "<%= "#{certDir}/log_cache.key" %>"
+
+    METRICS_PORT: <%= p("metrics.port") %>
+    METRICS_CA_FILE_PATH: "<%= certDir %>/metrics_ca.crt"
+    METRICS_CERT_FILE_PATH: "<%= certDir %>/metrics.crt"
+    METRICS_KEY_FILE_PATH: "<%= certDir %>/metrics.key"
   limits:
     open_files: 8192

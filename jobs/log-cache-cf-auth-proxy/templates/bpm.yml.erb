@@ -10,7 +10,6 @@ processes:
 - name: log-cache-cf-auth-proxy
   executable: /var/vcap/packages/log-cache-cf-auth-proxy/log-cache-cf-auth-proxy
   env:
-    HEALTH_PORT:               "<%= p('health_port') %>"
     LOG_CACHE_GATEWAY_ADDR:    "<%= "https://#{gw.p('gateway_addr')}" %>"
     ADDR:                      "<%= ":#{p('proxy_port')}" %>"
     INTERNAL_IP:               "<%= spec.ip %>"
@@ -33,5 +32,9 @@ processes:
     UAA_CLIENT_SECRET: "<%= p('uaa.client_secret') %>"
     SKIP_CERT_VERIFY:  "<%= p('skip_cert_verify') %>"
 
+    METRICS_PORT: <%= p("metrics.port") %>
+    METRICS_CA_FILE_PATH: "<%= certDir %>/metrics_ca.crt"
+    METRICS_CERT_FILE_PATH: "<%= certDir %>/metrics.crt"
+    METRICS_KEY_FILE_PATH: "<%= certDir %>/metrics.key"
   limits:
     open_files: 8192
