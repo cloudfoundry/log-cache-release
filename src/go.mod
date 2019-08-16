@@ -21,7 +21,7 @@ require (
 	github.com/go-kit/kit v0.9.0 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.3
-	github.com/grpc-ecosystem/grpc-gateway v1.9.5
+	github.com/grpc-ecosystem/grpc-gateway v1.9.6
 	github.com/influxdata/go-syslog/v2 v2.0.0
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
