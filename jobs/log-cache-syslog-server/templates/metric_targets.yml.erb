@@ -17,7 +17,7 @@ scrape_configs = [
     {
       "source_labels"=> ['__address__'], # always there (added by Prometheus)
       "target_label" => 'source_id',
-      "replacement" => "log_cache_syslog_server"
+      "replacement" => "log-cache-syslog-server"
     },
     {
       "source_labels"=> ['__address__'], # always there (added by Prometheus)

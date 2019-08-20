@@ -17,7 +17,7 @@ scrape_configs = [
     {
       "source_labels"=> ['__address__'], # always there (added by Prometheus)
       "target_label" => 'source_id',
-      "replacement" => "log_cache_cf_auth_proxy"
+      "replacement" => "log-cache-cf-auth-proxy"
     },
     {
       "source_labels"=> ['__address__'], # always there (added by Prometheus)
