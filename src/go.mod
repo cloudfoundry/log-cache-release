@@ -20,6 +20,7 @@ require (
 	github.com/emirpasic/gods v1.12.0
 	github.com/go-kit/kit v0.9.0 // indirect
 	github.com/golang/protobuf v1.3.2
+	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/gorilla/mux v1.7.3
 	github.com/grpc-ecosystem/grpc-gateway v1.9.6
 	github.com/influxdata/go-syslog/v2 v2.0.0
@@ -29,13 +30,14 @@ require (
 	github.com/prometheus/client_golang v1.1.0
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4
 	github.com/prometheus/common v0.6.0
+	github.com/prometheus/procfs v0.0.4 // indirect
 	github.com/prometheus/prometheus v2.11.0+incompatible // pinned
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
-	golang.org/x/sys v0.0.0-20190825160603-fb81701db80f // indirect
+	golang.org/x/sys v0.0.0-20190826163724-acd9dae8e8cc // indirect
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
 	google.golang.org/grpc v1.23.0
