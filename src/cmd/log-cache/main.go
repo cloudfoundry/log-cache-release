@@ -31,7 +31,6 @@ func main() {
 
 	m := metrics.NewRegistry(
 		logger,
-		metrics.WithDefaultTags(map[string]string{"job": "log_cache"}),
 		metrics.WithTLSServer(
 			int(cfg.MetricsServer.Port),
 			cfg.MetricsServer.CertFile,

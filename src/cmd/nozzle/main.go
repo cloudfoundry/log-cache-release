@@ -38,7 +38,7 @@ func main() {
 	}
 
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
-	m := metrics.NewRegistry(loggr, metrics.WithDefaultTags(map[string]string{"job": "log_cache_nozzle"}))
+	m := metrics.NewRegistry(loggr)
 
 	dropped := m.NewCounter(
 		"nozzle_dropped",

@@ -35,7 +35,6 @@ func main() {
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
 	m := metrics.NewRegistry(
 		loggr,
-		metrics.WithDefaultTags(map[string]string{"job": "log_cache_syslog_server"}),
 		metrics.WithTLSServer(
 			int(cfg.MetricsServer.Port),
 			cfg.MetricsServer.CertFile,

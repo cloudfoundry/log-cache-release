@@ -36,7 +36,6 @@ func main() {
 
 	metrics := metrics.NewRegistry(
 		loggr,
-		metrics.WithDefaultTags(map[string]string{"job": "cf_auth_proxy"}),
 		metrics.WithTLSServer(
 			int(cfg.MetricsServer.Port),
 			cfg.MetricsServer.CertFile,
