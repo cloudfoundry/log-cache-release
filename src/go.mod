@@ -22,7 +22,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/grpc-ecosystem/grpc-gateway v1.9.6
+	github.com/grpc-ecosystem/grpc-gateway v1.10.0
 	github.com/influxdata/go-syslog/v2 v2.0.0
 	github.com/onsi/ginkgo v1.9.0
 	github.com/onsi/gomega v1.6.0
@@ -36,7 +36,7 @@ require (
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
-	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
+	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297
 	golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
