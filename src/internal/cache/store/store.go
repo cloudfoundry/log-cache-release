@@ -51,13 +51,13 @@ type Store struct {
 }
 
 type Metrics struct {
-	incExpired            metrics.Counter
-	setCachePeriod        metrics.Gauge
-	incIngress            metrics.Counter
-	incEgress             metrics.Counter
-	setStoreSize          metrics.Gauge
-	setTruncationDuration metrics.Gauge
-	setMemoryUtilization  metrics.Gauge
+	expired            metrics.Counter
+	cachePeriod        metrics.Gauge
+	ingress            metrics.Counter
+	egress             metrics.Counter
+	storeSize          metrics.Gauge
+	truncationDuration metrics.Gauge
+	memoryUtilization  metrics.Gauge
 }
 
 func NewStore(maxPerSource int, mc MemoryConsultant, m MetricsRegistry) *Store {
@@ -66,25 +66,56 @@ func NewStore(maxPerSource int, mc MemoryConsultant, m MetricsRegistry) *Store {
 		maxTimestampFudge: 4000,
 		oldestTimestamp:   MIN_INT64,
 
-		metrics: Metrics{
-			incExpired:            m.NewCounter("log_cache_expired"),
-			setCachePeriod:        m.NewGauge("log_cache_cache_period", metrics.WithMetricTags(map[string]string{"unit": "milliseconds"})),
-			incIngress:            m.NewCounter("log_cache_ingress"),
-			incEgress:             m.NewCounter("log_cache_egress"),
-			setStoreSize:          m.NewGauge("log_cache_store_size", metrics.WithMetricTags(map[string]string{"unit": "entries"})),
-			setTruncationDuration: m.NewGauge("log_cache_truncation_duration", metrics.WithMetricTags(map[string]string{"unit": "milliseconds"})),
-			setMemoryUtilization:  m.NewGauge("log_cache_memory_utilization", metrics.WithMetricTags(map[string]string{"unit": "percentage"})),
-		},
+		metrics: registerMetrics(m),
 
 		mc:                  mc,
 		truncationCompleted: make(chan bool),
 	}
 
-	store.mc.SetMemoryReporter(store.metrics.setMemoryUtilization)
+	store.mc.SetMemoryReporter(store.metrics.memoryUtilization)
 
 	go store.truncationLoop(500 * time.Millisecond)
 
 	return store
+}
+
+func registerMetrics(m MetricsRegistry) Metrics {
+	return Metrics{
+		expired: m.NewCounter(
+			"log_cache_expired",
+			metrics.WithHelpText("total_expired_envelopes"),
+		),
+		cachePeriod: m.NewGauge(
+			"log_cache_cache_period",
+			metrics.WithHelpText("Cache period in milliseconds. Calculated as the difference between the oldest envelope timestamp and now."),
+			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+		),
+		ingress: m.NewCounter(
+			"log_cache_ingress",
+			metrics.WithHelpText("Total envelopes ingressed."),
+		),
+		egress: m.NewCounter(
+			"log_cache_egress",
+			metrics.WithHelpText("Total envelopes retrieved from the store."),
+		),
+		storeSize: m.NewGauge(
+			"log_cache_store_size",
+			metrics.WithHelpText("Current number of envelopes in the store."),
+			metrics.WithMetricTags(map[string]string{"unit": "entries"}),
+		),
+
+		//TODO convert to histogram
+		truncationDuration: m.NewGauge(
+			"log_cache_truncation_duration",
+			metrics.WithHelpText("Duration of last truncation in milliseconds."),
+			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+		),
+		memoryUtilization: m.NewGauge(
+			"log_cache_memory_utilization",
+			metrics.WithHelpText("Percentage of system memory in use by log cache. Calculated as heap memory in use divided by system memory."),
+			metrics.WithMetricTags(map[string]string{"unit": "percentage"}),
+		),
+	}
 }
 
 func (store *Store) getOrInitializeStorage(sourceId string) (*storage, bool) {
@@ -116,10 +147,10 @@ func (storage *storage) insertOrSwap(store *Store, e *loggregator_v2.Envelope) {
 		oldestTimestamp := storage.Left().Key.(int64)
 		storage.Remove(oldestTimestamp)
 		storage.meta.Expired++
-		store.metrics.incExpired.Add(1)
+		store.metrics.expired.Add(1)
 	} else {
 		atomic.AddInt64(&store.count, 1)
-		store.metrics.setStoreSize.Set(float64(atomic.LoadInt64(&store.count)))
+		store.metrics.storeSize.Set(float64(atomic.LoadInt64(&store.count)))
 	}
 
 	var timestampFudge int64
@@ -147,7 +178,7 @@ func (storage *storage) insertOrSwap(store *Store, e *loggregator_v2.Envelope) {
 	}
 
 	cachePeriod := calculateCachePeriod(storeOldestTimestamp)
-	store.metrics.setCachePeriod.Set(float64(cachePeriod))
+	store.metrics.cachePeriod.Set(float64(cachePeriod))
 }
 
 func (store *Store) WaitForTruncationToComplete() bool {
@@ -174,12 +205,12 @@ func (store *Store) truncationLoop(runInterval time.Duration) {
 		startTime := time.Now()
 		store.truncate()
 		t.Reset(runInterval)
-		store.metrics.setTruncationDuration.Set(float64(time.Since(startTime) / time.Millisecond))
+		store.metrics.truncationDuration.Set(float64(time.Since(startTime) / time.Millisecond))
 	}
 }
 
 func (store *Store) Put(envelope *loggregator_v2.Envelope, sourceId string) {
-	store.metrics.incIngress.Add(1)
+	store.metrics.ingress.Add(1)
 
 	envelopeStorage, _ := store.getOrInitializeStorage(sourceId)
 	envelopeStorage.insertOrSwap(store, envelope)
@@ -230,7 +261,7 @@ func (store *Store) truncate() {
 
 	// Always update our store size metric and close out the channel when we return
 	defer func() {
-		store.metrics.setStoreSize.Set(float64(atomic.LoadInt64(&store.count)))
+		store.metrics.storeSize.Set(float64(atomic.LoadInt64(&store.count)))
 		store.sendTruncationCompleted(true)
 	}()
 
@@ -238,7 +269,7 @@ func (store *Store) truncate() {
 	// reset everything to default values and bail out
 	if expirationHeap.Len() == 0 {
 		atomic.StoreInt64(&store.oldestTimestamp, MIN_INT64)
-		store.metrics.setCachePeriod.Set(0)
+		store.metrics.cachePeriod.Set(0)
 		return
 	}
 
@@ -246,7 +277,7 @@ func (store *Store) truncate() {
 	if oldest := expirationHeap.Pop(); oldest.(storageExpiration).tree != nil {
 		atomic.StoreInt64(&store.oldestTimestamp, oldest.(storageExpiration).timestamp)
 		cachePeriod := calculateCachePeriod(oldest.(storageExpiration).timestamp)
-		store.metrics.setCachePeriod.Set(float64(cachePeriod))
+		store.metrics.cachePeriod.Set(float64(cachePeriod))
 	}
 }
 
@@ -259,7 +290,7 @@ func (store *Store) removeOldestEnvelope(treeToPrune *storage, sourceId string) 
 	}
 
 	atomic.AddInt64(&store.count, -1)
-	store.metrics.incExpired.Add(1)
+	store.metrics.expired.Add(1)
 
 	oldestEnvelope := treeToPrune.Left()
 
@@ -318,7 +349,7 @@ func (store *Store) Get(
 		return len(res) >= limit
 	})
 
-	store.metrics.incEgress.Add(float64(len(res)))
+	store.metrics.egress.Add(float64(len(res)))
 	return res
 }
 

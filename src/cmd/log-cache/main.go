@@ -41,6 +41,7 @@ func main() {
 	)
 	uptimeFn := m.NewGauge(
 		"log_cache_uptime",
+		metrics.WithHelpText("Time since log cache started."),
 		metrics.WithMetricTags(map[string]string{
 			"unit": "seconds",
 		}),

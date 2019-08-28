@@ -22,18 +22,18 @@ import (
 
 type Server struct {
 	sync.Mutex
-	port           int
-	l              net.Listener
-	logCache       logcache_v1.IngressClient
-	syslogCert     string
-	syslogKey      string
-	idleTimeout    time.Duration
+	port        int
+	l           net.Listener
+	logCache    logcache_v1.IngressClient
+	syslogCert  string
+	syslogKey   string
+	idleTimeout time.Duration
 
 	ingress        metrics.Counter
 	invalidIngress metrics.Counter
 	sendFailure    metrics.Counter
 
-	loggr          *log.Logger
+	loggr *log.Logger
 }
 
 type MetricsRegistry interface {
@@ -62,11 +62,19 @@ func NewServer(
 		o(s)
 	}
 
-	s.ingress = m.NewCounter("ingress")
-	s.invalidIngress = m.NewCounter("invalid_ingress")
-	s.sendFailure = m.NewCounter("log_cache_send_failure", metrics.WithMetricTags(map[string]string{
-		"sender": "syslog_server",
-	}))
+	s.ingress = m.NewCounter(
+		"ingress",
+		metrics.WithHelpText("Total syslog messages ingressed successfully."),
+	)
+	s.invalidIngress = m.NewCounter(
+		"invalid_ingress",
+		metrics.WithHelpText("Total number of syslog messages unable to be converted to valid envelopes."),
+	)
+	s.sendFailure = m.NewCounter(
+		"log_cache_send_failure",
+		metrics.WithHelpText("Total number of failures while sending to log cache."),
+		metrics.WithMetricTags(map[string]string{"sender": "syslog_server"}),
+	)
 
 	return s
 }
@@ -321,7 +329,7 @@ func (s *Server) typeFromPriority(priority int) loggregator_v2.Log_Type {
 	return loggregator_v2.Log_OUT
 }
 
-func (s *Server) instanceIdFromPID(pid string)  string {
+func (s *Server) instanceIdFromPID(pid string) string {
 	pid = strings.Trim(pid, "[]")
 
 	pidToks := strings.Split(pid, "/")

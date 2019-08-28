@@ -43,7 +43,7 @@ func NewCAPIClient(
 		log.Fatalf("failed to parse CAPI addr: %s", err)
 	}
 
-	unitTag := map[string]string{"unit":"nanoseconds"}
+	unitTag := map[string]string{"unit": "nanoseconds"}
 	c := &CAPIClient{
 		client:                  client,
 		addr:                    addr,
@@ -52,9 +52,22 @@ func NewCAPIClient(
 		cacheExpirationInterval: time.Minute,
 		log:                     log,
 
-		storeAppsLatency:                 m.NewGauge("cf_auth_proxy_last_capiv3_apps_latency", metrics.WithMetricTags(unitTag)),
-		storeListServiceInstancesLatency: m.NewGauge("cf_auth_proxy_last_capiv3_list_service_instances_latency", metrics.WithMetricTags(unitTag)),
-		storeAppsByNameLatency:           m.NewGauge("cf_auth_proxy_last_capiv3_apps_by_name_latency", metrics.WithMetricTags(unitTag)),
+		//TODO convert to histograms
+		storeAppsLatency: m.NewGauge(
+			"cf_auth_proxy_last_capiv3_apps_latency",
+			metrics.WithHelpText("Duration of last v3 apps CAPI request in nanoseconds."),
+			metrics.WithMetricTags(unitTag),
+		),
+		storeListServiceInstancesLatency: m.NewGauge(
+			"cf_auth_proxy_last_capiv3_list_service_instances_latency",
+			metrics.WithHelpText("Duration of last v3 list service instances CAPI request in nanoseconds."),
+			metrics.WithMetricTags(unitTag),
+		),
+		storeAppsByNameLatency: m.NewGauge(
+			"cf_auth_proxy_last_capiv3_apps_by_name_latency",
+			metrics.WithHelpText("Duration of last v3 apps by name CAPI request in nanoseconds."),
+			metrics.WithMetricTags(unitTag),
+		),
 	}
 
 	for _, opt := range opts {

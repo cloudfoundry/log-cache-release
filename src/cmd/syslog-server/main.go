@@ -53,10 +53,15 @@ func main() {
 
 	client := logcache_v1.NewIngressClient(conn)
 
-	egressDropped := m.NewCounter("egress_dropped")
-	sendFailures := m.NewCounter("log_cache_send_failure", metrics.WithMetricTags(
-		map[string]string{"sender": "batched_ingress_client"},
-	))
+	egressDropped := m.NewCounter(
+		"egress_dropped",
+		metrics.WithHelpText("Total number of envelopes dropped while sending to log cache."),
+	)
+	sendFailures := m.NewCounter(
+		"log_cache_send_failure",
+		metrics.WithHelpText("Total number of envelope batches failed to send to log cache."),
+		metrics.WithMetricTags(map[string]string{"sender": "batched_ingress_client"}),
+	)
 	logCacheClient := routing.NewBatchedIngressClient(
 		BATCH_CHANNEL_SIZE,
 		BATCH_FLUSH_INTERVAL,

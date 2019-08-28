@@ -79,7 +79,6 @@ func New(m Metrics, logger *log.Logger, opts ...LogCacheOption) *LogCache {
 // LogCacheOption configures a LogCache.
 type LogCacheOption func(*LogCache)
 
-
 // WithMaxPerSource returns a LogCacheOption that configures the store's
 // memory size as number of envelopes for a specific sourceID. Defaults to
 // 100000 envelopes.
@@ -190,12 +189,16 @@ func (c *LogCache) setupRouting(s *store.Store) {
 				100,
 				250*time.Millisecond,
 				logcache_v1.NewIngressClient(conn),
-				c.metrics.NewCounter("ingress_dropped", metrics.WithMetricTags(map[string]string{
-					"nodeIndex": strconv.Itoa(i),
-				})),
-				c.metrics.NewCounter("log_cache_send_failures", metrics.WithMetricTags(map[string]string{
-					"sender": "batched_ingress_client",
-				})),
+				c.metrics.NewCounter(
+					"ingress_dropped",
+					metrics.WithHelpText("Total number of envelopes dropped."),
+					metrics.WithMetricTags(map[string]string{"nodeIndex": strconv.Itoa(i)}),
+				),
+				c.metrics.NewCounter(
+					"log_cache_send_failures",
+					metrics.WithHelpText("Total number of envelope batches that failed to send to other log-cache nodes."),
+					metrics.WithMetricTags(map[string]string{"sender": "batched_ingress_client"}),
+				),
 				c.log,
 			)
 

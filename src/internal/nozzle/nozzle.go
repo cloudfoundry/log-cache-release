@@ -28,9 +28,9 @@ type Nozzle struct {
 	selectors    []string
 	streamBuffer *diodes.OneToOne
 
-	ingressInc metrics.Counter
-	egressInc  metrics.Counter
-	errInc     metrics.Counter
+	ingressCounter metrics.Counter
+	egressCounter  metrics.Counter
+	errCounter     metrics.Counter
 
 	// LogCache
 	addr string
@@ -99,9 +99,18 @@ func (n *Nozzle) Start() {
 	}
 	client := logcache_v1.NewIngressClient(conn)
 
-	n.ingressInc = n.metrics.NewCounter("nozzle_ingress")
-	n.egressInc = n.metrics.NewCounter("nozzle_egress")
-	n.errInc = n.metrics.NewCounter("nozzle_err")
+	n.ingressCounter = n.metrics.NewCounter(
+		"nozzle_ingress",
+		metrics.WithHelpText("Total envelopes ingressed."),
+	)
+	n.egressCounter = n.metrics.NewCounter(
+		"nozzle_egress",
+		metrics.WithHelpText("Total envelopes written to log cache."),
+	)
+	n.errCounter = n.metrics.NewCounter(
+		"nozzle_err",
+		metrics.WithHelpText("Total errors while egressing to log cache."),
+	)
 
 	go n.envelopeReader(rx)
 
@@ -169,11 +178,11 @@ func (n *Nozzle) envelopeWriter(ch chan []*loggregator_v2.Envelope, client logca
 		})
 
 		if err != nil {
-			n.errInc.Add(1)
+			n.errCounter.Add(1)
 			continue
 		}
 
-		n.egressInc.Add(float64(len(envelopes)))
+		n.egressCounter.Add(float64(len(envelopes)))
 	}
 }
 
@@ -182,7 +191,7 @@ func (n *Nozzle) envelopeReader(rx loggregator.EnvelopeStream) {
 		envelopeBatch := rx()
 		for _, envelope := range envelopeBatch {
 			n.streamBuffer.Set(diodes.GenericDataType(envelope))
-			n.ingressInc.Add(1)
+			n.ingressCounter.Add(1)
 		}
 	}
 }

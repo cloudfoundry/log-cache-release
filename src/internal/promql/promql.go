@@ -46,13 +46,26 @@ func New(
 	queryTimeout time.Duration,
 ) *PromQL {
 	q := &PromQL{
-		r:                 r,
-		log:               log,
-		queryTimeout:      queryTimeout,
-		failureCounter:    m.NewCounter("log_cache_promql_timeout"),
-		instantQueryTimer: m.NewGauge("log_cache_promql_instant_query_time", metrics.WithMetricTags(map[string]string{"unit": "milliseconds"})),
-		rangeQueryTimer:   m.NewGauge("log_cache_promql_range_query_time", metrics.WithMetricTags(map[string]string{"unit": "milliseconds"})),
-		result:            1,
+		r:            r,
+		log:          log,
+		queryTimeout: queryTimeout,
+		failureCounter: m.NewCounter(
+			"log_cache_promql_timeout",
+			metrics.WithHelpText("Total number of errors while executing queries."),
+		),
+
+		//TODO convert to histograms
+		instantQueryTimer: m.NewGauge(
+			"log_cache_promql_instant_query_time",
+			metrics.WithHelpText("Duration of last instant query in milliseconds."),
+			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+		),
+		rangeQueryTimer: m.NewGauge(
+			"log_cache_promql_range_query_time",
+			metrics.WithHelpText("Duration of last range query in milliseconds."),
+			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+		),
+		result: 1,
 	}
 
 	return q
