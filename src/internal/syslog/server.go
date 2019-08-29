@@ -71,7 +71,7 @@ func NewServer(
 		metrics.WithHelpText("Total number of syslog messages unable to be converted to valid envelopes."),
 	)
 	s.sendFailure = m.NewCounter(
-		"log_cache_send_failure",
+		"send_failure",
 		metrics.WithHelpText("Total number of failures while sending to log cache."),
 		metrics.WithMetricTags(map[string]string{"sender": "syslog_server"}),
 	)

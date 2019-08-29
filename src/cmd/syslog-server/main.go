@@ -59,7 +59,7 @@ func main() {
 	sendFailures := m.NewCounter(
 		"log_cache_send_failure",
 		metrics.WithHelpText("Total number of envelope batches failed to send to log cache."),
-		metrics.WithMetricTags(map[string]string{"sender": "batched_ingress_client"}),
+		metrics.WithMetricTags(map[string]string{"sender": "batched_ingress_client", "source": "syslog_server"}),
 	)
 	logCacheClient := routing.NewBatchedIngressClient(
 		BATCH_CHANNEL_SIZE,
