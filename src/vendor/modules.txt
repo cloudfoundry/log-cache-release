@@ -70,7 +70,7 @@ github.com/golang/protobuf/protoc-gen-go/plugin
 github.com/golang/snappy
 # github.com/gorilla/mux v1.7.3
 github.com/gorilla/mux
-# github.com/grpc-ecosystem/grpc-gateway v1.10.0
+# github.com/grpc-ecosystem/grpc-gateway v1.11.0
 github.com/grpc-ecosystem/grpc-gateway/runtime
 github.com/grpc-ecosystem/grpc-gateway/utilities
 github.com/grpc-ecosystem/grpc-gateway/internal
