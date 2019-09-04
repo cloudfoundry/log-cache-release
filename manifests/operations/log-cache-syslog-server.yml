@@ -12,8 +12,8 @@
     name: log-cache-syslog-server
     properties:
       tls:
-        cert: "((log_cache_syslog_tls.certificate))"
-        key: "((log_cache_syslog_tls.private_key))"
+        cert: "((log_cache_syslog_server_tls.certificate))"
+        key: "((log_cache_syslog_server_tls.private_key))"
       metrics:
         ca_cert: "((log_cache_syslog_server_metrics_tls.ca))"
         cert: "((log_cache_syslog_server_metrics_tls.certificate))"
@@ -21,13 +21,22 @@
         server_name: log_cache_syslog_server_metrics
 
 - type: replace
-  path: /variables/name=log_cache_syslog_tls?
+  path: /variables/name=syslog_drain_ca?
   value:
-    name: log_cache_syslog_tls
+    name: syslog_drain_ca
     type: certificate
     options:
-      ca: loggregator_ca
-      common_name: log-cache-syslog
+      is_ca: true
+      common_name: syslogDrainCA
+
+- type: replace
+  path: /variables/name=log_cache_syslog_server_tls?
+  value:
+    name: log_cache_syslog_server_tls
+    type: certificate
+    options:
+      ca: syslog_drain_ca
+      common_name: "doppler.service.cf.internal"
       extended_key_usage:
       - server_auth
 
@@ -57,6 +66,10 @@
 - type: replace
   path: /addons/name=loggr-syslog-agent/jobs/name=loggr-syslog-agent/properties/non_app_drains?
   value: "syslog-tls://doppler.service.cf.internal:6067"
+
+- type: replace
+  path: /addons/name=loggr-syslog-agent/jobs/name=loggr-syslog-agent/properties/drain_ca_cert?
+  value: "((log_cache_syslog_server_tls.ca))"
 
 # This can be removed when CAPI PR to handle container metrics from multiple envelopes is merged/released
 # https://github.com/cloudfoundry/cloud_controller_ng/pull/1408
