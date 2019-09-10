@@ -18,7 +18,7 @@ code.cloudfoundry.org/tlsconfig/certtest
 github.com/Benjamintf1/unmarshalledmatchers
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
-# github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4
+# github.com/alecthomas/units v0.0.0-20190910110746-680d30ca3117
 github.com/alecthomas/units
 # github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 github.com/benbjohnson/jmphash
@@ -191,7 +191,7 @@ golang.org/x/net/html
 golang.org/x/net/html/atom
 # golang.org/x/sync v0.0.0-20190423024810-112230192c58
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20190909082730-f460065e899a
+# golang.org/x/sys v0.0.0-20190910064555-bbd175535a8b
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
