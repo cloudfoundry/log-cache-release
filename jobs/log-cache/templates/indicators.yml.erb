@@ -1,34 +1,38 @@
 ---
-apiVersion: v0
-
-product:
-  name: log-cache
-  version: 2.2.0
+apiVersion: indicatorprotocol.io/v1
+kind: IndicatorDocument
 
 metadata:
-  deployment: <%= spec.deployment %>
-  source_id: infra_doppler
+  labels:
+    deployment: <%= spec.deployment %>
+    source_id: infra_doppler
 
-indicators:
-- name: log_cache_duration
-  promql: min(log_cache_cache_period{source_id="$source_id",deployment="$deployment"})
-  thresholds:
-  - level: warning
-    lte: 30000
-  documentation:
-    title: Log Cache Duration Monitor
-    measurement: The time difference between the oldest and newest node on Log Cache.
-    description: The shortest cache duration of all the Log Cache nodes.
-    recommended_response: Check if all of your Log Cache processes are healthy.
-      If you recently rolled your doppler VMs, the cache duration has reset and
-      this warning can be ignored.
+spec:
+  product:
+    name: log-cache
+    version: "2.2.0"
 
-layout:
-  owner: Log Cache Team
-  title: Log Cache Monitors
-  description: Monitoring Log Cache
-  sections:
-  - title: Log Cache Duration
-    description: The time difference between the oldest and newest node on Log Cache.
-    indicators:
-    - log_cache_duration
+  indicators:
+  - name: log_cache_duration
+    promql: min(log_cache_cache_period{source_id="$source_id",deployment="$deployment"})
+    thresholds:
+    - level: warning
+      operator: lte
+      value: 30000
+    documentation:
+      title: Log Cache Duration Monitor
+      measurement: The time difference between the oldest and newest node on Log Cache.
+      description: The shortest cache duration of all the Log Cache nodes.
+      recommended_response: Check if all of your Log Cache processes are healthy.
+        If you recently rolled your doppler VMs, the cache duration has reset and
+        this warning can be ignored.
+
+  layout:
+    owner: Log Cache Team
+    title: Log Cache Monitors
+    description: Monitoring Log Cache
+    sections:
+    - title: Log Cache Duration
+      description: The time difference between the oldest and newest node on Log Cache.
+      indicators:
+      - log_cache_duration
