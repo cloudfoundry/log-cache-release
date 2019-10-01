@@ -167,7 +167,7 @@ github.com/prometheus/prometheus/tsdb/fileutil
 github.com/prometheus/prometheus/tsdb/goversion
 github.com/prometheus/prometheus/tsdb/index
 github.com/prometheus/prometheus/tsdb/wal
-# github.com/shirou/gopsutil v2.18.12+incompatible
+# github.com/shirou/gopsutil v2.19.9+incompatible
 github.com/shirou/gopsutil/host
 github.com/shirou/gopsutil/internal/common
 github.com/shirou/gopsutil/process
@@ -191,7 +191,7 @@ golang.org/x/net/html
 golang.org/x/net/html/atom
 # golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20190927073244-c990c680b611
+# golang.org/x/sys v0.0.0-20191001151750-bb3f8db39f24
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
@@ -258,5 +258,5 @@ google.golang.org/grpc/internal/syscall
 gopkg.in/fsnotify.v1
 # gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 gopkg.in/tomb.v1
-# gopkg.in/yaml.v2 v2.2.2
+# gopkg.in/yaml.v2 v2.2.3
 gopkg.in/yaml.v2
