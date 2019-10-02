@@ -32,7 +32,7 @@ properties:
     default: 1m
   source_id:
     description: "Source ID for metadata of both test and result metrics"
-    default: log-cache
+    default: log-cache-blackbox
 
   cf_blackbox.enabled:
     description: "Test HTTP egress which uses CF-based UAA authentication"
