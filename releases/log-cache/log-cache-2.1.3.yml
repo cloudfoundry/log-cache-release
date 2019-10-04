@@ -32,7 +32,7 @@ jobs:
   fingerprint: 0f9e6d5661d1648963fd09e15f5407acb30e31600e4fd9e3424a14d38b6e0e2e
   sha1: sha256:0c7c8d2c234df2e8ee733c0ddab9e242044ef3c16ee65248b48c80b2195a05d0
 packages:
-- name: golang1.11.5
+- name: golang1.13.1
   version: fa07acc188101b63837c98a7008d28a3b530bf4ca62558f9fdd09cac781f6ebb
   fingerprint: fa07acc188101b63837c98a7008d28a3b530bf4ca62558f9fdd09cac781f6ebb
   sha1: sha256:2b8da29ef91b76f8204773cc68929f850adfc23a0ceb8d7af2e40aabbbb70a2c
@@ -42,43 +42,43 @@ packages:
   fingerprint: 2c23404b70e0c4fbfcd4bf617c24a2517427521b4b5df2741c3085245a6324eb
   sha1: sha256:883dd9df1bdb3aebd7648b6e6804b98211de30dcff02b57167c3121b79024657
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 - name: log-cache-blackbox
   version: b42edf9eab2a6d4cd8809e78f2fb90c67c3ce353d2fe2c084229e4f8f308bb95
   fingerprint: b42edf9eab2a6d4cd8809e78f2fb90c67c3ce353d2fe2c084229e4f8f308bb95
   sha1: sha256:29b9d1f5e1fbcae597752f929b5f0cf12bd08519e75d980452539ab71a30e582
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 - name: log-cache-cf-auth-proxy
   version: 59f0da1ed875bb3e8adc71aa1231a3664de877d806b9c47614c2886207817674
   fingerprint: 59f0da1ed875bb3e8adc71aa1231a3664de877d806b9c47614c2886207817674
   sha1: sha256:a6b85f8b46b264ed8023ad423808988153f75b4502daa103f6eba45386ad8b52
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 - name: log-cache-expvar-forwarder
   version: 0be3a29b14b981ca27db1a4c1c08600c29b0e4d2c650b30e4a82a4f2aadb31ca
   fingerprint: 0be3a29b14b981ca27db1a4c1c08600c29b0e4d2c650b30e4a82a4f2aadb31ca
   sha1: sha256:c99ff343efe073f71b3060dbaee50b0eba43a41a4fc3b9f40e19cae4126cb5f5
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 - name: log-cache-gateway
   version: 5bf881a3247dc36d95b74fa6261798efd5ba3d28ab546fd9a074bf2becf6edc7
   fingerprint: 5bf881a3247dc36d95b74fa6261798efd5ba3d28ab546fd9a074bf2becf6edc7
   sha1: sha256:d23b04ac2d9afcdc9eb73d8f1e1b0e576b1039ce12991c9c6f4e0d82bf8eb17b
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 - name: log-cache-nozzle
   version: 9a825a7c6cf3a0ff118cf39b1328baad905031602a2d1ef7c3a0f2db13afcf87
   fingerprint: 9a825a7c6cf3a0ff118cf39b1328baad905031602a2d1ef7c3a0f2db13afcf87
   sha1: sha256:47d4573a7ddbc7856d2efd0b7e120c11aa789c4b921593a8881604bc9decf0c7
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 - name: log-cache-scheduler
   version: 92114417495b03bb7278cc9074584ec47eac3fa01113be34668933d041fe36a6
   fingerprint: 92114417495b03bb7278cc9074584ec47eac3fa01113be34668933d041fe36a6
   sha1: sha256:f53bc6b52f69df0a6bdc329c572c7e6aba7825edc9215c64dd0efcf06175eca7
   dependencies:
-  - golang1.11.5
+  - golang1.13.1
 license:
   version: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
   fingerprint: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
