@@ -33,7 +33,7 @@ require (
 	github.com/shirou/gopsutil v2.19.9+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/square/certstrap v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20191011234655-491137f69257
+	golang.org/x/net v0.0.0-20191014212845-da9a3fd4c582
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
 	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
