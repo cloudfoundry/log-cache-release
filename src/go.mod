@@ -25,7 +25,7 @@ require (
 	github.com/influxdata/go-syslog/v2 v2.0.0
 	github.com/onsi/ginkgo v1.10.2
 	github.com/onsi/gomega v1.7.0
-	github.com/prometheus/client_golang v1.2.0
+	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4
 	github.com/prometheus/common v0.7.0
 	github.com/prometheus/prometheus v2.12.0+incompatible // pinned
