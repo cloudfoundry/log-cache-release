@@ -21,6 +21,9 @@ consumes:
   type: log-cache
 
 properties:
+  enabled:
+    description: "Enable Log Cache Syslog Ingress"
+    default: true
   tls.cert:
     description: "TLS certificate for the Syslog Server connection"
   tls.key:

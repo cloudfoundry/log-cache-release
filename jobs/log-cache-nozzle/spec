@@ -25,6 +25,9 @@ consumes:
   type: log-cache
 
 properties:
+  enabled:
+    description: "Enable Log Cache RLP Ingress"
+    default: true
   logs_provider.tls.ca_cert:
     description: "CA root required for key/cert verification to connect to the logs-provider"
   logs_provider.tls.cert:
