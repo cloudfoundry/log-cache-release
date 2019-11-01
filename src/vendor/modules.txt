@@ -171,7 +171,7 @@ github.com/prometheus/prometheus/tsdb/index
 github.com/prometheus/prometheus/tsdb/record
 github.com/prometheus/prometheus/tsdb/tombstones
 github.com/prometheus/prometheus/tsdb/wal
-# github.com/shirou/gopsutil v2.19.9+incompatible
+# github.com/shirou/gopsutil v2.19.10+incompatible
 github.com/shirou/gopsutil/host
 github.com/shirou/gopsutil/internal/common
 github.com/shirou/gopsutil/process
