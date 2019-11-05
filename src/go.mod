@@ -32,9 +32,10 @@ require (
 	github.com/shirou/gopsutil v2.19.10+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/square/certstrap v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20191101175033-0deb6923b6d9
+	golang.org/x/net v0.0.0-20191105084925-a882066a44e0
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
-	golang.org/x/sys v0.0.0-20191104094858-e8c54fb511f6 // indirect
+	golang.org/x/sys v0.0.0-20191105142833-ac3223d80179 // indirect
 	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6
 	google.golang.org/grpc v1.24.0
+	gopkg.in/yaml.v2 v2.2.5 // indirect
 )
