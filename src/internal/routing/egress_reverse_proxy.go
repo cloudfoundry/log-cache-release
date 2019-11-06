@@ -1,8 +1,10 @@
 package routing
 
 import (
+	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"context"
 	"errors"
+	"google.golang.org/grpc/status"
 	"log"
 	"math/rand"
 	"sync/atomic"
@@ -10,7 +12,6 @@ import (
 	"unsafe"
 
 	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
@@ -54,14 +55,27 @@ func NewEgressReverseProxy(
 func (e *EgressReverseProxy) Read(ctx context.Context, in *rpc.ReadRequest) (*rpc.ReadResponse, error) {
 	idx := e.l(in.GetSourceId())
 	if len(idx) == 0 {
-		return nil, grpc.Errorf(codes.Unavailable, "failed to find route for request. please try again")
+		return nil, status.Errorf(codes.Unavailable, "failed to find route for request. please try again")
 	}
 	for _, i := range idx {
 		if i == e.localIdx {
 			return e.clients[e.localIdx].Read(ctx, in)
 		}
 	}
-	return e.clients[idx[rand.Intn(len(idx))]].Read(ctx, in)
+
+	return e.remoteRead(idx, ctx, in)
+}
+
+func (e *EgressReverseProxy) remoteRead(idx []int, ctx context.Context, in *rpc.ReadRequest) (*rpc.ReadResponse, error) {
+	response, err := e.clients[idx[rand.Intn(len(idx))]].Read(ctx, in)
+	if status.Code(err) == codes.Unavailable {
+		return &rpc.ReadResponse{
+			Envelopes: &loggregator_v2.EnvelopeBatch{
+				Batch: []*loggregator_v2.Envelope{},
+			},
+		}, nil
+	}
+	return response, err
 }
 
 // Meta will gather meta from the local store and remote nodes.

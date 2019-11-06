@@ -3,6 +3,7 @@ package routing_test
 import (
 	"context"
 	"errors"
+	"google.golang.org/grpc/status"
 	"io/ioutil"
 	"log"
 	"time"
@@ -119,7 +120,7 @@ var _ = Describe("EgressReverseProxy", func() {
 		_, err := p.Read(context.Background(), &rpc.ReadRequest{
 			SourceId: "c",
 		})
-		Expect(grpc.Code(err)).To(Equal(codes.Unavailable))
+		Expect(status.Code(err)).To(Equal(codes.Unavailable))
 	})
 
 	It("uses the given context", func() {
@@ -146,6 +147,17 @@ var _ = Describe("EgressReverseProxy", func() {
 			SourceId: "a",
 		})
 		Expect(err).To(HaveOccurred())
+	})
+
+	It("returns an empty batch if log cache is unavailable", func() {
+		spyEgressRemoteClient1.err = status.Error(codes.Unavailable, "oh no")
+		spyLookup.results["a"] = []int{1}
+
+		resp, err := p.Read(context.Background(), &rpc.ReadRequest{
+			SourceId: "a",
+		})
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.Envelopes.Batch).To(BeEmpty())
 	})
 
 	It("gets meta from the local store", func() {
