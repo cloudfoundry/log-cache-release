@@ -321,36 +321,39 @@ func (store *Store) Get(
 	limit int,
 	descending bool,
 ) []*loggregator_v2.Envelope {
-	tree, ok := store.storageIndex.Load(index)
-	if !ok {
-		return nil
-	}
+	store.metrics.egress.Add(1.0)
 
-	tree.(*storage).RLock()
-	defer tree.(*storage).RUnlock()
+	envelopes := make([]*loggregator_v2.Envelope, 0)
 
-	traverser := store.treeAscTraverse
-	if descending {
-		traverser = store.treeDescTraverse
-	}
-
-	var res []*loggregator_v2.Envelope
-	traverser(tree.(*storage).Root, start.UnixNano(), end.UnixNano(), func(e *loggregator_v2.Envelope) bool {
-		e = store.filterByName(e, nameFilter)
-		if e == nil {
-			return false
-		}
-
-		if store.validEnvelopeType(e, envelopeTypes) {
-			res = append(res, e)
-		}
-
-		// Return true to stop traversing
-		return len(res) >= limit
+	envelopes = append(envelopes, &loggregator_v2.Envelope{
+		Timestamp:  (start.UnixNano() + end.UnixNano()) / 2,
+		SourceId:   index,
+		InstanceId: "0",
+		Tags: map[string]string{
+			"process_id": index,
+			"origin":     "rep",
+		},
+		Message: &loggregator_v2.Envelope_Gauge{
+			Gauge: &loggregator_v2.Gauge{
+				Metrics: map[string]*loggregator_v2.GaugeValue{
+					"cpu": {
+						Unit:  "percentage",
+						Value: 42,
+					},
+					"disk": {
+						Unit:  "bytes",
+						Value: 420000000,
+					},
+					"memory": {
+						Unit:  "bytes",
+						Value: 420000000,
+					},
+				},
+			},
+		},
 	})
 
-	store.metrics.egress.Add(float64(len(res)))
-	return res
+	return envelopes
 }
 
 func (store *Store) filterByName(envelope *loggregator_v2.Envelope, nameFilter *regexp.Regexp) *loggregator_v2.Envelope {
