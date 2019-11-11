@@ -29,12 +29,12 @@ require (
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4
 	github.com/prometheus/common v0.7.0
+	github.com/prometheus/procfs v0.0.6 // indirect
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.19.10+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/square/certstrap v1.2.0 // indirect
 	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20191110163157-d32e6e3b99c4 // indirect
 	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a
 	google.golang.org/grpc v1.25.1
