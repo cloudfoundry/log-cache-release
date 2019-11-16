@@ -16,6 +16,7 @@ require (
 	github.com/benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea // indirect
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/xxhash v1.1.0
+	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cloudfoundry/gosigar v1.1.0
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/emirpasic/gods v1.12.0
@@ -29,14 +30,14 @@ require (
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4
 	github.com/prometheus/common v0.7.0
-	github.com/prometheus/procfs v0.0.6 // indirect
+	github.com/prometheus/procfs v0.0.7 // indirect
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.19.10+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/square/certstrap v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20191112182307-2180aed22343
-	golang.org/x/sys v0.0.0-20191113165036-4c7a9d0fe056 // indirect
-	google.golang.org/genproto v0.0.0-20191114150713-6bbd007550de
+	golang.org/x/net v0.0.0-20191116160921-f9c825593386
+	golang.org/x/sys v0.0.0-20191115151921-52ab43148777 // indirect
+	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11
 	google.golang.org/grpc v1.25.1
 	gopkg.in/yaml.v2 v2.2.5 // indirect
 )
