@@ -4,12 +4,14 @@ import (
     "time"
     "sort"
     "fmt"
+
+    "github.com/influxdata/go-syslog/v2/common"
 )
 
 %%{
 machine builder;
 
-include rfc5424 "rfc5424.rl";
+include common "common.rl";
 
 action mark {
     pb = p
@@ -49,7 +51,7 @@ action set_sdid {
     if sm.structuredData == nil {
         sm.structuredData = &(map[string]map[string]string{})
     }
-    
+
     id := string(data[pb:p])
     elements := *sm.structuredData
     if _, ok := elements[id]; !ok {
@@ -72,7 +74,7 @@ action set_sdpv {
 	text := data[pb:p]
 	// Strip backslashes only when there are ...
     if len(backslashes) > 0 {
-        text = rmchars(text, backslashes, pb)
+        text = common.RemoveBytes(text, backslashes, pb)
     }
 	// Assuming SD map already exists, contains currentid key and currentparamname key (set from outside)
     elements := *sm.structuredData
@@ -224,7 +226,7 @@ func (sm *SyslogMessage) SetElementID(value string) *SyslogMessage {
 func (sm *SyslogMessage) SetParameter(id string, name string, value string) *SyslogMessage {
     // Create an element with the given id (or re-use the existing one)
     sm.set(sdid, id)
-    
+
     // We can create parameter iff the given element id exists
     if sm.structuredData != nil {
         elements := *sm.structuredData
@@ -238,7 +240,7 @@ func (sm *SyslogMessage) SetParameter(id string, name string, value string) *Sys
             }
         }
     }
-    
+
     return sm
 }
 
@@ -297,7 +299,7 @@ func (sm *SyslogMessage) String() (string, error) {
             sort.Strings(names)
 
             for _, name := range names {
-                sd += fmt.Sprintf(" %s=\"%s\"", name, escape(params[name]))
+                sd += fmt.Sprintf(" %s=\"%s\"", name, common.EscapeBytes(params[name]))
             }
             sd += "]"
         }
