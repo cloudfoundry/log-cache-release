@@ -37,7 +37,7 @@ require (
 	github.com/square/certstrap v1.2.0 // indirect
 	golang.org/x/net v0.0.0-20191204025024-5ee1b9f4859a
 	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e // indirect
-	google.golang.org/genproto v0.0.0-20191203220235-3fa9dbf08042
+	google.golang.org/genproto v0.0.0-20191205163323-51378566eb59
 	google.golang.org/grpc v1.25.1
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
