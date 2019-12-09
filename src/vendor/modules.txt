@@ -183,7 +183,7 @@ github.com/shirou/gopsutil/net
 github.com/shirou/w32
 # github.com/square/certstrap v1.2.0
 github.com/square/certstrap/pkix
-# golang.org/x/net v0.0.0-20191207000613-e7e4b65ae663
+# golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 golang.org/x/net/context
 golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
