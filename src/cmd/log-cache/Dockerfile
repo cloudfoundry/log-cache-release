@@ -43,9 +43,12 @@ USER 1000:1000
 WORKDIR /srv
 
 ENV ADDR=:8080 \
-    CA_PATH="/srv/certs/ca.crt" \
-    CERT_PATH="/srv/certs/log-cache.crt" \
-    KEY_PATH="/srv/certs/log-cache.key" \
+    CA_PATH="/ca/tls.crt" \
+    CERT_PATH="/log-cache-certs/tls.crt" \
+    KEY_PATH="/log-cache-certs/tls.key" \
+    METRICS_CA_FILE_PATH="/ca/tls.crt" \
+    METRICS_CERT_FILE_PATH="/metrics-certs/tls.crt" \
+    METRICS_KEY_FILE_PATH="/metrics-certs/tls.key" \
     ENV_DIR="/srv/conf.d"
 
 EXPOSE 8080
