@@ -56,7 +56,7 @@ bosh \
     -v system_domain=bosh-lite.com
 ```
 
-##### Log Cache Client
+##### Log Cache UAA Client
 By Default, Log Cache uses the `doppler` client included with `cf-deployment`.
 
 If you would like to use a custom client, it requires the `uaa.resource` authority:
@@ -87,3 +87,5 @@ Loggregator system for [colocation in cf-deployment][cf-deployment-ops] - that s
 recent testing with this colocation strategy has not met these SLOs. If targeting these
 SLOs is critical to your foundation we recommend using a log-cache instance group.
 
+### Log Cache API
+Documentation about the internals of Log Cache and its API can be found [here](https://github.com/cloudfoundry/log-cache-release/blob/develop/src/README.md)
