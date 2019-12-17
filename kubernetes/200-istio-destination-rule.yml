@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: log-cache-tls
+spec:
+  host: log-cache.pas-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      clientCertificate: /log-cache-certs/tls.crt
+      privateKey: /log-cache-certs/tls.key
+  volumeMounts:
+  - mountPath: /log-cache-certs
+    name: log-cache-certs
+    readOnly: true
+  volumes:
+  - name: log-cache-certs
+    secret:
+      secretName: log-cache-gateway
