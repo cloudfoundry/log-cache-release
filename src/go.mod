@@ -25,8 +25,8 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/grpc-ecosystem/grpc-gateway v1.12.1
 	github.com/influxdata/go-syslog/v2 v2.0.1
-	github.com/onsi/ginkgo v1.10.3
-	github.com/onsi/gomega v1.8.0
+	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/gomega v1.8.1
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/client_model v0.0.0-20191202183732-d1d2010b5bee
 	github.com/prometheus/common v0.7.0
