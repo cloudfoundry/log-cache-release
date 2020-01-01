@@ -30,8 +30,7 @@ require (
 	github.com/prometheus/client_model v0.1.0
 	github.com/prometheus/common v0.7.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
-	github.com/shirou/gopsutil v2.19.11+incompatible
-	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
+	github.com/shirou/gopsutil v2.19.12+incompatible
 	github.com/square/certstrap v1.2.0 // indirect
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8 // indirect
