@@ -7,7 +7,7 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee
 	code.cloudfoundry.org/go-envstruct v1.5.0
 	code.cloudfoundry.org/go-loggregator v0.0.0-20190809213911-969cb33bee6a // pinned
-	code.cloudfoundry.org/tlsconfig v0.0.0-20200103214402-4ae6f49cdca0
+	code.cloudfoundry.org/tlsconfig v0.0.0-20200108215323-551ec42d1f74
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/OneOfOne/xxhash v1.2.6 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/shirou/gopsutil v2.19.12+incompatible
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/sys v0.0.0-20200107162124-548cf772de50 // indirect
-	google.golang.org/genproto v0.0.0-20191230161307-f3c370f40bfb
+	google.golang.org/genproto v0.0.0-20200108215221-bd8f9a0ef82f
 	google.golang.org/grpc v1.26.0
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
