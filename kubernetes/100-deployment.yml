@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: log-cache
+  namespace: pas-system
   labels:
     app: log-cache
 spec:
