@@ -9,7 +9,7 @@ require (
 	code.cloudfoundry.org/go-loggregator v0.0.0-20190809213911-969cb33bee6a // pinned
 	code.cloudfoundry.org/tlsconfig v0.0.0-20200108215323-551ec42d1f74
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
-	github.com/OneOfOne/xxhash v1.2.6 // indirect
+	github.com/OneOfOne/xxhash v1.2.7 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
