@@ -32,12 +32,12 @@ require (
 	github.com/pkg/errors v0.9.0 // indirect
 	github.com/prometheus/client_golang v1.3.0
 	github.com/prometheus/client_model v0.1.0
-	github.com/prometheus/common v0.7.0
+	github.com/prometheus/common v0.8.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.19.12+incompatible
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
-	golang.org/x/sys v0.0.0-20200107162124-548cf772de50 // indirect
-	google.golang.org/genproto v0.0.0-20200108215221-bd8f9a0ef82f
+	golang.org/x/sys v0.0.0-20200113162924-86b910548bc1 // indirect
+	google.golang.org/genproto v0.0.0-20200113173426-e1de0a7b01eb
 	google.golang.org/grpc v1.26.0
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
