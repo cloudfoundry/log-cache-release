@@ -35,7 +35,7 @@ require (
 	github.com/prometheus/common v0.8.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.19.12+incompatible
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
 	golang.org/x/sys v0.0.0-20200113162924-86b910548bc1 // indirect
 	google.golang.org/genproto v0.0.0-20200113173426-e1de0a7b01eb
 	google.golang.org/grpc v1.26.0
