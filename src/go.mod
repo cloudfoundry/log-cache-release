@@ -7,7 +7,7 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee
 	code.cloudfoundry.org/go-envstruct v1.5.0
 	code.cloudfoundry.org/go-loggregator v0.0.0-20190809213911-969cb33bee6a // pinned
-	code.cloudfoundry.org/tlsconfig v0.0.0-20200108215323-551ec42d1f74
+	code.cloudfoundry.org/tlsconfig v0.0.0-20200121234528-fcd72f4608b7
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/OneOfOne/xxhash v1.2.7 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
@@ -24,20 +24,20 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/grpc-ecosystem/grpc-gateway v1.12.1
+	github.com/grpc-ecosystem/grpc-gateway v1.12.2
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.3.0
-	github.com/prometheus/client_model v0.1.0
-	github.com/prometheus/common v0.8.0
+	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/common v0.9.1
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.19.12+incompatible
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
-	golang.org/x/sys v0.0.0-20200113162924-86b910548bc1 // indirect
-	google.golang.org/genproto v0.0.0-20200113173426-e1de0a7b01eb
+	golang.org/x/sys v0.0.0-20200122134326-e047566fdf82 // indirect
+	google.golang.org/genproto v0.0.0-20200122232147-0452cf42e150
 	google.golang.org/grpc v1.26.0
-	gopkg.in/yaml.v2 v2.2.7 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
