@@ -44,6 +44,7 @@ WORKDIR /srv
 
 ENV LOG_CACHE_GATEWAY_ADDR=log-cache:8081 \
     ADDR=:8083 \
+    DISABLE_TLS_SERVER="true" \
     PROXY_CA_PATH="/ca/tls.crt" \
     EXTERNAL_CERT="/external-certs/tls.crt" \
     EXTERNAL_KEY="/external-certs/tls.key" \

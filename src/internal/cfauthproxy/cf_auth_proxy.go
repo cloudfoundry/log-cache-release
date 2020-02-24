@@ -16,6 +16,7 @@ import (
 )
 
 type CFAuthProxy struct {
+	tlsDisabled  bool
 	blockOnStart bool
 	ln           net.Listener
 
@@ -80,6 +81,14 @@ func WithAccessMiddleware(accessMiddleware func(http.Handler) *auth.AccessHandle
 	}
 }
 
+// WithCFAuthProxyTLSDisabled returns a CFAuthProxyOption that sets the CFAuthProxy
+// to accept insecure plain text communication
+func WithCFAuthProxyTLSDisabled() CFAuthProxyOption {
+	return func(p *CFAuthProxy) {
+		p.tlsDisabled = true
+	}
+}
+
 // Start starts the HTTP listener and serves the HTTP server. If the
 // CFAuthProxy was initialized with the WithCFAuthProxyBlock option this
 // method will block.
@@ -90,19 +99,26 @@ func (p *CFAuthProxy) Start() {
 	}
 
 	p.ln = ln
+	if p.blockOnStart {
+		p.startServer()
+	}
 
+	go func() {
+		p.startServer()
+	}()
+}
+
+func (p *CFAuthProxy) startServer() {
 	server := http.Server{
 		Handler:   p.accessMiddleware(p.authMiddleware(p.reverseProxy())),
 		TLSConfig: sharedtls.NewBaseTLSConfig(),
 	}
 
-	if p.blockOnStart {
-		log.Fatal(server.ServeTLS(ln, p.certPath, p.keyPath))
+	if p.tlsDisabled {
+		log.Fatal(server.Serve(p.ln))
+	} else {
+		log.Fatal(server.ServeTLS(p.ln, p.certPath, p.keyPath))
 	}
-
-	go func() {
-		log.Fatal(server.ServeTLS(ln, p.certPath, p.keyPath))
-	}()
 }
 
 // Addr returns the listener address. This must be called after calling Start.

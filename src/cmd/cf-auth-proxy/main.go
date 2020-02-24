@@ -98,14 +98,22 @@ func main() {
 		capiClient,
 	)
 
+	proxyOptions := []CFAuthProxyOption{
+		WithAuthMiddleware(middlewareProvider.Middleware),
+		WithCFAuthProxyBlock(),
+	}
+
+	if cfg.DisableTLSServer {
+		proxyOptions = append(proxyOptions, WithCFAuthProxyTLSDisabled())
+	}
+
 	proxy := NewCFAuthProxy(
 		gatewayURL.String(),
 		cfg.Addr,
 		cfg.CertPath,
 		cfg.KeyPath,
 		proxyCACertPool,
-		WithAuthMiddleware(middlewareProvider.Middleware),
-		WithCFAuthProxyBlock(),
+		proxyOptions...,
 	)
 
 	if cfg.SecurityEventLog != "" {

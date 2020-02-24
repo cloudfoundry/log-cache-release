@@ -99,7 +99,7 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(middlewareCalled).To(BeTrue())
 	})
 
-	It("does not accept unencrypted connections", func() {
+	It("does not accept unencrypted connections when configured for TLS", func() {
 		testServer := httptest.NewTLSServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}),
 		)
@@ -110,6 +110,21 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
+	})
+
+	It("accepts plain text when TLS is disabled", func() {
+		gateway := startSecureGateway("Hello World!")
+		defer gateway.Close()
+
+		proxy := newCFAuthProxy(gateway.URL, WithCFAuthProxyTLSDisabled())
+		proxy.Start()
+
+		resp, err := makeTLSReq("http", proxy.Addr())
+		Expect(err).ToNot(HaveOccurred())
+
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		body, _ := ioutil.ReadAll(resp.Body)
+		Expect(body).To(Equal([]byte("Hello World!")))
 	})
 })
 
