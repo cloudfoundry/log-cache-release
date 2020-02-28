@@ -140,40 +140,49 @@ func main() {
 }
 
 func buildUAAClient(cfg *Config, loggr *log.Logger) *http.Client {
+	uaaClient := &http.Client{
+		Timeout:       20 * time.Second,
+	}
+
+	if cfg.UAA.CAPath == "" {
+		return uaaClient
+	}
 	tlsConfig := sharedtls.NewBaseTLSConfig()
 	tlsConfig.InsecureSkipVerify = cfg.SkipCertVerify
 
 	tlsConfig.RootCAs = loadCA(cfg.UAA.CAPath, loggr)
 
-	transport := &http.Transport{
+	uaaClient.Transport = &http.Transport{
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     tlsConfig,
 		DisableKeepAlives:   true,
 	}
 
-	return &http.Client{
-		Timeout:   20 * time.Second,
-		Transport: transport,
-	}
+	return uaaClient
 }
 
 func buildCAPIClient(cfg *Config, loggr *log.Logger) *http.Client {
+	capiClient := &http.Client{
+		Timeout:       20 * time.Second,
+	}
+
+	if cfg.CAPI.CAPath == "" {
+		return capiClient
+	}
+
 	tlsConfig := sharedtls.NewBaseTLSConfig()
 	tlsConfig.ServerName = cfg.CAPI.CommonName
 
 	tlsConfig.RootCAs = loadCA(cfg.CAPI.CAPath, loggr)
 
 	tlsConfig.InsecureSkipVerify = cfg.SkipCertVerify
-	transport := &http.Transport{
+	capiClient.Transport = &http.Transport{
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     tlsConfig,
 		DisableKeepAlives:   true,
 	}
 
-	return &http.Client{
-		Timeout:   20 * time.Second,
-		Transport: transport,
-	}
+	return capiClient
 }
 
 func loadCA(caCertPath string, loggr *log.Logger) *x509.CertPool {
