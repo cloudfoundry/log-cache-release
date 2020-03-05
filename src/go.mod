@@ -23,7 +23,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.3.4
 	github.com/gorilla/mux v1.7.4
-	github.com/grpc-ecosystem/grpc-gateway v1.13.0
+	github.com/grpc-ecosystem/grpc-gateway v1.14.1
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -37,7 +37,7 @@ require (
 	github.com/shirou/gopsutil v2.20.2+incompatible
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
-	google.golang.org/genproto v0.0.0-20200303153909-beee998c1893
+	google.golang.org/genproto v0.0.0-20200305110556-506484158171
 	google.golang.org/grpc v1.27.1
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
