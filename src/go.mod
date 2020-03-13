@@ -21,7 +21,7 @@ require (
 	github.com/emirpasic/gods v1.12.0
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/golang/protobuf v1.3.4
+	github.com/golang/protobuf v1.3.5
 	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3
 	github.com/influxdata/go-syslog/v2 v2.0.1
@@ -37,7 +37,7 @@ require (
 	github.com/shirou/gopsutil v2.20.2+incompatible
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
-	google.golang.org/genproto v0.0.0-20200312145019-da6875a35672
+	google.golang.org/genproto v0.0.0-20200313141609-30c55424f95d
 	google.golang.org/grpc v1.28.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
