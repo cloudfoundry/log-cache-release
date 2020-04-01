@@ -34,10 +34,10 @@ require (
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.9.1
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
-	github.com/shirou/gopsutil v2.20.2+incompatible
+	github.com/shirou/gopsutil v2.20.3+incompatible
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/sys v0.0.0-20200331124033-c3d80250170d // indirect
-	google.golang.org/genproto v0.0.0-20200331122359-1ee6d9798940
+	google.golang.org/genproto v0.0.0-20200401122417-09ab7b7031d2
 	google.golang.org/grpc v1.28.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
