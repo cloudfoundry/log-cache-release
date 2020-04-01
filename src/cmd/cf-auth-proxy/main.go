@@ -1,7 +1,6 @@
 package main
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"io/ioutil"
 	"log"
 	"net"
@@ -10,6 +9,8 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"code.cloudfoundry.org/go-loggregator/metrics"
 
 	"crypto/x509"
 
@@ -44,11 +45,16 @@ func main() {
 		),
 	)
 
+	var options []auth.UAAOption
+	if cfg.UAA.ClientID != "" && cfg.UAA.ClientSecret != "" {
+		options = append(options,auth.WithBasicAuth(cfg.UAA.ClientID, cfg.UAA.ClientSecret))
+	}
 	uaaClient := auth.NewUAAClient(
 		cfg.UAA.Addr,
 		buildUAAClient(cfg, loggr),
 		metrics,
 		loggr,
+		options...
 	)
 
 	// try to get our first token key, but bail out if we can't talk to UAA
@@ -141,7 +147,7 @@ func main() {
 
 func buildUAAClient(cfg *Config, loggr *log.Logger) *http.Client {
 	uaaClient := &http.Client{
-		Timeout:       20 * time.Second,
+		Timeout: 20 * time.Second,
 	}
 
 	if cfg.UAA.CAPath == "" {
@@ -163,7 +169,7 @@ func buildUAAClient(cfg *Config, loggr *log.Logger) *http.Client {
 
 func buildCAPIClient(cfg *Config, loggr *log.Logger) *http.Client {
 	capiClient := &http.Client{
-		Timeout:       20 * time.Second,
+		Timeout: 20 * time.Second,
 	}
 
 	if cfg.CAPI.CAPath == "" {

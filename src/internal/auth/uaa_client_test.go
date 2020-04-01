@@ -1,7 +1,6 @@
 package auth_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 
 	"code.cloudfoundry.org/log-cache/internal/auth"
 
@@ -29,12 +30,25 @@ import (
 )
 
 var _ = Describe("UAAClient", func() {
+	Context("HS256", func() {
+		It("accepts tokens that are signed with HS256", func() {
+			tc := uaaSetup(false)
+			tc.PrimePublicKeyCache(false)
+			payload := tc.BuildValidPayload("doppler.firehose")
+			token := tc.CreateHS256SignedToken(payload)
+
+			c, err := tc.uaaClient.Read(withBearer(token))
+			Expect(err).ToNot(HaveOccurred())
+			Expect(c.Token).To(Equal(withBearer(token)))
+			Expect(c.IsAdmin).To(BeTrue())
+		})
+	})
 	Context("Read()", func() {
 		var tc *UAATestContext
 
 		BeforeEach(func() {
-			tc = uaaSetup()
-			tc.PrimePublicKeyCache()
+			tc = uaaSetup(true)
+			tc.PrimePublicKeyCache(true)
 		})
 
 		It("only accepts tokens that are signed with RS256", func() {
@@ -100,7 +114,7 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("does not allow use of an expired token", func() {
-			tc.GenerateSingleTokenKeyResponse()
+			tc.GenerateSingleTokenKeyResponse(true)
 
 			tc.uaaClient.RefreshTokenKeys()
 
@@ -232,8 +246,8 @@ var _ = Describe("UAAClient", func() {
 
 	Context("RefreshTokenKeys()", func() {
 		It("handles concurrent refreshes", func() {
-			tc := uaaSetup()
-			tc.GenerateSingleTokenKeyResponse()
+			tc := uaaSetup(true)
+			tc.GenerateSingleTokenKeyResponse(true)
 			tc.uaaClient.RefreshTokenKeys()
 
 			payload := tc.BuildValidPayload("logs.admin")
@@ -259,8 +273,8 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("calls UAA correctly", func() {
-			tc := uaaSetup()
-			tc.GenerateSingleTokenKeyResponse()
+			tc := uaaSetup(true)
+			tc.GenerateSingleTokenKeyResponse(true)
 			tc.uaaClient.RefreshTokenKeys()
 
 			r := tc.httpClient.requests[0]
@@ -276,8 +290,26 @@ var _ = Describe("UAAClient", func() {
 			Expect(r.Body).To(BeNil())
 		})
 
+		It("calls UAA with basic auth", func() {
+			tc := uaaSetup(true, auth.WithBasicAuth("User", "Password"))
+			tc.GenerateSingleTokenKeyResponse(true)
+			tc.uaaClient.RefreshTokenKeys()
+
+			r := tc.httpClient.requests[0]
+
+			Expect(r.Method).To(Equal(http.MethodGet))
+			Expect(r.Header.Get("Content-Type")).To(Equal("application/json"))
+			Expect(r.URL.Path).To(Equal("/token_keys"))
+
+			// confirm that we're not using any authentication
+			user, password, ok := r.BasicAuth()
+			Expect(ok).To(BeTrue())
+			Expect(user).To(Equal("User"))
+			Expect(password).To(Equal("Password"))
+		})
+
 		It("returns an error when UAA cannot be reached", func() {
-			tc := uaaSetup()
+			tc := uaaSetup(true)
 			tc.httpClient.resps = []response{{
 				err: errors.New("error!"),
 			}}
@@ -287,7 +319,7 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("returns an error when UAA returns a non-200 response", func() {
-			tc := uaaSetup()
+			tc := uaaSetup(true)
 			tc.httpClient.resps = []response{{
 				body:   []byte{},
 				status: http.StatusUnauthorized,
@@ -298,7 +330,7 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("returns an error when the response from the UAA is malformed", func() {
-			tc := uaaSetup()
+			tc := uaaSetup(true)
 			tc.httpClient.resps = []response{{
 				body:   []byte("garbage"),
 				status: http.StatusOK,
@@ -309,7 +341,7 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("returns an error when the response from the UAA has an empty key", func() {
-			tc := uaaSetup()
+			tc := uaaSetup(true)
 			tc.GenerateEmptyTokenKeyResponse()
 
 			err := tc.uaaClient.RefreshTokenKeys()
@@ -317,7 +349,7 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("returns an error when the response from the UAA has an unparsable PEM format", func() {
-			tc := uaaSetup()
+			tc := uaaSetup(true)
 			tc.GenerateTokenKeyResponseWithInvalidPEM()
 
 			err := tc.uaaClient.RefreshTokenKeys()
@@ -326,7 +358,7 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("returns an error when the response from the UAA has an invalid key format", func() {
-			tc := uaaSetup()
+			tc := uaaSetup(true)
 			tc.GenerateTokenKeyResponseWithInvalidKey()
 
 			err := tc.uaaClient.RefreshTokenKeys()
@@ -335,8 +367,8 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("overwrites a pre-existing keyId with the new key", func() {
-			tc := uaaSetup()
-			tc.PrimePublicKeyCache()
+			tc := uaaSetup(true)
+			tc.PrimePublicKeyCache(true)
 
 			payload := tc.BuildValidPayload("doppler.firehose")
 			token := tc.CreateSignedToken(payload)
@@ -345,7 +377,7 @@ var _ = Describe("UAAClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			tokenKey := generateLegitTokenKey("testKey1")
-			tc.GenerateTokenKeyResponse([]mockTokenKey{tokenKey})
+			tc.GenerateTokenKeyResponse(true, []mockTokenKey{tokenKey})
 			tc.uaaClient.RefreshTokenKeys()
 
 			_, err = tc.uaaClient.Read(withBearer(token))
@@ -357,8 +389,8 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("overwrites a pre-existing keyId with the new key", func() {
-			tc := uaaSetup()
-			tc.PrimePublicKeyCache()
+			tc := uaaSetup(true)
+			tc.PrimePublicKeyCache(true)
 
 			payload := tc.BuildValidPayload("doppler.firehose")
 			token := tc.CreateSignedToken(payload)
@@ -367,7 +399,7 @@ var _ = Describe("UAAClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			tokenKey := generateLegitTokenKey("testKey1")
-			tc.GenerateTokenKeyResponse([]mockTokenKey{tokenKey})
+			tc.GenerateTokenKeyResponse(true, []mockTokenKey{tokenKey})
 			newToken := tc.CreateSignedTokenUsingPrivateKey(payload, tokenKey)
 
 			Eventually(func() bool {
@@ -381,8 +413,8 @@ var _ = Describe("UAAClient", func() {
 		})
 
 		It("rate limits UAA TokenKey refreshes", func() {
-			tc := uaaSetup(auth.WithMinimumRefreshInterval(200 * time.Millisecond))
-			tc.GenerateSingleTokenKeyResponse()
+			tc := uaaSetup(true, auth.WithMinimumRefreshInterval(200*time.Millisecond))
+			tc.GenerateSingleTokenKeyResponse(true)
 
 			initialRequestCount := len(tc.httpClient.requests)
 
@@ -401,27 +433,45 @@ var _ = Describe("UAAClient", func() {
 })
 
 type mockTokenKey struct {
-	privateKey *rsa.PrivateKey
+	privateKey string
 	publicKey  string
 	keyId      string
 }
 
 func generateLegitTokenKey(keyId string) mockTokenKey {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
-	publicKey := publicKeyPEMToString(privateKey)
+	publicKeyString, privateKeyString := keyPEMToString(privateKey)
 
 	return mockTokenKey{
-		privateKey: privateKey,
-		publicKey:  publicKey,
+		privateKey: privateKeyString,
+		publicKey:  publicKeyString,
 		keyId:      keyId,
 	}
 }
 
-func uaaSetup(opts ...auth.UAAOption) *UAATestContext {
+func generateHSTokenKey(keyId string) mockTokenKey {
+	privateKey := keyId
+
+	return mockTokenKey{
+		privateKey: privateKey,
+		publicKey:  privateKey,
+		keyId:      keyId,
+	}
+}
+
+func uaaSetup(rsa bool, opts ...auth.UAAOption) *UAATestContext {
 	httpClient := newSpyHTTPClient()
 	metrics := testhelpers.NewMetricsRegistry()
-	tokenKey := generateLegitTokenKey("testKey1")
-
+	var tokenKey mockTokenKey
+	if rsa {
+		tokenKey = generateLegitTokenKey("testKey1")
+	} else {
+		tokenKey = mockTokenKey{
+			privateKey: "key",
+			publicKey:  "key",
+			keyId:      "key",
+		}
+	}
 	// default the minimumRefreshInterval in tests to 0, but make sure we
 	// apply user-provided options afterwards
 	opts = append([]auth.UAAOption{auth.WithMinimumRefreshInterval(0)}, opts...)
@@ -449,8 +499,8 @@ type UAATestContext struct {
 	privateKeys []mockTokenKey
 }
 
-func (tc *UAATestContext) PrimePublicKeyCache() {
-	tc.GenerateSingleTokenKeyResponse()
+func (tc *UAATestContext) PrimePublicKeyCache(rsa bool) {
+	tc.GenerateSingleTokenKeyResponse(rsa)
 
 	err := tc.uaaClient.RefreshTokenKeys()
 	Expect(err).ToNot(HaveOccurred())
@@ -470,15 +520,22 @@ func (tc *UAATestContext) BuildExpiredPayload(scope string) string {
 	return payload
 }
 
-func (tc *UAATestContext) GenerateTokenKeyResponse(mockTokenKeys []mockTokenKey) {
+func (tc *UAATestContext) GenerateTokenKeyResponse(rsa bool, mockTokenKeys []mockTokenKey) {
 	var tokenKeys []map[string]string
-
+	var kty, alg string
+	if rsa {
+		kty = "RSA"
+		alg = "RSA256"
+	} else {
+		kty = "MAC"
+		alg = "HS256"
+	}
 	for _, mockPrivateKey := range mockTokenKeys {
 		tokenKey := map[string]string{
-			"kty":   "RSA",
+			"kty":   kty,
 			"use":   "sig",
 			"kid":   mockPrivateKey.keyId,
-			"alg":   "RS256",
+			"alg":   alg,
 			"value": mockPrivateKey.publicKey,
 		}
 		tokenKeys = append(tokenKeys, tokenKey)
@@ -496,8 +553,9 @@ func (tc *UAATestContext) GenerateTokenKeyResponse(mockTokenKeys []mockTokenKey)
 	}}
 }
 
-func (tc *UAATestContext) GenerateSingleTokenKeyResponse() {
+func (tc *UAATestContext) GenerateSingleTokenKeyResponse(rsa bool) {
 	tc.GenerateTokenKeyResponse(
+		rsa,
 		[]mockTokenKey{
 			tc.privateKeys[0],
 		},
@@ -506,6 +564,7 @@ func (tc *UAATestContext) GenerateSingleTokenKeyResponse() {
 
 func (tc *UAATestContext) MockUAATokenKeyResponseUsingPrivateKey(tokenKey mockTokenKey) {
 	tc.GenerateTokenKeyResponse(
+		true,
 		[]mockTokenKey{
 			tokenKey,
 		},
@@ -514,6 +573,7 @@ func (tc *UAATestContext) MockUAATokenKeyResponseUsingPrivateKey(tokenKey mockTo
 
 func (tc *UAATestContext) AddPrivateKeyToUAATokenKeyResponse(tokenKey mockTokenKey) {
 	tc.GenerateTokenKeyResponse(
+		true,
 		[]mockTokenKey{
 			tokenKey,
 			tc.privateKeys[0],
@@ -523,6 +583,7 @@ func (tc *UAATestContext) AddPrivateKeyToUAATokenKeyResponse(tokenKey mockTokenK
 
 func (tc *UAATestContext) GenerateEmptyTokenKeyResponse() {
 	tc.GenerateTokenKeyResponse(
+		true,
 		[]mockTokenKey{
 			{publicKey: "", keyId: ""},
 		},
@@ -531,6 +592,7 @@ func (tc *UAATestContext) GenerateEmptyTokenKeyResponse() {
 
 func (tc *UAATestContext) GenerateTokenKeyResponseWithInvalidPEM() {
 	tc.GenerateTokenKeyResponse(
+		true,
 		[]mockTokenKey{
 			{publicKey: "-- BEGIN SOMETHING --\nNOTVALIDPEM\n-- END SOMETHING --\n", keyId: ""},
 		},
@@ -538,24 +600,38 @@ func (tc *UAATestContext) GenerateTokenKeyResponseWithInvalidPEM() {
 }
 
 func (tc *UAATestContext) GenerateTokenKeyResponseWithInvalidKey() {
-	pem := publicKeyPEMToString(tc.privateKeys[0].privateKey)
 	tc.GenerateTokenKeyResponse(
+		true,
 		[]mockTokenKey{
-			{publicKey: strings.Replace(pem, "MIIB", "XXXX", 1), keyId: ""},
+			{publicKey: strings.Replace(tc.privateKeys[0].publicKey, "MIIB", "XXXX", 1), keyId: ""},
 		},
 	)
 }
 
 func (tc *UAATestContext) CreateSignedToken(payload string) string {
 	tokenKey := tc.privateKeys[0]
-	token, err := jose.Sign(payload, jose.RS256, tokenKey.privateKey, jose.Header("kid", tokenKey.keyId))
+	decode, _ := pem.Decode([]byte(tokenKey.privateKey))
+	privateKey, err := x509.ParsePKCS1PrivateKey(decode.Bytes)
+	Expect(err).ToNot(HaveOccurred())
+	token, err := jose.Sign(payload, jose.RS256, privateKey, jose.Header("kid", tokenKey.keyId))
+	Expect(err).ToNot(HaveOccurred())
+
+	return token
+}
+
+func (tc *UAATestContext) CreateHS256SignedToken(payload string) string {
+	tokenKey := tc.privateKeys[0]
+	token, err := jose.Sign(payload, jose.HS256, []byte(tokenKey.privateKey), jose.Header("kid", tokenKey.keyId))
 	Expect(err).ToNot(HaveOccurred())
 
 	return token
 }
 
 func (tc *UAATestContext) CreateSignedTokenUsingPrivateKey(payload string, tokenKey mockTokenKey) string {
-	token, err := jose.Sign(payload, jose.RS256, tokenKey.privateKey, jose.Header("kid", tokenKey.keyId))
+	decode, _ := pem.Decode([]byte(tokenKey.privateKey))
+	privateKey, err := x509.ParsePKCS1PrivateKey(decode.Bytes)
+	Expect(err).ToNot(HaveOccurred())
+	token, err := jose.Sign(payload, jose.RS256, privateKey, jose.Header("kid", tokenKey.keyId))
 	Expect(err).ToNot(HaveOccurred())
 
 	return token
@@ -639,7 +715,7 @@ func publicKeyExponentToString(privateKey *rsa.PrivateKey) string {
 	return base64.StdEncoding.EncodeToString(b[0:3])
 }
 
-func publicKeyPEMToString(privateKey *rsa.PrivateKey) string {
+func keyPEMToString(privateKey *rsa.PrivateKey) (string, string) {
 	encodedKey, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
 	Expect(err).ToNot(HaveOccurred())
 
@@ -647,8 +723,16 @@ func publicKeyPEMToString(privateKey *rsa.PrivateKey) string {
 		Type:  "RSA PUBLIC KEY",
 		Bytes: encodedKey,
 	}
+	publicKey := string(pem.EncodeToMemory(pemKey))
 
-	return string(pem.EncodeToMemory(pemKey))
+	encodedKey = x509.MarshalPKCS1PrivateKey(privateKey)
+
+	pemKey = &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: encodedKey,
+	}
+	privateKeyString := string(pem.EncodeToMemory(pemKey))
+	return publicKey, privateKeyString
 }
 
 func publicKeyModulusToString(privateKey *rsa.PrivateKey) string {

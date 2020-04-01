@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/json"
@@ -17,6 +16,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"code.cloudfoundry.org/go-loggregator/metrics"
 
 	jose "github.com/dvsekhvalnov/jose2go"
 )
@@ -35,6 +36,8 @@ type UAAClient struct {
 	log                    *log.Logger
 	publicKeys             sync.Map
 	minimumRefreshInterval time.Duration
+	username               string
+	password               string
 	lastQueryTime          int64
 }
 
@@ -75,6 +78,13 @@ func WithMinimumRefreshInterval(interval time.Duration) UAAOption {
 	}
 }
 
+func WithBasicAuth(username, password string) UAAOption {
+	return func(c *UAAClient) {
+		c.username = username
+		c.password = password
+	}
+}
+
 func (c *UAAClient) RefreshTokenKeys() error {
 	lastQueryTime := atomic.LoadInt64(&c.lastQueryTime)
 	nextAllowedRefreshTime := time.Unix(0, lastQueryTime).Add(c.minimumRefreshInterval)
@@ -94,6 +104,9 @@ func (c *UAAClient) RefreshTokenKeys() error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	if c.username != "" {
+		req.SetBasicAuth(c.username, c.password)
+	}
 
 	resp, err := c.httpClient.Do(req)
 
@@ -119,31 +132,34 @@ func (c *UAAClient) RefreshTokenKeys() error {
 	})
 
 	for _, tokenKey := range tokenKeys {
+
 		if tokenKey.Value == "" {
 			return fmt.Errorf("received an empty token key from UAA")
 		}
+		if tokenKey.Algorithm == "HS256" {
+			publicKey := tokenKey.Value
+			c.publicKeys.Store(tokenKey.KeyId, []byte(publicKey))
+		} else {
+			block, _ := pem.Decode([]byte(tokenKey.Value))
+			if block == nil {
+				return fmt.Errorf("failed to parse PEM block containing the public key")
+			}
 
-		block, _ := pem.Decode([]byte(tokenKey.Value))
-		if block == nil {
-			return fmt.Errorf("failed to parse PEM block containing the public key")
+			publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+			if err != nil {
+				return fmt.Errorf("error parsing public key: %s", err)
+			}
+
+			publicKey, isRSAPublicKey := publicKeyInterface.(*rsa.PublicKey)
+			if !isRSAPublicKey {
+				return fmt.Errorf("did not get a valid RSA key from UAA: %s", err)
+			}
+			// always overwrite the key stored at keyId because:
+			// if you manually delete the UAA signing key from Credhub, UAA will
+			// generate a new key with the same (default) keyId, which is something
+			// along the lines of `key-1`
+			c.publicKeys.Store(tokenKey.KeyId, publicKey)
 		}
-
-		publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-		if err != nil {
-			return fmt.Errorf("error parsing public key: %s", err)
-		}
-
-		publicKey, isRSAPublicKey := publicKeyInterface.(*rsa.PublicKey)
-		if !isRSAPublicKey {
-			return fmt.Errorf("did not get a valid RSA key from UAA: %s", err)
-		}
-
-		// always overwrite the key stored at keyId because:
-		// if you manually delete the UAA signing key from Credhub, UAA will
-		// generate a new key with the same (default) keyId, which is something
-		// along the lines of `key-1`
-		c.publicKeys.Store(tokenKey.KeyId, publicKey)
-
 		// update list of previously-known keys so that we can prune them
 		// if UAA no longer considers them valid
 		delete(currentKeyIds, tokenKey.KeyId)
@@ -178,7 +194,7 @@ func (c *UAAClient) Read(token string) (Oauth2ClientContext, error) {
 	}
 
 	payload, _, err := jose.Decode(trimBearer(token), func(headers map[string]interface{}, payload string) interface{} {
-		if headers["alg"] != "RS256" {
+		if headers["alg"] != "RS256" && headers["alg"] != "HS256" {
 			return AlgorithmError{Alg: headers["alg"].(string)}
 		}
 
@@ -230,17 +246,17 @@ func (c *UAAClient) Read(token string) (Oauth2ClientContext, error) {
 	}, err
 }
 
-func (c *UAAClient) loadOrFetchPublicKey(keyId string) (*rsa.PublicKey, error) {
+func (c *UAAClient) loadOrFetchPublicKey(keyId string) (interface{}, error) {
 	publicKey, ok := c.publicKeys.Load(keyId)
 	if ok {
-		return (publicKey.(*rsa.PublicKey)), nil
+		return publicKey, nil
 	}
 
 	c.RefreshTokenKeys()
 
 	publicKey, ok = c.publicKeys.Load(keyId)
 	if ok {
-		return (publicKey.(*rsa.PublicKey)), nil
+		return publicKey, nil
 	}
 
 	return nil, UnknownTokenKeyError{Kid: keyId}
@@ -254,8 +270,9 @@ func trimBearer(authToken string) string {
 
 // TODO: move key processing to a method of tokenKey
 type tokenKey struct {
-	KeyId string `json:"kid"`
-	Value string `json:"value"`
+	KeyId     string `json:"kid"`
+	Value     string `json:"value"`
+	Algorithm string `json:"alg"`
 }
 
 type tokenKeys struct {
