@@ -51,10 +51,7 @@ ENV LOG_CACHE_GATEWAY_ADDR=log-cache:8081 \
     METRICS_KEY_FILE_PATH="/metrics-certs/tls.key" \
     INTERNAL_IP="127.0.0.1" \
     CAPI_ADDR="" \
-    UAA_ADDR="" \
-    UAA_CLIENT_ID="" \
-    UAA_CLIENT_SECRET=""
-
+    UAA_ADDR=""
 
 EXPOSE 8083
 CMD [ "/srv/cf-auth-proxy" ]
