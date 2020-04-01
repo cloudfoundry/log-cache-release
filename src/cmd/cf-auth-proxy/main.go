@@ -45,12 +45,16 @@ func main() {
 		),
 	)
 
+	var options []auth.UAAOption
+	if cfg.UAA.ClientID != "" && cfg.UAA.ClientSecret != "" {
+		options = append(options,auth.WithBasicAuth(cfg.UAA.ClientID, cfg.UAA.ClientSecret))
+	}
 	uaaClient := auth.NewUAAClient(
 		cfg.UAA.Addr,
 		buildUAAClient(cfg, loggr),
 		metrics,
 		loggr,
-		auth.WithBasicAuth(cfg.UAA.ClientID, cfg.UAA.ClientSecret),
+		options...
 	)
 
 	// try to get our first token key, but bail out if we can't talk to UAA
