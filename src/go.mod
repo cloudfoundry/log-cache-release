@@ -37,7 +37,7 @@ require (
 	github.com/shirou/gopsutil v2.20.3+incompatible
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/sys v0.0.0-20200331124033-c3d80250170d // indirect
-	google.golang.org/genproto v0.0.0-20200401122417-09ab7b7031d2
+	google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932
 	google.golang.org/grpc v1.28.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
