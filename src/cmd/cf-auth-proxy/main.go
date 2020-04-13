@@ -1,7 +1,6 @@
 package main
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"io/ioutil"
 	"log"
 	"net"
@@ -10,6 +9,8 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"code.cloudfoundry.org/go-loggregator/metrics"
 
 	"crypto/x509"
 
@@ -71,7 +72,6 @@ func main() {
 		buildCAPIClient(cfg, loggr),
 		metrics,
 		loggr,
-		auth.WithTokenPruningInterval(cfg.TokenPruningInterval),
 		auth.WithCacheExpirationInterval(cfg.CacheExpirationInterval),
 	)
 

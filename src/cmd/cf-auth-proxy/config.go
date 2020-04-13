@@ -43,7 +43,6 @@ func LoadConfig() (*Config, error) {
 		Addr:                    ":8083",
 		InternalIP:              "0.0.0.0",
 		LogCacheGatewayAddr:     "localhost:8081",
-		TokenPruningInterval:    time.Minute,
 		CacheExpirationInterval: time.Minute,
 		MetricsServer: config.MetricsServer{
 			Port: 6065,
