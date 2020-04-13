@@ -80,40 +80,24 @@ var _ = Describe("CAPIClient", func() {
 			}).Should(Equal(4))
 		})
 
-		It("succeeds when a CAPI retry returns a valid sourceId", func() {
+		It("succeeds when a CAPI returns 200 for either app or service", func() {
 			tc := setup(
 				auth.WithCacheExpirationInterval(250 * time.Millisecond),
 			)
 
 			tc.capiClient.resps = []response{
-				newCapiResp("37cbff06-79ef-4146-a7b0-01838940f185", http.StatusOK),
-				newCapiResp("afbdcab7-6fd1-418d-bfd0-95c60276507b", http.StatusOK),
-
-				newCapiResp("37cbff06-79ef-4146-a7b0-01838940f185", http.StatusOK),
-				newCapiResp("afbdcab7-6fd1-418d-bfd0-95c60276507b", http.StatusOK),
-
-				newCapiResp("abcd1234", http.StatusOK),
-				newCapiResp("afbdcab7-6fd1-418d-bfd0-95c60276507b", http.StatusOK),
+				newCapiResp("app-guid", http.StatusOK),
 			}
 
-			// the first time we call IsAuthorized, we'll cache the response
-			authorized := tc.client.IsAuthorized("37cbff06-79ef-4146-a7b0-01838940f185", "some-token")
-
-			Expect(len(tc.capiClient.requests)).To(Equal(2))
+			authorized := tc.client.IsAuthorized("app-guid", "some-token")
+			Expect(len(tc.capiClient.requests)).To(Equal(1))
 			Expect(authorized).To(BeTrue())
 
-			// when we use the same token to look for an unknown sourceId, the
-			// request should fail to authorize, but we've still made 2 new
-			// calls out to CAPI - this is retry #1
-			authorized = tc.client.IsAuthorized("abcd1234", "some-token")
-			Expect(len(tc.capiClient.requests)).To(Equal(4))
-			Expect(authorized).To(BeFalse())
-
-			// this is retry #2, which now has the correct sourceId and
-			// should authorize correctly
-			authorized = tc.client.IsAuthorized("abcd1234", "some-token")
-			Expect(len(tc.capiClient.requests)).To(Equal(6))
-			Expect(authorized).To(BeTrue())
+			tc.capiClient.resps = []response{
+				newCapiResp("service-guid", http.StatusOK),
+			}
+			Expect(tc.client.IsAuthorized("service-guid", "some-token")).To(BeTrue())
+			Expect(len(tc.capiClient.requests)).To(Equal(3)) //two requests because we check apps and services
 		})
 
 		It("sourceIDs from expired cached tokens are not authorized", func() {
@@ -158,30 +142,36 @@ var _ = Describe("CAPIClient", func() {
 
 			Eventually(tc.client.TokenCacheSize).Should(BeZero())
 		})
-	})
 
-	Describe("AvailableSourceIDs", func() {
-		It("returns the available app and service instance IDs", func() {
+		FIt("Has App returns true if capi returns 200", func() {
 			tc := setup()
 
 			tc.capiClient.resps = []response{
-				{status: http.StatusOK, body: []byte(`{"resources": [{"guid": "app-0"}, {"guid": "app-1"}]}`)},
-				{status: http.StatusOK, body: []byte(`{"resources": [{"guid": "service-2"}, {"guid": "service-3"}]}`)},
+				{status: http.StatusOK, body: nil},
 			}
-			sourceIDs := tc.client.AvailableSourceIDs("some-token")
-			Expect(sourceIDs).To(ConsistOf("app-0", "app-1", "service-2", "service-3"))
 
-			Expect(tc.capiClient.requests).To(HaveLen(2))
+			Expect(tc.client.HasApp("some-source", "some-token")).To(BeTrue())
 
+			Expect(tc.capiClient.requests).To(HaveLen(1))
 			appsReq := tc.capiClient.requests[0]
 			Expect(appsReq.Method).To(Equal(http.MethodGet))
-			Expect(appsReq.URL.String()).To(Equal("http://internal.capi.com/v3/apps"))
+			Expect(appsReq.URL.String()).To(Equal("http://internal.capi.com/v3/apps/some-source"))
 			Expect(appsReq.Header.Get("Authorization")).To(Equal("some-token"))
+		})
 
-			servicesReq := tc.capiClient.requests[1]
-			Expect(servicesReq.Method).To(Equal(http.MethodGet))
-			Expect(servicesReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances"))
-			Expect(servicesReq.Header.Get("Authorization")).To(Equal("some-token"))
+		It("Has Service returns true if capi returns 200", func() {
+			tc := setup()
+
+			tc.capiClient.resps = []response{
+				{status: http.StatusOK, body: nil},
+			}
+			Expect(tc.client.HasService("some-source", "some-token")).To(BeTrue())
+
+			Expect(tc.capiClient.requests).To(HaveLen(1))
+			appsReq := tc.capiClient.requests[0]
+			Expect(appsReq.Method).To(Equal(http.MethodGet))
+			Expect(appsReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances/some-source"))
+			Expect(appsReq.Header.Get("Authorization")).To(Equal("some-token"))
 		})
 
 		It("iterates through all pages returned by /v3/apps", func() {

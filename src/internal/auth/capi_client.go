@@ -122,7 +122,8 @@ func (c *CAPIClient) IsAuthorized(sourceId string, clientToken string) bool {
 		expiresAt: time.Now().Add(c.cacheExpirationInterval),
 	})
 
-	return isContained(sourceIds, sourceId)
+	// return isContained(sourceIds, sourceId)
+	return c.HasApp(sourceId, clientToken) || c.HasService(sourceId, clientToken)
 }
 
 func isContained(sourceIds []string, sourceId string) bool {
@@ -168,6 +169,36 @@ func (c *CAPIClient) AvailableSourceIDs(authToken string) []string {
 	}
 
 	return sourceIDs
+}
+
+func (c *CAPIClient) HasApp(sourceID, authToken string) bool {
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps/"+sourceID, nil)
+	if err != nil {
+		c.log.Printf("failed to build authorize log access request: %s", err)
+		return false
+	}
+
+	resp, err := c.doRequest(req, authToken, c.storeAppsLatency)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return false
+	}
+
+	return true
+}
+
+func (c *CAPIClient) HasService(sourceID, authToken string) bool {
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/service_instances/"+sourceID, nil)
+	if err != nil {
+		c.log.Printf("failed to build authorize log access request: %s", err)
+		return false
+	}
+
+	resp, err := c.doRequest(req, authToken, c.storeAppsLatency)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return false
+	}
+
+	return true
 }
 
 func (c *CAPIClient) GetRelatedSourceIds(appNames []string, authToken string) map[string][]string {
