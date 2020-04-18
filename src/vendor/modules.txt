@@ -71,7 +71,7 @@ github.com/golang/protobuf/ptypes/wrappers
 github.com/golang/snappy
 # github.com/gorilla/mux v1.7.4
 github.com/gorilla/mux
-# github.com/grpc-ecosystem/grpc-gateway v1.14.3
+# github.com/grpc-ecosystem/grpc-gateway v1.14.4
 github.com/grpc-ecosystem/grpc-gateway/internal
 github.com/grpc-ecosystem/grpc-gateway/runtime
 github.com/grpc-ecosystem/grpc-gateway/utilities
