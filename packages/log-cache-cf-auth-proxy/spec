@@ -2,7 +2,7 @@
 name: log-cache-cf-auth-proxy
 
 dependencies:
-- golang1.13.3
+- golang1.13.10
 
 files:
 - code.cloudfoundry.org/go-envstruct/*.go # gosub
