@@ -18,6 +18,10 @@ import (
 )
 
 var _ = Describe("CAPIClient", func() {
+	var (
+		unitTag = map[string]string{"unit": "nanoseconds"}
+	)
+
 	type testContext struct {
 		capiClient *spyHTTPClient
 		client     *auth.CAPIClient
@@ -197,11 +201,11 @@ var _ = Describe("CAPIClient", func() {
 			tc.client.HasApp("app-guid", "my-token")
 
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_latency", unitTag)
+			}).Should(BeNumerically(">", 0))
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_list_service_instances_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_list_service_instances_latency", unitTag)
+			}).Should(BeZero())
 		})
 
 		It("stores the latency", func() {
@@ -214,11 +218,11 @@ var _ = Describe("CAPIClient", func() {
 			tc.client.HasService("service-guid", "my-token")
 
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_latency", unitTag)
+			}).Should(BeZero())
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_list_service_instances_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_list_service_instances_latency", unitTag)
+			}).Should(BeNumerically(">", 0))
 		})
 
 		It("is goroutine safe", func() {
@@ -382,11 +386,11 @@ var _ = Describe("CAPIClient", func() {
 			tc.client.AvailableSourceIDs("my-token")
 
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_latency", unitTag)
+			}).Should(BeNumerically(">", 0))
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_list_service_instances_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_list_service_instances_latency", unitTag)
+			}).Should(BeNumerically(">", 0))
 		})
 
 		It("is goroutine safe", func() {
@@ -514,8 +518,8 @@ var _ = Describe("CAPIClient", func() {
 			tc.client.GetRelatedSourceIds([]string{"app-name"}, "some-token")
 
 			Eventually(func() float64 {
-				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_by_name_latency", nil)
-			}).ShouldNot(BeZero())
+				return tc.metrics.GetMetricValue("cf_auth_proxy_last_capiv3_apps_by_name_latency", unitTag)
+			}).Should(BeNumerically(">", 0))
 		})
 
 		It("returns no source IDs when the request fails", func() {
