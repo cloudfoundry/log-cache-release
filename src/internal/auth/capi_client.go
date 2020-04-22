@@ -118,7 +118,7 @@ func (c *CAPIClient) HasService(sourceID, authToken string) bool {
 		return false
 	}
 
-	resp, err := c.doRequest(req, authToken, c.storeAppsLatency)
+	resp, err := c.doRequest(req, authToken, c.storeListServiceInstancesLatency)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return false
 	}
@@ -182,7 +182,7 @@ func (c *CAPIClient) sourceIDsForResourceType(resourceType, authToken string, me
 	query.Set("per_page", "5000")
 	req.URL.RawQuery = query.Encode()
 
-	resources, err := c.doPaginatedResourceRequest(req, authToken, c.storeListServiceInstancesLatency)
+	resources, err := c.doPaginatedResourceRequest(req, authToken, metrics)
 	if err != nil {
 		c.log.Print(err)
 		return nil, err
