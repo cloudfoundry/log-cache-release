@@ -9,6 +9,9 @@ import (
 type Config struct {
 	LogProviderAddr string `env:"LOGS_PROVIDER_ADDR, required, report"`
 	LogsProviderTLS LogsProviderTLS
+	USE_GATEWAY     bool   `env:"USE_GATEWAY, report"`
+	GATEWAY_TOKEN   string `env:"GATEWAY_TOKEN, report"`
+	GATEWAY_ADDR    string `env:"GATEWAY_ADDR, report"`
 
 	LogCacheAddr string   `env:"LOG_CACHE_ADDR, required, report"`
 	HealthPort   int      `env:"HEALTH_PORT, report"`

@@ -165,13 +165,6 @@ func (c *RLPGatewayClient) connect(
 				continue
 			}
 
-			for _, e := range eb.Batch {
-				select {
-				case <-ctx.Done():
-					return
-				case es <- e:
-				}
-			}
 		}
 
 	}

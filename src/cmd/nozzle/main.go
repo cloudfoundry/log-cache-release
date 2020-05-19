@@ -1,12 +1,13 @@
 package main
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+
+	"code.cloudfoundry.org/go-loggregator/metrics"
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/nozzle"
@@ -14,6 +15,15 @@ import (
 
 	loggregator "code.cloudfoundry.org/go-loggregator"
 )
+
+type tokenAttacher struct {
+	token string
+}
+
+func (a *tokenAttacher) Do(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", a.token)
+	return http.DefaultClient.Do(req)
+}
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
@@ -45,15 +55,26 @@ func main() {
 		metrics.WithHelpText("Total number of envelopes dropped."),
 	)
 
-	streamConnector := loggregator.NewEnvelopeStreamConnector(
-		cfg.LogProviderAddr,
-		tlsCfg,
-		loggregator.WithEnvelopeStreamLogger(loggr),
-		loggregator.WithEnvelopeStreamBuffer(10000, func(missed int) {
-			loggr.Printf("dropped %d envelope batches", missed)
-			dropped.Add(float64(missed))
-		}),
-	)
+	var streamConnector StreamConnector
+	if !cfg.USE_GATEWAY {
+		streamConnector = loggregator.NewEnvelopeStreamConnector(
+			cfg.LogProviderAddr,
+			tlsCfg,
+			loggregator.WithEnvelopeStreamLogger(loggr),
+			loggregator.WithEnvelopeStreamBuffer(10000, func(missed int) {
+				loggr.Printf("dropped %d envelope batches", missed)
+				dropped.Add(float64(missed))
+			}),
+		)
+	} else {
+		streamConnector = loggregator.NewRLPGatewayClient(
+			cfg.GATEWAY_ADDR,
+			loggregator.WithRLPGatewayClientLogger(loggr),
+			loggregator.WithRLPGatewayHTTPClient(&tokenAttacher{
+				token: cfg.GATEWAY_TOKEN,
+			}),
+		)
+	}
 
 	nozzle := NewNozzle(
 		streamConnector,
