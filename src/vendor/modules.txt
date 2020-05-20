@@ -92,7 +92,7 @@ github.com/nxadm/tail/watch
 github.com/nxadm/tail/winfile
 # github.com/oklog/ulid v1.3.1
 github.com/oklog/ulid
-# github.com/onsi/ginkgo v1.12.1
+# github.com/onsi/ginkgo v1.12.2
 github.com/onsi/ginkgo
 github.com/onsi/ginkgo/config
 github.com/onsi/ginkgo/extensions/table
@@ -112,7 +112,7 @@ github.com/onsi/ginkgo/reporters/stenographer
 github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable
 github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty
 github.com/onsi/ginkgo/types
-# github.com/onsi/gomega v1.10.0
+# github.com/onsi/gomega v1.10.1
 github.com/onsi/gomega
 github.com/onsi/gomega/format
 github.com/onsi/gomega/gstruct
@@ -180,7 +180,7 @@ github.com/shirou/gopsutil/net
 github.com/shirou/gopsutil/process
 # github.com/square/certstrap v1.2.0
 github.com/square/certstrap/pkix
-# golang.org/x/net v0.0.0-20200519113804-d87ec0cfa476
+# golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
 golang.org/x/net/context
 golang.org/x/net/html
 golang.org/x/net/html/atom

@@ -19,7 +19,6 @@ require (
 	github.com/cloudfoundry/gosigar v1.1.0
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/emirpasic/gods v1.12.0
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.4.2 // pinned
@@ -28,17 +27,15 @@ require (
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/onsi/ginkgo v1.12.1
-	github.com/onsi/gomega v1.10.0
+	github.com/onsi/ginkgo v1.12.2
+	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.20.4+incompatible
-	golang.org/x/net v0.0.0-20200519113804-d87ec0cfa476
-	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
+	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
 	google.golang.org/genproto v0.0.0-20200519141106-08726f379972
 	google.golang.org/grpc v1.29.1
-	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
