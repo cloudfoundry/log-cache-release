@@ -23,7 +23,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.4.2 // pinned
 	github.com/gorilla/mux v1.7.4
-	github.com/grpc-ecosystem/grpc-gateway v1.14.5
+	github.com/grpc-ecosystem/grpc-gateway v1.14.6
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
