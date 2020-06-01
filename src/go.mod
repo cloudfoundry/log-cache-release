@@ -27,16 +27,16 @@ require (
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/onsi/ginkgo v1.12.2
+	github.com/onsi/ginkgo v1.12.3
 	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
-	github.com/shirou/gopsutil v2.20.4+incompatible
+	github.com/shirou/gopsutil v2.20.5+incompatible
 	golang.org/x/net v0.0.0-20200528225125-3c3fba18258b
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
-	google.golang.org/genproto v0.0.0-20200528191852-705c0b31589b
+	google.golang.org/genproto v0.0.0-20200601130524-0f60399e6634
 	google.golang.org/grpc v1.29.1
 )
