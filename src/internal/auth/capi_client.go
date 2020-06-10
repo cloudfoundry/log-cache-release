@@ -112,18 +112,25 @@ func (c *CAPIClient) HasApp(sourceID, authToken string) bool {
 }
 
 func (c *CAPIClient) HasService(sourceID, authToken string) bool {
-	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/service_instances/"+sourceID, nil)
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/service_instances", nil)
 	if err != nil {
 		c.log.Printf("failed to build authorize log access request: %s", err)
 		return false
 	}
 
-	resp, err := c.doRequest(req, authToken, c.storeListServiceInstancesLatency)
-	if err != nil || resp.StatusCode != http.StatusOK {
+	services, err := c.doPaginatedResourceRequest(req, authToken, c.storeListServiceInstancesLatency)
+	if err != nil {
+		c.log.Printf("unable to list services: %s", err)
 		return false
 	}
 
-	return true
+	for _, service := range services {
+		if service.Guid == sourceID {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (c *CAPIClient) GetRelatedSourceIds(appNames []string, authToken string) map[string][]string {

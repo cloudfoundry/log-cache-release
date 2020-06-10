@@ -141,18 +141,18 @@ var _ = Describe("CAPIClient", func() {
 			Expect(appsReq.Header.Get("Authorization")).To(Equal("some-token"))
 		})
 
-		It("Has Service returns true if capi returns 200", func() {
+		It("Has Service returns true if capi returns 200 and the service-id is present", func() {
 			tc := setup()
 
 			tc.capiClient.resps = []response{
-				{status: http.StatusOK, body: nil},
+				{status: http.StatusOK, body: []byte(serviceIdResponseBody)},
 			}
-			Expect(tc.client.HasService("some-source", "some-token")).To(BeTrue())
+			Expect(tc.client.HasService("service-id", "some-token")).To(BeTrue())
 
 			Expect(tc.capiClient.requests).To(HaveLen(1))
 			serviceReq := tc.capiClient.requests[0]
 			Expect(serviceReq.Method).To(Equal(http.MethodGet))
-			Expect(serviceReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances/some-source"))
+			Expect(serviceReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances"))
 			Expect(serviceReq.Header.Get("Authorization")).To(Equal("some-token"))
 		})
 
@@ -162,12 +162,27 @@ var _ = Describe("CAPIClient", func() {
 			tc.capiClient.resps = []response{
 				{status: http.StatusNotFound, body: nil},
 			}
-			Expect(tc.client.HasService("some-source", "some-token")).To(BeFalse())
+			Expect(tc.client.HasService("service-id", "some-token")).To(BeFalse())
 
 			Expect(tc.capiClient.requests).To(HaveLen(1))
 			serviceReq := tc.capiClient.requests[0]
 			Expect(serviceReq.Method).To(Equal(http.MethodGet))
-			Expect(serviceReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances/some-source"))
+			Expect(serviceReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances"))
+			Expect(serviceReq.Header.Get("Authorization")).To(Equal("some-token"))
+		})
+
+		It("Has Service returns false if service is not in the list returned by capi", func() {
+			tc := setup()
+
+			tc.capiClient.resps = []response{
+				{status: http.StatusOK, body: []byte(someServiceResponseBody)},
+			}
+			Expect(tc.client.HasService("service-id", "some-token")).To(BeFalse())
+
+			Expect(tc.capiClient.requests).To(HaveLen(1))
+			serviceReq := tc.capiClient.requests[0]
+			Expect(serviceReq.Method).To(Equal(http.MethodGet))
+			Expect(serviceReq.URL.String()).To(Equal("http://internal.capi.com/v3/service_instances"))
 			Expect(serviceReq.Header.Get("Authorization")).To(Equal("some-token"))
 		})
 
@@ -565,3 +580,82 @@ var emptyCapiResp = response{
 	status: http.StatusOK,
 	body:   []byte(`{"resources": []}`),
 }
+
+const (
+	serviceIdResponseBody = `{
+  "pagination": {
+    "total_results": 1,
+    "total_pages": 1,
+    "first": {
+      "href": "https://api.example.org/v3/service_instances?page=1&per_page=50"
+    },
+    "last": {
+      "href": "https://api.example.org/v3/service_instances?page=1&per_page=50"
+    },
+    "next": null,
+    "previous": null
+  },
+  "resources": [
+    {
+      "guid": "service-id",
+      "created_at": "2017-11-17T13:54:21Z",
+      "updated_at": "2017-11-17T13:54:21Z",
+      "name": "my_service_instance",
+      "relationships": {
+        "space": {
+          "data": {
+            "guid": "ae0031f9-dd49-461c-a945-df40e77c39cb"
+          }
+        }
+      },
+      "metadata": {
+        "labels": { },
+        "annotations": { }
+      },
+      "links": {
+        "space": {
+          "href": "https://api.example.org/v3/spaces/ae0031f9-dd49-461c-a945-df40e77c39cb"
+        }
+      }
+    }
+  ]
+}`
+	someServiceResponseBody = `{
+  "pagination": {
+    "total_results": 1,
+    "total_pages": 1,
+    "first": {
+      "href": "https://api.example.org/v3/service_instances?page=1&per_page=50"
+    },
+    "last": {
+      "href": "https://api.example.org/v3/service_instances?page=1&per_page=50"
+    },
+    "next": null,
+    "previous": null
+  },
+  "resources": [
+    {
+      "guid": "some-service",
+      "created_at": "2017-11-17T13:54:21Z",
+      "updated_at": "2017-11-17T13:54:21Z",
+      "name": "my_service_instance",
+      "relationships": {
+        "space": {
+          "data": {
+            "guid": "ae0031f9-dd49-461c-a945-df40e77c39cb"
+          }
+        }
+      },
+      "metadata": {
+        "labels": { },
+        "annotations": { }
+      },
+      "links": {
+        "space": {
+          "href": "https://api.example.org/v3/spaces/ae0031f9-dd49-461c-a945-df40e77c39cb"
+        }
+      }
+    }
+  ]
+}`
+)
