@@ -1,13 +1,14 @@
 package main
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"log"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"code.cloudfoundry.org/go-loggregator/metrics"
 
 	"code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/cache"
@@ -29,15 +30,22 @@ func main() {
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	m := metrics.NewRegistry(
-		logger,
-		metrics.WithTLSServer(
+	metricServerOption := metrics.WithServer(int(cfg.MetricsServer.Port))
+
+	if cfg.MetricsServer.CAFile != "" {
+		metricServerOption = metrics.WithTLSServer(
 			int(cfg.MetricsServer.Port),
 			cfg.MetricsServer.CertFile,
 			cfg.MetricsServer.KeyFile,
 			cfg.MetricsServer.CAFile,
-		),
+		)
+	}
+
+	m := metrics.NewRegistry(
+		logger,
+		metricServerOption,
 	)
+
 	uptimeFn := m.NewGauge(
 		"log_cache_uptime",
 		metrics.WithHelpText("Time since log cache started."),
