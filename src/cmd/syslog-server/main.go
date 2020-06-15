@@ -1,14 +1,15 @@
 package main
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
-	"code.cloudfoundry.org/log-cache/internal/routing"
-	"code.cloudfoundry.org/log-cache/internal/syslog"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"log"
 	_ "net/http/pprof"
 	"os"
 	"time"
+
+	"code.cloudfoundry.org/go-loggregator/metrics"
+	"code.cloudfoundry.org/log-cache/internal/routing"
+	"code.cloudfoundry.org/log-cache/internal/syslog"
+	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 
 	"code.cloudfoundry.org/go-envstruct"
 	"google.golang.org/grpc"
@@ -33,14 +34,19 @@ func main() {
 	envstruct.WriteReport(cfg)
 
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
-	m := metrics.NewRegistry(
-		loggr,
-		metrics.WithTLSServer(
+
+	metricServerOption := metrics.WithServer(int(cfg.MetricsServer.Port))
+	if cfg.MetricsServer.CAFile != "" {
+		metricServerOption = metrics.WithTLSServer(
 			int(cfg.MetricsServer.Port),
 			cfg.MetricsServer.CertFile,
 			cfg.MetricsServer.KeyFile,
 			cfg.MetricsServer.CAFile,
-		),
+		)
+	}
+	m := metrics.NewRegistry(
+		loggr,
+		metricServerOption,
 	)
 
 	conn, err := grpc.Dial(

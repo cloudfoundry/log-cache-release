@@ -35,14 +35,20 @@ func main() {
 	}
 	envstruct.WriteReport(cfg)
 
-	metrics := metrics.NewRegistry(
-		loggr,
-		metrics.WithTLSServer(
+	metricServerOption := metrics.WithServer(int(cfg.MetricsServer.Port))
+
+	if cfg.MetricsServer.CAFile != "" {
+		metricServerOption = metrics.WithTLSServer(
 			int(cfg.MetricsServer.Port),
 			cfg.MetricsServer.CertFile,
 			cfg.MetricsServer.KeyFile,
 			cfg.MetricsServer.CAFile,
-		),
+		)
+	}
+
+	metrics := metrics.NewRegistry(
+		loggr,
+		metricServerOption,
 	)
 
 	var options []auth.UAAOption
