@@ -48,10 +48,7 @@ ENV SYSLOG_PORT=8082 \
     CERT_PATH="/log-cache-certs/tls.crt" \
     KEY_PATH="/log-cache-certs/tls.key" \
     SYSLOG_TLS_CERT_PATH="/syslog-server-certs/tls.crt" \
-    SYSLOG_TLS_KEY_PATH="/syslog-server-certs/tls.key" \
-    METRICS_CA_FILE_PATH="" \
-    METRICS_CERT_FILE_PATH="" \
-    METRICS_KEY_FILE_PATH=""
+    SYSLOG_TLS_KEY_PATH="/syslog-server-certs/tls.key"
 
 EXPOSE 8082
 CMD [ "/srv/syslog-server" ]

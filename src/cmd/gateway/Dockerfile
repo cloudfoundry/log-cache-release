@@ -51,10 +51,7 @@ ENV ADDR=:8081 \
     CERT_PATH="/log-cache-certs/tls.crt" \
     KEY_PATH="/log-cache-certs/tls.key" \
     PROXY_CERT_PATH="/gateway-certs/tls.crt" \
-    PROXY_KEY_PATH="/gateway-certs/tls.key" \
-    METRICS_CA_FILE_PATH="" \
-    METRICS_CERT_FILE_PATH="" \
-    METRICS_KEY_FILE_PATH=""
+    PROXY_KEY_PATH="/gateway-certs/tls.key"
 
 EXPOSE 8081
 CMD [ "/srv/log-cache-gateway" ]
