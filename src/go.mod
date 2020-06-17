@@ -30,14 +30,13 @@ require (
 	github.com/onsi/ginkgo v1.13.0
 	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.6.0
+	github.com/prometheus/client_golang v1.7.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.20.5+incompatible
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
-	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
 	golang.org/x/text v0.3.3 // indirect
-	google.golang.org/genproto v0.0.0-20200616192300-fc83d8c00726
+	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088
 	google.golang.org/grpc v1.29.1
 )
