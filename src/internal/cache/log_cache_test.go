@@ -1,13 +1,14 @@
 package cache_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"context"
 	"crypto/tls"
 	"errors"
 	"io/ioutil"
 	"log"
 	"time"
+
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"code.cloudfoundry.org/log-cache/internal/auth"
 

@@ -1,9 +1,9 @@
 package store_test
 
 import (
-
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"fmt"
+
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"sync"
 	"sync/atomic"

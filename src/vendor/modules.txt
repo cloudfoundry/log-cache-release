@@ -9,6 +9,9 @@ code.cloudfoundry.org/go-loggregator
 code.cloudfoundry.org/go-loggregator/metrics
 code.cloudfoundry.org/go-loggregator/metrics/testhelpers
 code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2
+# code.cloudfoundry.org/go-metric-registry v0.0.0-20200413202920-40d97c8804ec
+code.cloudfoundry.org/go-metric-registry
+code.cloudfoundry.org/go-metric-registry/testhelpers
 # code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a
 code.cloudfoundry.org/rfc5424
 # code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3

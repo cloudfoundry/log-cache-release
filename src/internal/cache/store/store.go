@@ -1,12 +1,13 @@
 package store
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"container/heap"
 	"regexp"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
@@ -15,8 +16,8 @@ import (
 )
 
 type MetricsRegistry interface {
-	NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter
-	NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge
+	NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter
+	NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge
 }
 
 // MemoryConsultant is used to determine if the store should prune.
@@ -83,37 +84,37 @@ func registerMetrics(m MetricsRegistry) Metrics {
 	return Metrics{
 		expired: m.NewCounter(
 			"log_cache_expired",
-			metrics.WithHelpText("total_expired_envelopes"),
+			"total_expired_envelopes",
 		),
 		cachePeriod: m.NewGauge(
 			"log_cache_cache_period",
-			metrics.WithHelpText("Cache period in milliseconds. Calculated as the difference between the oldest envelope timestamp and now."),
-			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+			"Cache period in milliseconds. Calculated as the difference between the oldest envelope timestamp and now.",
+			metrics.WithMetricLabels(map[string]string{"unit": "milliseconds"}),
 		),
 		ingress: m.NewCounter(
 			"log_cache_ingress",
-			metrics.WithHelpText("Total envelopes ingressed."),
+			"Total envelopes ingressed.",
 		),
 		egress: m.NewCounter(
 			"log_cache_egress",
-			metrics.WithHelpText("Total envelopes retrieved from the store."),
+			"Total envelopes retrieved from the store.",
 		),
 		storeSize: m.NewGauge(
 			"log_cache_store_size",
-			metrics.WithHelpText("Current number of envelopes in the store."),
-			metrics.WithMetricTags(map[string]string{"unit": "entries"}),
+			"Current number of envelopes in the store.",
+			metrics.WithMetricLabels(map[string]string{"unit": "entries"}),
 		),
 
 		//TODO convert to histogram
 		truncationDuration: m.NewGauge(
 			"log_cache_truncation_duration",
-			metrics.WithHelpText("Duration of last truncation in milliseconds."),
-			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+			"Duration of last truncation in milliseconds.",
+			metrics.WithMetricLabels(map[string]string{"unit": "milliseconds"}),
 		),
 		memoryUtilization: m.NewGauge(
 			"log_cache_memory_utilization",
-			metrics.WithHelpText("Percentage of system memory in use by log cache. Calculated as heap memory in use divided by system memory."),
-			metrics.WithMetricTags(map[string]string{"unit": "percentage"}),
+			"Percentage of system memory in use by log cache. Calculated as heap memory in use divided by system memory.",
+			metrics.WithMetricLabels(map[string]string{"unit": "percentage"}),
 		),
 	}
 }

@@ -1,7 +1,6 @@
 package promql
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"context"
 	"fmt"
 	"log"
@@ -9,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
@@ -35,8 +36,8 @@ type DataReader interface {
 }
 
 type Metrics interface {
-	NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter
-	NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge
+	NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter
+	NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge
 }
 
 func New(
@@ -51,19 +52,19 @@ func New(
 		queryTimeout: queryTimeout,
 		failureCounter: m.NewCounter(
 			"log_cache_promql_timeout",
-			metrics.WithHelpText("Total number of errors while executing queries."),
+			"Total number of errors while executing queries.",
 		),
 
 		//TODO convert to histograms
 		instantQueryTimer: m.NewGauge(
 			"log_cache_promql_instant_query_time",
-			metrics.WithHelpText("Duration of last instant query in milliseconds."),
-			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+			"Duration of last instant query in milliseconds.",
+			metrics.WithMetricLabels(map[string]string{"unit": "milliseconds"}),
 		),
 		rangeQueryTimer: m.NewGauge(
 			"log_cache_promql_range_query_time",
-			metrics.WithHelpText("Duration of last range query in milliseconds."),
-			metrics.WithMetricTags(map[string]string{"unit": "milliseconds"}),
+			"Duration of last range query in milliseconds.",
+			metrics.WithMetricLabels(map[string]string{"unit": "milliseconds"}),
 		),
 		result: 1,
 	}

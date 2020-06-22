@@ -1,11 +1,12 @@
 package end2end_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"context"
 	"fmt"
 	"log"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/internal/cache"
@@ -19,10 +20,10 @@ import (
 
 var _ = Describe("LogCache", func() {
 	var (
-		lc_addrs     []string
-		node1        *cache.LogCache
-		node2        *cache.LogCache
-		lc_client    *client.Client
+		lc_addrs  []string
+		node1     *cache.LogCache
+		node2     *cache.LogCache
+		lc_client *client.Client
 
 		// run is used to set varying port numbers
 		// it is incremented for each spec
@@ -38,7 +39,7 @@ var _ = Describe("LogCache", func() {
 		}
 
 		logger := log.New(GinkgoWriter, "", 0)
-		m := metrics.NewRegistry(logger, metrics.WithDefaultTags(map[string]string{"job": "log_cache_end_to_end"}))
+		m := metrics.NewRegistry(logger)
 		node1 = cache.New(
 			m,
 			logger,

@@ -5,8 +5,8 @@ import (
 
 	"sync"
 
-	"code.cloudfoundry.org/go-loggregator/metrics"
-	"github.com/cloudfoundry/gosigar"
+	metrics "code.cloudfoundry.org/go-metric-registry"
+	sigar "github.com/cloudfoundry/gosigar"
 )
 
 // MemoryAnalyzer reports the available and total memory.
@@ -29,18 +29,18 @@ func NewMemoryAnalyzer(m Metrics) *MemoryAnalyzer {
 	return &MemoryAnalyzer{
 		setAvail: m.NewGauge(
 			"log_cache_available_system_memory",
-			metrics.WithHelpText("Current system memory available."),
-			metrics.WithMetricTags(map[string]string{"unit": "bytes"}),
+			"Current system memory available.",
+			metrics.WithMetricLabels(map[string]string{"unit": "bytes"}),
 		),
 		setHeap: m.NewGauge(
 			"log_cache_heap_in_use_memory",
-			metrics.WithHelpText("Current heap memory usage."),
-			metrics.WithMetricTags(map[string]string{"unit": "bytes"}),
+			"Current heap memory usage.",
+			metrics.WithMetricLabels(map[string]string{"unit": "bytes"}),
 		),
 		setTotal: m.NewGauge(
 			"log_cache_total_system_memory",
-			metrics.WithHelpText("Total system memory."),
-			metrics.WithMetricTags(map[string]string{"unit": "bytes"}),
+			"Total system memory.",
+			metrics.WithMetricLabels(map[string]string{"unit": "bytes"}),
 		),
 	}
 }

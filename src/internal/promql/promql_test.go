@@ -1,13 +1,14 @@
 package promql_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"context"
 	"errors"
 	"io/ioutil"
 	"log"
 	"sync"
 	"time"
+
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/internal/promql"

@@ -1,12 +1,13 @@
 package store_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"regexp"
 	"strconv"
 	"sync"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/internal/cache/store"
@@ -50,7 +51,7 @@ var _ = Describe("Store", func() {
 			Expect(e.SourceId).To(Equal("a"))
 		}
 
-		Eventually(func() float64{
+		Eventually(func() float64 {
 			return sm.GetMetricValue("log_cache_expired", nil)
 		}).Should(Equal(0.0))
 	})
@@ -361,12 +362,12 @@ var _ = Describe("Store", func() {
 			Expect(e.Timestamp).To(Equal(int64(3)))
 		}
 
-		Eventually(func() float64{
+		Eventually(func() float64 {
 			return sm.GetMetricValue("log_cache_expired", nil)
 		}).Should(Equal(3.0))
 
-		Eventually(func() float64{
-			return sm.GetMetricValue("log_cache_store_size", map[string]string{"unit":"entries"})
+		Eventually(func() float64 {
+			return sm.GetMetricValue("log_cache_store_size", map[string]string{"unit": "entries"})
 		}).Should(Equal(5.0))
 
 		// Ensure b was removed fully
@@ -399,7 +400,7 @@ var _ = Describe("Store", func() {
 		envelopes = s.Get("b", start, end, nil, nil, 10, false)
 		Expect(envelopes).To(HaveLen(1))
 
-		Eventually(func() float64{
+		Eventually(func() float64 {
 			return sm.GetMetricValue("log_cache_expired", nil)
 		}).Should(Equal(1.0))
 	})

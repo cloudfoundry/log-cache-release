@@ -1,23 +1,25 @@
 package syslog
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
-	"code.cloudfoundry.org/tlsconfig"
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/influxdata/go-syslog/v2"
-	"github.com/influxdata/go-syslog/v2/octetcounting"
 	"log"
 	"time"
 
-	"golang.org/x/net/context"
+	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	metrics "code.cloudfoundry.org/go-metric-registry"
+	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
+	"code.cloudfoundry.org/tlsconfig"
+	"github.com/influxdata/go-syslog/v2"
+	"github.com/influxdata/go-syslog/v2/octetcounting"
+
 	"net"
 	"strconv"
 	"strings"
 	"sync"
+
+	"golang.org/x/net/context"
 )
 
 type Server struct {
@@ -37,7 +39,7 @@ type Server struct {
 }
 
 type MetricsRegistry interface {
-	NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter
+	NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter
 }
 
 type ServerOption func(s *Server)
@@ -64,16 +66,16 @@ func NewServer(
 
 	s.ingress = m.NewCounter(
 		"ingress",
-		metrics.WithHelpText("Total syslog messages ingressed successfully."),
+		"Total syslog messages ingressed successfully.",
 	)
 	s.invalidIngress = m.NewCounter(
 		"invalid_ingress",
-		metrics.WithHelpText("Total number of syslog messages unable to be converted to valid envelopes."),
+		"Total number of syslog messages unable to be converted to valid envelopes.",
 	)
 	s.sendFailure = m.NewCounter(
 		"send_failure",
-		metrics.WithHelpText("Total number of failures while sending to log cache."),
-		metrics.WithMetricTags(map[string]string{"sender": "syslog_server"}),
+		"Total number of failures while sending to log cache.",
+		metrics.WithMetricLabels(map[string]string{"sender": "syslog_server"}),
 	)
 
 	return s

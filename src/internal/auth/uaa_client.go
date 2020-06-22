@@ -17,13 +17,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/metrics"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	jose "github.com/dvsekhvalnov/jose2go"
 )
 
 type Metrics interface {
-	NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge
+	NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge
 }
 
 type HTTPClient interface {

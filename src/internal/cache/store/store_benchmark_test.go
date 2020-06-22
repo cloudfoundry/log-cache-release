@@ -1,12 +1,13 @@
 package store_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"context"
 	"fmt"
 	"math/rand"
 	"testing"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/internal/cache/store"
@@ -187,18 +188,20 @@ func benchBuildLog(appID string, ts int64) *loggregator_v2.Envelope {
 
 type nopMetrics struct{}
 
-type nopCounter struct {}
+type nopCounter struct{}
+
 func (nc *nopCounter) Add(float64) {}
 
-type nopGauge struct {}
+type nopGauge struct{}
+
 func (ng *nopGauge) Add(float64) {}
 func (ng *nopGauge) Set(float64) {}
 
-func (n nopMetrics) NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter {
+func (n nopMetrics) NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter {
 	return &nopCounter{}
 }
 
-func (n nopMetrics) NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge {
+func (n nopMetrics) NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge {
 	return &nopGauge{}
 }
 

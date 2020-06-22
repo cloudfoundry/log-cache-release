@@ -1,9 +1,10 @@
 package nozzle_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"log"
 	"sync"
+
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
@@ -23,7 +24,7 @@ var _ = Describe("Nozzle", func() {
 		streamConnector *spyStreamConnector
 		logCache        *testing.SpyLogCache
 		spyMetrics      *testhelpers.SpyMetricsRegistry
-		logger 			*log.Logger
+		logger          *log.Logger
 	)
 
 	Context("With custom envelope selectors", func() {

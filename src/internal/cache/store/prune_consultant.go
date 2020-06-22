@@ -1,6 +1,6 @@
 package store
 
-import "code.cloudfoundry.org/go-loggregator/metrics"
+import metrics "code.cloudfoundry.org/go-metric-registry"
 
 // PruneConsultant keeps track of the available memory on the system and tries
 // to utilize as much memory as possible while not being a bad neighbor.

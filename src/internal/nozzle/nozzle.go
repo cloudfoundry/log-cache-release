@@ -1,10 +1,11 @@
 package nozzle
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"log"
 	"runtime"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	diodes "code.cloudfoundry.org/go-diodes"
 	"code.cloudfoundry.org/go-loggregator"
@@ -15,8 +16,8 @@ import (
 )
 
 type Metrics interface {
-	NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter
-	NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge
+	NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter
+	NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge
 }
 
 // Nozzle reads envelopes and writes them to LogCache.
@@ -101,15 +102,15 @@ func (n *Nozzle) Start() {
 
 	n.ingressCounter = n.metrics.NewCounter(
 		"nozzle_ingress",
-		metrics.WithHelpText("Total envelopes ingressed."),
+		"Total envelopes ingressed.",
 	)
 	n.egressCounter = n.metrics.NewCounter(
 		"nozzle_egress",
-		metrics.WithHelpText("Total envelopes written to log cache."),
+		"Total envelopes written to log cache.",
 	)
 	n.errCounter = n.metrics.NewCounter(
 		"nozzle_err",
-		metrics.WithHelpText("Total errors while egressing to log cache."),
+		"Total errors while egressing to log cache.",
 	)
 
 	go n.envelopeReader(rx)

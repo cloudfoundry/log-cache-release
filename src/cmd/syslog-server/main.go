@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/metrics"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/log-cache/internal/routing"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
@@ -35,14 +35,14 @@ func main() {
 
 	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
 
-	metricServerOption := metrics.WithServer(int(cfg.MetricsServer.Port))
-	if cfg.MetricsServer.CAFile != "" {
-		metricServerOption = metrics.WithTLSServer(
-			int(cfg.MetricsServer.Port),
-			cfg.MetricsServer.CertFile,
-			cfg.MetricsServer.KeyFile,
-			cfg.MetricsServer.CAFile,
-		)
+	metricServerOption := metrics.WithTLSServer(
+		int(cfg.MetricsServer.Port),
+		cfg.MetricsServer.CertFile,
+		cfg.MetricsServer.KeyFile,
+		cfg.MetricsServer.CAFile,
+	)
+	if cfg.MetricsServer.CAFile == "" {
+		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
 	m := metrics.NewRegistry(
 		loggr,
@@ -60,12 +60,12 @@ func main() {
 
 	egressDropped := m.NewCounter(
 		"egress_dropped",
-		metrics.WithHelpText("Total number of envelopes dropped while sending to log cache."),
+		"Total number of envelopes dropped while sending to log cache.",
 	)
 	sendFailures := m.NewCounter(
 		"log_cache_send_failure",
-		metrics.WithHelpText("Total number of envelope batches failed to send to log cache."),
-		metrics.WithMetricTags(map[string]string{"sender": "batched_ingress_client", "source": "syslog_server"}),
+		"Total number of envelope batches failed to send to log cache.",
+		metrics.WithMetricLabels(map[string]string{"sender": "batched_ingress_client", "source": "syslog_server"}),
 	)
 	logCacheClient := routing.NewBatchedIngressClient(
 		BATCH_CHANNEL_SIZE,

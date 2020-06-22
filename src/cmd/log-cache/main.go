@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/metrics"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/cache"
@@ -30,15 +30,15 @@ func main() {
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	metricServerOption := metrics.WithServer(int(cfg.MetricsServer.Port))
+	metricServerOption := metrics.WithTLSServer(
+		int(cfg.MetricsServer.Port),
+		cfg.MetricsServer.CertFile,
+		cfg.MetricsServer.KeyFile,
+		cfg.MetricsServer.CAFile,
+	)
 
-	if cfg.MetricsServer.CAFile != "" {
-		metricServerOption = metrics.WithTLSServer(
-			int(cfg.MetricsServer.Port),
-			cfg.MetricsServer.CertFile,
-			cfg.MetricsServer.KeyFile,
-			cfg.MetricsServer.CAFile,
-		)
+	if cfg.MetricsServer.CAFile == "" {
+		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
 
 	m := metrics.NewRegistry(
@@ -48,8 +48,8 @@ func main() {
 
 	uptimeFn := m.NewGauge(
 		"log_cache_uptime",
-		metrics.WithHelpText("Time since log cache started."),
-		metrics.WithMetricTags(map[string]string{
+		"Time since log cache started.",
+		metrics.WithMetricLabels(map[string]string{
 			"unit": "seconds",
 		}),
 	)

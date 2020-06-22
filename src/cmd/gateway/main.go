@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"code.cloudfoundry.org/go-loggregator/metrics"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	_ "net/http/pprof"
 
@@ -23,14 +23,14 @@ func main() {
 		log.Fatalf("invalid configuration: %s", err)
 	}
 
-	metricServerOption := metrics.WithServer(int(cfg.MetricsServer.Port))
-	if cfg.MetricsServer.CAFile != "" {
-		metricServerOption = metrics.WithTLSServer(
-			int(cfg.MetricsServer.Port),
-			cfg.MetricsServer.CertFile,
-			cfg.MetricsServer.KeyFile,
-			cfg.MetricsServer.CAFile,
-		)
+	metricServerOption := metrics.WithTLSServer(
+		int(cfg.MetricsServer.Port),
+		cfg.MetricsServer.CertFile,
+		cfg.MetricsServer.KeyFile,
+		cfg.MetricsServer.CAFile,
+	)
+	if cfg.MetricsServer.CAFile == "" {
+		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
 	metrics.NewRegistry(
 		log.New(os.Stderr, "[METRICS] ", log.LstdFlags),

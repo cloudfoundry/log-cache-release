@@ -1,12 +1,13 @@
 package cache
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"log"
 	"net"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -20,8 +21,8 @@ import (
 )
 
 type Metrics interface {
-	NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter
-	NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge
+	NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter
+	NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge
 }
 
 // LogCache is a in memory cache for Loggregator envelopes.
@@ -191,13 +192,13 @@ func (c *LogCache) setupRouting(s *store.Store) {
 				logcache_v1.NewIngressClient(conn),
 				c.metrics.NewCounter(
 					"ingress_dropped",
-					metrics.WithHelpText("Total number of envelopes dropped."),
-					metrics.WithMetricTags(map[string]string{"nodeIndex": strconv.Itoa(i)}),
+					"Total number of envelopes dropped.",
+					metrics.WithMetricLabels(map[string]string{"nodeIndex": strconv.Itoa(i)}),
 				),
 				c.metrics.NewCounter(
 					"log_cache_send_failures",
-					metrics.WithHelpText("Total number of envelope batches that failed to send to other log-cache nodes."),
-					metrics.WithMetricTags(map[string]string{"sender": "batched_ingress_client"}),
+					"Total number of envelope batches that failed to send to other log-cache nodes.",
+					metrics.WithMetricLabels(map[string]string{"sender": "batched_ingress_client"}),
 				),
 				c.log,
 			)
