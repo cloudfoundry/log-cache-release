@@ -3,7 +3,7 @@ set -euxo pipefail
 mkdir -p ${BOSH_INSTALL_TARGET}/src
 cp -a . ${BOSH_INSTALL_TARGET}/src
 
-export GOROOT=$(readlink -nf /var/vcap/packages/golang1.13.10)
+export GOROOT=$(readlink -nf /var/vcap/packages/golang1.13.12)
 export GOPATH=$BOSH_INSTALL_TARGET
 export PATH=$GOROOT/bin:$PATH
 export HOME=/var/vcap

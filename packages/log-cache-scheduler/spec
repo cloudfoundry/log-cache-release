@@ -2,7 +2,7 @@
 name: log-cache-scheduler
 
 dependencies:
-- golang1.13.10
+- golang1.13.12
 
 files:
 - code.cloudfoundry.org/go-batching/*.go # gosub
