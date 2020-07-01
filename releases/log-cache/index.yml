@@ -99,6 +99,8 @@ builds:
     version: 2.6.4
   db48b327-2070-4273-65c7-7dc66dda52a7:
     version: 1.4.8
+  db5ec7af-ef62-4abe-5e3b-2c0240c37f2c:
+    version: 2.7.2
   ed96d95a-9af0-4e47-6d03-d8d80e6d972d:
     version: 1.4.6
   f9467fbb-fade-4edf-49bb-7871aa1434c3:
