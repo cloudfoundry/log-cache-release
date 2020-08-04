@@ -1,7 +1,6 @@
 package nozzle
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"log"
 	"runtime"
 	"time"
@@ -9,14 +8,15 @@ import (
 	diodes "code.cloudfoundry.org/go-diodes"
 	"code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
 type Metrics interface {
-	NewCounter(name string, opts ...metrics.MetricOption) metrics.Counter
-	NewGauge(name string, opts ...metrics.MetricOption) metrics.Gauge
+	NewCounter(name, helpText string, opts ...metrics.MetricOption) metrics.Counter
+	NewGauge(name, helpText string, opts ...metrics.MetricOption) metrics.Gauge
 }
 
 // Nozzle reads envelopes and writes them to LogCache.
@@ -49,14 +49,13 @@ type StreamConnector interface {
 }
 
 // NewNozzle creates a new Nozzle.
-func NewNozzle(c StreamConnector, logCacheAddr, shardId string, m Metrics, logger *log.Logger, opts ...NozzleOption) *Nozzle {
+func NewNozzle(c StreamConnector, logCacheAddr string, m Metrics, logger *log.Logger, opts ...NozzleOption) *Nozzle {
 	n := &Nozzle{
 		s:         c,
 		addr:      logCacheAddr,
 		opts:      []grpc.DialOption{grpc.WithInsecure()},
 		log:       logger,
 		metrics:   m,
-		shardId:   shardId,
 		selectors: []string{},
 	}
 
@@ -82,6 +81,12 @@ func WithDialOpts(opts ...grpc.DialOption) NozzleOption {
 	}
 }
 
+func WithShardID(shardId string) NozzleOption {
+	return func(n *Nozzle) {
+		n.shardId = shardId
+	}
+}
+
 func WithSelectors(selectors ...string) NozzleOption {
 	return func(n *Nozzle) {
 		n.selectors = selectors
@@ -101,15 +106,15 @@ func (n *Nozzle) Start() {
 
 	n.ingressCounter = n.metrics.NewCounter(
 		"nozzle_ingress",
-		metrics.WithHelpText("Total envelopes ingressed."),
+		"Total envelopes ingressed.",
 	)
 	n.egressCounter = n.metrics.NewCounter(
 		"nozzle_egress",
-		metrics.WithHelpText("Total envelopes written to log cache."),
+		"Total envelopes written to log cache.",
 	)
 	n.errCounter = n.metrics.NewCounter(
 		"nozzle_err",
-		metrics.WithHelpText("Total errors while egressing to log cache."),
+		"Total errors while egressing to log cache.",
 	)
 
 	go n.envelopeReader(rx)

@@ -1,12 +1,13 @@
 package main
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
 	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/nozzle"
@@ -42,7 +43,7 @@ func main() {
 
 	dropped := m.NewCounter(
 		"nozzle_dropped",
-		metrics.WithHelpText("Total number of envelopes dropped."),
+		"Total number of envelopes dropped.",
 	)
 
 	streamConnector := loggregator.NewEnvelopeStreamConnector(
@@ -58,7 +59,6 @@ func main() {
 	nozzle := NewNozzle(
 		streamConnector,
 		cfg.LogCacheAddr,
-		cfg.ShardId,
 		m,
 		loggr,
 		WithDialOpts(
@@ -67,6 +67,7 @@ func main() {
 			),
 		),
 		WithSelectors(cfg.Selectors...),
+		WithShardID(cfg.ShardId),
 	)
 
 	go nozzle.Start()

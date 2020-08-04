@@ -1,9 +1,10 @@
 package nozzle_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"log"
 	"sync"
+
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 
 	"code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
@@ -23,7 +24,7 @@ var _ = Describe("Nozzle", func() {
 		streamConnector *spyStreamConnector
 		logCache        *testing.SpyLogCache
 		spyMetrics      *testhelpers.SpyMetricsRegistry
-		logger 			*log.Logger
+		logger          *log.Logger
 	)
 
 	Context("With custom envelope selectors", func() {
@@ -41,9 +42,10 @@ var _ = Describe("Nozzle", func() {
 			logger = log.New(GinkgoWriter, "", log.LstdFlags)
 			addr := logCache.Start()
 
-			n = NewNozzle(streamConnector, addr, "log-cache", spyMetrics, logger,
+			n = NewNozzle(streamConnector, addr, spyMetrics, logger,
 				WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))),
 				WithSelectors("gauge", "timer", "event"),
+				WithShardID("log-cache"),
 			)
 			go n.Start()
 		})
@@ -89,9 +91,10 @@ var _ = Describe("Nozzle", func() {
 			logger = log.New(GinkgoWriter, "", log.LstdFlags)
 			addr := logCache.Start()
 
-			n = NewNozzle(streamConnector, addr, "log-cache", spyMetrics, logger,
+			n = NewNozzle(streamConnector, addr, spyMetrics, logger,
 				WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))),
 				WithSelectors("log", "gauge", "counter", "timer", "event"),
+				WithShardID("log-cache"),
 			)
 			go n.Start()
 		})
