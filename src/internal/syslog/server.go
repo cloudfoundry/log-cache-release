@@ -7,9 +7,9 @@ import (
 	"log"
 	"time"
 
+	"code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	metrics "code.cloudfoundry.org/go-metric-registry"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"code.cloudfoundry.org/tlsconfig"
 	"github.com/influxdata/go-syslog/v2"
 	"github.com/influxdata/go-syslog/v2/octetcounting"
@@ -26,14 +26,13 @@ type Server struct {
 	sync.Mutex
 	port        int
 	l           net.Listener
-	logCache    logcache_v1.IngressClient
+	envelopes   chan *loggregator_v2.Envelope
 	syslogCert  string
 	syslogKey   string
 	idleTimeout time.Duration
 
 	ingress        metrics.Counter
 	invalidIngress metrics.Counter
-	sendFailure    metrics.Counter
 
 	loggr *log.Logger
 }
@@ -46,17 +45,16 @@ type ServerOption func(s *Server)
 
 func NewServer(
 	loggr *log.Logger,
-	logCache logcache_v1.IngressClient,
 	m MetricsRegistry,
 	cert string,
 	key string,
 	opts ...ServerOption,
 ) *Server {
 	s := &Server{
-		logCache:    logCache,
 		loggr:       loggr,
 		syslogCert:  cert,
 		syslogKey:   key,
+		envelopes:   make(chan *loggregator_v2.Envelope, 100),
 		idleTimeout: 2 * time.Minute,
 	}
 
@@ -71,11 +69,6 @@ func NewServer(
 	s.invalidIngress = m.NewCounter(
 		"invalid_ingress",
 		"Total number of syslog messages unable to be converted to valid envelopes.",
-	)
-	s.sendFailure = m.NewCounter(
-		"send_failure",
-		"Total number of failures while sending to log cache.",
-		metrics.WithMetricLabels(map[string]string{"sender": "syslog_server"}),
 	)
 
 	return s
@@ -115,6 +108,17 @@ func (s *Server) Start() {
 	}
 }
 
+func (s *Server) Stream(ctx context.Context, req *loggregator_v2.EgressBatchRequest) loggregator.EnvelopeStream {
+	return func() []*loggregator_v2.Envelope {
+		select {
+		case envelope := <-s.envelopes:
+			return []*loggregator_v2.Envelope{envelope}
+		case <-ctx.Done():
+			return []*loggregator_v2.Envelope{}
+		}
+	}
+}
+
 func (s *Server) handleConnection(conn net.Conn) {
 	defer conn.Close()
 	s.setReadDeadline(conn)
@@ -139,13 +143,13 @@ func (s *Server) setReadDeadline(conn net.Conn) {
 }
 
 func (s *Server) parseListener(res *syslog.Result) {
-	msg := res.Message
 	if res.Error != nil {
 		s.invalidIngress.Add(1)
 		s.loggr.Printf("unable to parse syslog message: %s", res.Error)
 		return
 	}
 
+	msg := res.Message
 	env, err := s.convertToEnvelope(msg)
 	if err != nil {
 		s.invalidIngress.Add(1)
@@ -153,19 +157,7 @@ func (s *Server) parseListener(res *syslog.Result) {
 		return
 	}
 
-	_, err = s.logCache.Send(
-		context.Background(),
-		&logcache_v1.SendRequest{
-			Envelopes: &loggregator_v2.EnvelopeBatch{
-				Batch: []*loggregator_v2.Envelope{env},
-			},
-		},
-	)
-	if err != nil {
-		s.loggr.Println("syslog server dropped messages to log cache")
-		s.sendFailure.Add(1)
-		return
-	}
+	s.envelopes <- env
 
 	s.ingress.Add(1)
 }

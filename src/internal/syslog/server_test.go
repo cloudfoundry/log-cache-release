@@ -7,19 +7,16 @@ import (
 	"io"
 	"log"
 	"net"
-	"sync"
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"code.cloudfoundry.org/log-cache/internal/testing"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"code.cloudfoundry.org/tlsconfig"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
-	"google.golang.org/grpc"
 )
 
 const defaultLogMessage = `145 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [tags@47450 key="value" source_type="actual-source-type"] just a test` + "\n"
@@ -28,18 +25,15 @@ var _ = Describe("Syslog", func() {
 	var (
 		server     *syslog.Server
 		spyMetrics *testhelpers.SpyMetricsRegistry
-		logCache   *spyLogCacheClient
 		loggr      *log.Logger
 	)
 
 	BeforeEach(func() {
 		spyMetrics = testhelpers.NewMetricsRegistry()
-		logCache = newSpyLogCacheClient()
 		loggr = log.New(GinkgoWriter, "", log.LstdFlags)
 
 		server = syslog.NewServer(
 			loggr,
-			logCache,
 			spyMetrics,
 			testing.LogCacheTestCerts.Cert("log-cache"),
 			testing.LogCacheTestCerts.Key("log-cache"),
@@ -57,7 +51,6 @@ var _ = Describe("Syslog", func() {
 	It("closes connection after idle timeout", func() {
 		timeoutServer := syslog.NewServer(
 			loggr,
-			logCache,
 			spyMetrics,
 			testing.LogCacheTestCerts.Cert("log-cache"),
 			testing.LogCacheTestCerts.Key("log-cache"),
@@ -85,7 +78,6 @@ var _ = Describe("Syslog", func() {
 	It("keeps the connection open if writes are occurring", func() {
 		timeoutServer := syslog.NewServer(
 			loggr,
-			logCache,
 			spyMetrics,
 			testing.LogCacheTestCerts.Cert("log-cache"),
 			testing.LogCacheTestCerts.Key("log-cache"),
@@ -126,7 +118,7 @@ var _ = Describe("Syslog", func() {
 		}).Should(Equal(2.0))
 	})
 
-	It("sends log messages to log cache", func() {
+	It("streams log messages", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -134,7 +126,9 @@ var _ = Describe("Syslog", func() {
 		_, err = fmt.Fprint(conn, defaultLogMessage)
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(logCache.envelopes).Should(ContainElement(
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx := context.Background()
+		Expect(server.Stream(ctx, &br)()).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				Tags: map[string]string{
 					"source_type": "actual-source-type",
@@ -153,7 +147,7 @@ var _ = Describe("Syslog", func() {
 		))
 	})
 
-	It("sends log messages to log cache", func() {
+	It("streams log messages", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -161,7 +155,9 @@ var _ = Describe("Syslog", func() {
 		_, err = fmt.Fprint(conn, defaultLogMessage)
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(logCache.envelopes).Should(ContainElement(
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx := context.Background()
+		Expect(server.Stream(ctx, &br)()).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				Tags: map[string]string{
 					"source_type": "actual-source-type",
@@ -180,7 +176,7 @@ var _ = Describe("Syslog", func() {
 		))
 	})
 
-	It("sends counter messages to log cache", func() {
+	It("streams counter messages", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -188,7 +184,9 @@ var _ = Describe("Syslog", func() {
 		_, err = fmt.Fprint(conn, buildSyslogWithTags(fmt.Sprintf(counterDataFormat, "some-counter", "99", "1"), `key="value"`))
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(logCache.envelopes).Should(ContainElement(
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx := context.Background()
+		Expect(server.Stream(ctx, &br)()).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				InstanceId: "1",
 				Timestamp:  12345000,
@@ -207,7 +205,7 @@ var _ = Describe("Syslog", func() {
 		))
 	})
 
-	It("sends gauge messages to log cache", func() {
+	It("streams gauge messages", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -215,7 +213,9 @@ var _ = Describe("Syslog", func() {
 		_, err = fmt.Fprint(conn, buildSyslog(fmt.Sprintf(gaugeDataFormat, "cpu", "0.23", `unit="percentage"`)))
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(logCache.envelopes).Should(ContainElement(
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx := context.Background()
+		Expect(server.Stream(ctx, &br)()).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				InstanceId: "1",
 				Timestamp:  12345000,
@@ -232,7 +232,7 @@ var _ = Describe("Syslog", func() {
 		))
 	})
 
-	It("sends event messages to log cache", func() {
+	It("streams event messages", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -240,7 +240,9 @@ var _ = Describe("Syslog", func() {
 		_, err = fmt.Fprint(conn, buildSyslog(`event@47450 title="event-title" body="event-body"`))
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(logCache.envelopes).Should(ContainElement(
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx := context.Background()
+		Expect(server.Stream(ctx, &br)()).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				InstanceId: "1",
 				Timestamp:  12345000,
@@ -256,7 +258,7 @@ var _ = Describe("Syslog", func() {
 		))
 	})
 
-	It("sends timer messages to log cache", func() {
+	It("streams timer messages", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -264,7 +266,9 @@ var _ = Describe("Syslog", func() {
 		_, err = fmt.Fprint(conn, buildSyslog(`timer@47450 name="some-name" start="10" stop="20"`))
 		Expect(err).ToNot(HaveOccurred())
 
-		Eventually(logCache.envelopes).Should(ContainElement(
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx := context.Background()
+		Expect(server.Stream(ctx, &br)()).Should(ContainElement(
 			&loggregator_v2.Envelope{
 				InstanceId: "1",
 				Timestamp:  12345000,
@@ -279,6 +283,25 @@ var _ = Describe("Syslog", func() {
 				},
 			},
 		))
+	})
+
+	It("can cancel the context of stream", func() {
+		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
+		_, err := tlsClientConnection(server.Addr(), tlsConfig)
+		Expect(err).ToNot(HaveOccurred())
+
+		finished := 0
+		br := loggregator_v2.EgressBatchRequest{}
+		ctx, cancel := context.WithCancel(context.Background())
+		go func() {
+			server.Stream(ctx, &br)()
+			finished = 1
+		}()
+
+		Consistently(func() int { return finished }).Should(Equal(0))
+		cancel()
+		Eventually(func() int { return finished }).Should(Equal(1))
+
 	})
 
 	It("increments invalid message metric when there is an invalid syslog message", func() {
@@ -348,14 +371,23 @@ var _ = Describe("Syslog", func() {
 		}).Should(Equal(4.0))
 	})
 
-	It("does not send invalid envelopes to log cache", func() {
+	It("closes syslog connection when invalid envelope is sent", func() {
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = fmt.Fprint(conn, buildSyslog(buildSyslog(fmt.Sprintf(counterDataFormat, "some-counter", "99", "d"))))
+		counterMessage := buildSyslog(fmt.Sprintf(counterDataFormat, "some-counter", "99", "d"))
+		invalidMessage := buildSyslog(counterMessage)
+		_, err = fmt.Fprint(conn, invalidMessage)
+		Expect(err).ToNot(HaveOccurred())
 
-		Consistently(logCache.envelopes).Should(HaveLen(0))
+		Eventually(func() float64 {
+			return spyMetrics.GetMetricValue("invalid_ingress", nil)
+		}).Should(Equal(1.0))
+
+		buf := make([]byte, 1024)
+		_, err = conn.Read(buf)
+		Expect(err).To(Equal(io.EOF))
 	})
 
 	DescribeTable("increments invalid ingress on invalid envelope data", func(rfc5424Log string) {
@@ -450,35 +482,6 @@ func waitForServerToStart(server *syslog.Server) {
 
 const counterDataFormat = `counter@47450 name="%s" total="%s" delta="%s"`
 const gaugeDataFormat = `gauge@47450 name="%s" value="%s" %s`
-
-func newSpyLogCacheClient() *spyLogCacheClient {
-	return &spyLogCacheClient{}
-}
-
-type spyLogCacheClient struct {
-	sync.Mutex
-	envs      []*loggregator_v2.Envelope
-	sendError error
-}
-
-func (s *spyLogCacheClient) Send(ctx context.Context, in *logcache_v1.SendRequest, opts ...grpc.CallOption) (*logcache_v1.SendResponse, error) {
-	s.Lock()
-	defer s.Unlock()
-
-	if s.sendError != nil {
-		return nil, s.sendError
-	}
-
-	s.envs = append(s.envs, in.Envelopes.Batch...)
-	return &logcache_v1.SendResponse{}, nil
-}
-
-func (s *spyLogCacheClient) envelopes() []*loggregator_v2.Envelope {
-	s.Lock()
-	defer s.Unlock()
-
-	return s.envs
-}
 
 func buildClientTLSConfig(maxVersion, cipherSuite uint16) *tls.Config {
 	tlsConf, err := tlsconfig.Build(

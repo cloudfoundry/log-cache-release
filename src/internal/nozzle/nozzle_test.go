@@ -42,9 +42,10 @@ var _ = Describe("Nozzle", func() {
 			logger = log.New(GinkgoWriter, "", log.LstdFlags)
 			addr := logCache.Start()
 
-			n = NewNozzle(streamConnector, addr, "log-cache", spyMetrics, logger,
+			n = NewNozzle(streamConnector, addr, spyMetrics, logger,
 				WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))),
 				WithSelectors("gauge", "timer", "event"),
+				WithShardID("log-cache"),
 			)
 			go n.Start()
 		})
@@ -90,9 +91,10 @@ var _ = Describe("Nozzle", func() {
 			logger = log.New(GinkgoWriter, "", log.LstdFlags)
 			addr := logCache.Start()
 
-			n = NewNozzle(streamConnector, addr, "log-cache", spyMetrics, logger,
+			n = NewNozzle(streamConnector, addr, spyMetrics, logger,
 				WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))),
 				WithSelectors("log", "gauge", "counter", "timer", "event"),
+				WithShardID("log-cache"),
 			)
 			go n.Start()
 		})

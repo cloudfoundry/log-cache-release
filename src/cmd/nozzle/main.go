@@ -59,7 +59,6 @@ func main() {
 	nozzle := NewNozzle(
 		streamConnector,
 		cfg.LogCacheAddr,
-		cfg.ShardId,
 		m,
 		loggr,
 		WithDialOpts(
@@ -68,6 +67,7 @@ func main() {
 			),
 		),
 		WithSelectors(cfg.Selectors...),
+		WithShardID(cfg.ShardId),
 	)
 
 	go nozzle.Start()

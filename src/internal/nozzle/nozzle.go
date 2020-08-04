@@ -50,14 +50,13 @@ type StreamConnector interface {
 }
 
 // NewNozzle creates a new Nozzle.
-func NewNozzle(c StreamConnector, logCacheAddr, shardId string, m Metrics, logger *log.Logger, opts ...NozzleOption) *Nozzle {
+func NewNozzle(c StreamConnector, logCacheAddr string, m Metrics, logger *log.Logger, opts ...NozzleOption) *Nozzle {
 	n := &Nozzle{
 		s:         c,
 		addr:      logCacheAddr,
 		opts:      []grpc.DialOption{grpc.WithInsecure()},
 		log:       logger,
 		metrics:   m,
-		shardId:   shardId,
 		selectors: []string{},
 	}
 
@@ -80,6 +79,12 @@ type NozzleOption func(*Nozzle)
 func WithDialOpts(opts ...grpc.DialOption) NozzleOption {
 	return func(n *Nozzle) {
 		n.opts = opts
+	}
+}
+
+func WithShardID(shardId string) NozzleOption {
+	return func(n *Nozzle) {
+		n.shardId = shardId
 	}
 }
 
