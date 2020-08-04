@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync/atomic"
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
@@ -290,18 +291,17 @@ var _ = Describe("Syslog", func() {
 		_, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
 
-		finished := 0
+		var finished int32
 		br := loggregator_v2.EgressBatchRequest{}
 		ctx, cancel := context.WithCancel(context.Background())
 		go func() {
 			server.Stream(ctx, &br)()
-			finished = 1
+			atomic.AddInt32(&finished, 1)
 		}()
 
-		Consistently(func() int { return finished }).Should(Equal(0))
+		Consistently(func() int32 { return atomic.LoadInt32(&finished) }).Should(Equal(int32(0)))
 		cancel()
-		Eventually(func() int { return finished }).Should(Equal(1))
-
+		Eventually(func() int32 { return atomic.LoadInt32(&finished) }).Should(Equal(int32(1)))
 	})
 
 	It("increments invalid message metric when there is an invalid syslog message", func() {
