@@ -1,4 +1,5 @@
 name: log-cache
+final_name: log-cache
 blobstore:
   provider: gcs
   options:
