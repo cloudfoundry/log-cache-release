@@ -27,8 +27,7 @@ type Config struct {
 	CertPath                string        `env:"EXTERNAL_CERT,                    report"`
 	KeyPath                 string        `env:"EXTERNAL_KEY,                     report"`
 	SkipCertVerify          bool          `env:"SKIP_CERT_VERIFY,                 report"`
-	DisableTLSServer        bool          `env:"DISABLE_TLS_SERVER,               report"`
-	ProxyCAPath             string        `env:"PROXY_CA_PATH,          required, report"`
+	ProxyCAPath             string        `env:"PROXY_CA_PATH,					  report"`
 	SecurityEventLog        string        `env:"SECURITY_EVENT_LOG,               report"`
 	TokenPruningInterval    time.Duration `env:"TOKEN_PRUNING_INTERVAL,           report"`
 	CacheExpirationInterval time.Duration `env:"CACHE_EXPIRATION_INTERVAL,        report"`
@@ -41,7 +40,6 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	cfg := Config{
 		SkipCertVerify:          false,
-		DisableTLSServer:        false,
 		Addr:                    ":8083",
 		InternalIP:              "0.0.0.0",
 		LogCacheGatewayAddr:     "localhost:8081",

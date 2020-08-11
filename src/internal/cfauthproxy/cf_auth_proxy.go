@@ -30,18 +30,15 @@ type CFAuthProxy struct {
 	accessMiddleware func(http.Handler) *auth.AccessHandler
 }
 
-func NewCFAuthProxy(gatewayAddr, addr, certPath, keyPath string, proxyCACertPool *x509.CertPool, opts ...CFAuthProxyOption) *CFAuthProxy {
+func NewCFAuthProxy(gatewayAddr, addr string, opts ...CFAuthProxyOption) *CFAuthProxy {
 	gatewayURL, err := url.Parse(gatewayAddr)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't parse gateway address: %s", err))
 	}
 
 	p := &CFAuthProxy{
-		gatewayURL:      gatewayURL,
-		addr:            addr,
-		certPath:        certPath,
-		keyPath:         keyPath,
-		proxyCACertPool: proxyCACertPool,
+		gatewayURL: gatewayURL,
+		addr:       addr,
 		authMiddleware: func(h http.Handler) http.Handler {
 			return h
 		},
@@ -67,6 +64,13 @@ func WithCFAuthProxyBlock() CFAuthProxyOption {
 	}
 }
 
+func WithCFAuthProxyTLSServer(certPath, keyPath string) CFAuthProxyOption {
+	return func(p *CFAuthProxy) {
+		p.keyPath = keyPath
+		p.certPath = certPath
+	}
+}
+
 // WithAuthMiddleware returns a CFAuthProxyOption that sets the CFAuthProxy's
 // authentication and authorization middleware.
 func WithAuthMiddleware(authMiddleware func(http.Handler) http.Handler) CFAuthProxyOption {
@@ -86,6 +90,15 @@ func WithAccessMiddleware(accessMiddleware func(http.Handler) *auth.AccessHandle
 func WithCFAuthProxyTLSDisabled() CFAuthProxyOption {
 	return func(p *CFAuthProxy) {
 		p.tlsDisabled = true
+	}
+}
+
+// WithCFAuthProxyCACertPool returns a CFAuthProxyOption that sets the
+// CFAuthProxy CA Cert pool. Otherwise, the CFAuthProxy communicates with the
+// gateway in plain text.
+func WithCFAuthProxyCACertPool(certPool *x509.CertPool) CFAuthProxyOption {
+	return func(p *CFAuthProxy) {
+		p.proxyCACertPool = certPool
 	}
 }
 
@@ -128,7 +141,11 @@ func (p *CFAuthProxy) Addr() string {
 
 func (p *CFAuthProxy) reverseProxy() *httputil.ReverseProxy {
 	proxy := httputil.NewSingleHostReverseProxy(p.gatewayURL)
-	proxy.Transport = NewTransportWithRootCA(p.proxyCACertPool)
+
+	if p.proxyCACertPool != nil {
+		proxy.Transport = NewTransportWithRootCA(p.proxyCACertPool)
+	}
+
 	return proxy
 }
 

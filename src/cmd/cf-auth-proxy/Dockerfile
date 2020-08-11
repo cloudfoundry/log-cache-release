@@ -44,8 +44,6 @@ WORKDIR /srv
 
 ENV LOG_CACHE_GATEWAY_ADDR=log-cache:8081 \
     ADDR=:8083 \
-    DISABLE_TLS_SERVER="true" \
-    PROXY_CA_PATH="/ca/tls.crt" \
     INTERNAL_IP="127.0.0.1" \
     CAPI_ADDR="" \
     UAA_ADDR=""
