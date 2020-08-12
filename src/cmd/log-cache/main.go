@@ -61,21 +61,31 @@ func main() {
 		}
 	}(time.Now())
 
-	cache := New(
-		m,
-		logger,
+	logCacheOptions := []LogCacheOption{
 		WithAddr(cfg.Addr),
 		WithMemoryLimit(float64(cfg.MemoryLimit)),
 		WithMaxPerSource(cfg.MaxPerSource),
 		WithQueryTimeout(cfg.QueryTimeout),
-		WithClustered(
-			cfg.NodeIndex,
-			cfg.NodeAddrs,
-			grpc.WithTransportCredentials(
-				cfg.TLS.Credentials("log-cache"),
-			),
-		),
-		WithServerOpts(grpc.Creds(cfg.TLS.Credentials("log-cache"))),
+	}
+	var transport grpc.DialOption
+	if cfg.TLS.HasAnyCredential() {
+		transport = grpc.WithTransportCredentials(
+			cfg.TLS.Credentials("log-cache"),
+		)
+		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(cfg.TLS.Credentials("log-cache"))))
+	} else {
+		transport = grpc.WithInsecure()
+	}
+	logCacheOptions = append(logCacheOptions, WithClustered(
+		cfg.NodeIndex,
+		cfg.NodeAddrs,
+		transport,
+	))
+
+	cache := New(
+		m,
+		logger,
+		logCacheOptions...,
 	)
 
 	cache.Start()

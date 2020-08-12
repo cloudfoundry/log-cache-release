@@ -24,49 +24,62 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("LogCache", func() {
-	var (
-		tlsConfig *tls.Config
-		peer      *testing.SpyLogCache
-		cache     *LogCache
-
-		spyMetrics *testhelpers.SpyMetricsRegistry
+func tlsLogCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMetricsRegistry, *tls.Config) {
+	var err error
+	tlsConfig, err := sharedtls.NewMutualTLSConfig(
+		testing.LogCacheTestCerts.CA(),
+		testing.LogCacheTestCerts.Cert("log-cache"),
+		testing.LogCacheTestCerts.Key("log-cache"),
+		"log-cache",
 	)
+	Expect(err).ToNot(HaveOccurred())
 
-	BeforeEach(func() {
-		var err error
-		tlsConfig, err = sharedtls.NewMutualTLSConfig(
-			testing.LogCacheTestCerts.CA(),
-			testing.LogCacheTestCerts.Cert("log-cache"),
-			testing.LogCacheTestCerts.Key("log-cache"),
-			"log-cache",
-		)
-		Expect(err).ToNot(HaveOccurred())
+	peer := testing.NewSpyLogCache(tlsConfig)
+	peerAddr := peer.Start()
+	spyMetrics := testhelpers.NewMetricsRegistry()
 
-		peer = testing.NewSpyLogCache(tlsConfig)
-		peerAddr := peer.Start()
-		spyMetrics = testhelpers.NewMetricsRegistry()
+	cache := New(
+		spyMetrics,
+		log.New(ioutil.Discard, "", 0),
+		WithAddr("127.0.0.1:0"),
+		WithClustered(0, []string{"my-addr", peerAddr},
+			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
+		),
+		WithServerOpts(
+			grpc.Creds(credentials.NewTLS(tlsConfig)),
+		),
+	)
+	cache.Start()
 
-		cache = New(
-			spyMetrics,
-			log.New(ioutil.Discard, "", 0),
-			WithAddr("127.0.0.1:0"),
-			WithClustered(0, []string{"my-addr", peerAddr},
-				grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
-			),
-			WithServerOpts(
-				grpc.Creds(credentials.NewTLS(tlsConfig)),
-			),
-		)
-		cache.Start()
-	})
+	return cache, peer, spyMetrics, tlsConfig
+}
 
-	AfterEach(func() {
-		cache.Close()
-	})
+func logCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMetricsRegistry) {
+	var err error
+	Expect(err).ToNot(HaveOccurred())
 
+	peer := testing.NewSpyLogCache(nil)
+	peerAddr := peer.Start()
+	spyMetrics := testhelpers.NewMetricsRegistry()
+
+	cache := New(
+		spyMetrics,
+		log.New(ioutil.Discard, "", 0),
+		WithAddr("127.0.0.1:0"),
+		WithClustered(0, []string{"my-addr", peerAddr},
+			grpc.WithInsecure(),
+		),
+	)
+	cache.Start()
+
+	return cache, peer, spyMetrics
+}
+
+var _ = Describe("LogCache", func() {
 	Describe("TLS security", func() {
 		DescribeTable("allows only supported TLS versions", func(clientTLSVersion int, serverAllows bool) {
+			cache, _, _, tlsConfig := tlsLogCacheTestSetup()
+			defer cache.Close()
 			clientTlsConfig := tlsConfig.Clone()
 			clientTlsConfig.MaxVersion = uint16(clientTLSVersion)
 			clientTlsConfig.CipherSuites = []uint16{tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384}
@@ -96,6 +109,8 @@ var _ = Describe("LogCache", func() {
 		)
 
 		DescribeTable("allows only supported cipher suites", func(clientCipherSuite uint16, serverAllows bool) {
+			cache, _, _, tlsConfig := tlsLogCacheTestSetup()
+			defer cache.Close()
 			clientTlsConfig := tlsConfig.Clone()
 			clientTlsConfig.MaxVersion = tls.VersionTLS12
 			clientTlsConfig.CipherSuites = []uint16{clientCipherSuite}
@@ -145,6 +160,8 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("returns tail of data filtered by source ID", func() {
+		cache, _, spyMetrics, tlsConfig := tlsLogCacheTestSetup()
+		defer cache.Close()
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
 			// src-zero hashes to 6727955504463301110 (route to node 0)
 			{Timestamp: 1, SourceId: "src-zero"},
@@ -196,6 +213,8 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("queries data via PromQL Instant Queries", func() {
+		cache, _, _, tlsConfig := tlsLogCacheTestSetup()
+		defer cache.Close()
 		now := time.Now()
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
 			// src-zero hashes to 6727955504463301110 (route to node 0)
@@ -237,6 +256,8 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("queries data via PromQL Range Queries", func() {
+		cache, _, _, tlsConfig := tlsLogCacheTestSetup()
+		defer cache.Close()
 		now := time.Now()
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
 			// src-zero hashes to 6727955504463301110 (route to node 0)
@@ -279,6 +300,8 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("routes envelopes to peers", func() {
+		cache, peer, _, _ := tlsLogCacheTestSetup()
+		defer cache.Close()
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
 			// src-zero hashes to 6727955504463301110 (route to node 0)
 			{Timestamp: 1, SourceId: "src-zero"},
@@ -293,7 +316,26 @@ var _ = Describe("LogCache", func() {
 		Expect(peer.GetLocalOnlyValues()).ToNot(ContainElement(false))
 	})
 
+	It("routes envelopes to peers without tls", func() {
+		cache, peer, _ := logCacheTestSetup()
+		defer cache.Close()
+		writeEnvelopesNoTLS(cache.Addr(), []*loggregator_v2.Envelope{
+			// src-zero hashes to 6727955504463301110 (route to node 0)
+			{Timestamp: 1, SourceId: "src-zero"},
+			// other-src hashes to 2416040688038506749 (route to node 1)
+			{Timestamp: 2, SourceId: "other-src"},
+			{Timestamp: 3, SourceId: "other-src"},
+		})
+
+		Eventually(peer.GetEnvelopes).Should(HaveLen(2))
+		Expect(peer.GetEnvelopes()[0].Timestamp).To(Equal(int64(2)))
+		Expect(peer.GetEnvelopes()[1].Timestamp).To(Equal(int64(3)))
+		Expect(peer.GetLocalOnlyValues()).ToNot(ContainElement(false))
+	})
+
 	It("accepts envelopes from peers", func() {
+		cache, _, _, tlsConfig := tlsLogCacheTestSetup()
+		defer cache.Close()
 		// src-zero hashes to 6727955504463301110 (route to node 0)
 		writeEnvelopes(cache.Addr(), []*loggregator_v2.Envelope{
 			{SourceId: "src-zero", Timestamp: 1},
@@ -329,6 +371,8 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("routes query requests to peers", func() {
+		cache, peer, _, tlsConfig := tlsLogCacheTestSetup()
+		defer cache.Close()
 		peer.ReadEnvelopes["other-src"] = func() []*loggregator_v2.Envelope {
 			return []*loggregator_v2.Envelope{
 				{Timestamp: 99},
@@ -362,6 +406,8 @@ var _ = Describe("LogCache", func() {
 	})
 
 	It("returns all meta information", func() {
+		cache, peer, _, tlsConfig := tlsLogCacheTestSetup()
+		defer cache.Close()
 		peer.MetaResponses = map[string]*rpc.MetaInfo{
 			"other-src": {
 				Count:           1,
@@ -421,6 +467,34 @@ func writeEnvelopes(addr string, es []*loggregator_v2.Envelope) {
 	}
 	conn, err := grpc.Dial(addr,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	client := rpc.NewIngressClient(conn)
+	var envelopes []*loggregator_v2.Envelope
+	for _, e := range es {
+		envelopes = append(envelopes, &loggregator_v2.Envelope{
+			Timestamp: e.Timestamp,
+			SourceId:  e.SourceId,
+			Message:   e.Message,
+		})
+	}
+
+	_, err = client.Send(context.Background(), &rpc.SendRequest{
+		Envelopes: &loggregator_v2.EnvelopeBatch{
+			Batch: envelopes,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func writeEnvelopesNoTLS(addr string, es []*loggregator_v2.Envelope) {
+	conn, err := grpc.Dial(addr,
+		grpc.WithInsecure(),
 	)
 	if err != nil {
 		panic(err)
