@@ -46,12 +46,7 @@ USER 1000:1000
 WORKDIR /srv
 
 ENV ADDR=:8081 \
-    LOG_CACHE_ADDR=log-cache:8080 \
-    CA_PATH="/ca/tls.crt" \
-    CERT_PATH="/log-cache-certs/tls.crt" \
-    KEY_PATH="/log-cache-certs/tls.key" \
-    PROXY_CERT_PATH="/gateway-certs/tls.crt" \
-    PROXY_KEY_PATH="/gateway-certs/tls.key"
+    LOG_CACHE_ADDR=log-cache:8080
 
 EXPOSE 8081
 CMD [ "/srv/log-cache-gateway" ]

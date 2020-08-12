@@ -37,14 +37,29 @@ func main() {
 		metricServerOption,
 	)
 
-	gateway := NewGateway(cfg.LogCacheAddr, cfg.Addr, cfg.ProxyCertPath, cfg.ProxyKeyPath,
+	gatewayOptions := []GatewayOption{
 		WithGatewayLogger(log.New(os.Stderr, "[GATEWAY] ", log.LstdFlags)),
-		WithGatewayLogCacheDialOpts(
-			grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
-		),
 		WithGatewayVersion(cfg.Version),
 		WithGatewayBlock(),
-	)
+	}
+
+	if cfg.ProxyCertPath != "" || cfg.ProxyKeyPath != "" {
+		gatewayOptions = append(gatewayOptions, WithGatewayTLSServer(cfg.ProxyCertPath, cfg.ProxyKeyPath))
+	}
+	if cfg.TLS.HasAnyCredential() {
+		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
+			grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
+		),
+		)
+	} else {
+		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
+			grpc.WithInsecure(),
+		),
+		)
+
+	}
+
+	gateway := NewGateway(cfg.LogCacheAddr, cfg.Addr, gatewayOptions...)
 
 	gateway.Start()
 }

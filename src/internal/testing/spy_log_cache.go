@@ -32,9 +32,12 @@ func (s *SpyAgent) Start() string {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	srv := grpc.NewServer(
-		grpc.Creds(credentials.NewTLS(s.tlsConfig)),
-	)
+	var srv *grpc.Server
+	if s.tlsConfig == nil {
+		srv = grpc.NewServer()
+	} else {
+		srv = grpc.NewServer(grpc.Creds(credentials.NewTLS(s.tlsConfig)))
+	}
 	loggregator_v2.RegisterIngressServer(srv, s)
 	go srv.Serve(lis)
 
@@ -101,9 +104,12 @@ func (s *SpyLogCache) Start() string {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	srv := grpc.NewServer(
-		grpc.Creds(credentials.NewTLS(s.tlsConfig)),
-	)
+	var srv *grpc.Server
+	if s.tlsConfig == nil {
+		srv = grpc.NewServer()
+	} else {
+		srv = grpc.NewServer(grpc.Creds(credentials.NewTLS(s.tlsConfig)))
+	}
 	rpc.RegisterIngressServer(srv, s)
 	rpc.RegisterEgressServer(srv, s)
 	rpc.RegisterPromQLQuerierServer(srv, s)

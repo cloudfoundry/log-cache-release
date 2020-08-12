@@ -36,14 +36,12 @@ type Gateway struct {
 // NewGateway creates a new Gateway. It will listen on the gatewayAddr and
 // submit requests via gRPC to the LogCache on logCacheAddr. Start() must be
 // invoked before using the Gateway.
-func NewGateway(logCacheAddr, gatewayAddr, certPath, keyPath string, opts ...GatewayOption) *Gateway {
+func NewGateway(logCacheAddr, gatewayAddr string, opts ...GatewayOption) *Gateway {
 	g := &Gateway{
 		log:          log.New(ioutil.Discard, "", 0),
 		logCacheAddr: logCacheAddr,
 		gatewayAddr:  gatewayAddr,
 		uptimeFn:     uptimeInSeconds,
-		certPath:     certPath,
-		keyPath:      keyPath,
 	}
 
 	for _, o := range opts {
@@ -94,6 +92,13 @@ func WithGatewayVersion(version string) GatewayOption {
 func WithGatewayVMUptimeFn(uptimeFn func() int64) GatewayOption {
 	return func(g *Gateway) {
 		g.uptimeFn = uptimeFn
+	}
+}
+
+func WithGatewayTLSServer(certPath, keyPath string) GatewayOption {
+	return func(g *Gateway) {
+		g.keyPath = keyPath
+		g.certPath = certPath
 	}
 }
 
@@ -158,8 +163,14 @@ func (g *Gateway) listenAndServe() {
 	topLevelMux.Handle("/", mux)
 
 	server := &http.Server{Handler: topLevelMux}
-	if err := server.ServeTLS(g.lis, g.certPath, g.keyPath); err != nil {
-		g.log.Fatalf("failed to serve HTTPS endpoint: %s", err)
+	if g.certPath != "" || g.keyPath != "" {
+		if err := server.ServeTLS(g.lis, g.certPath, g.keyPath); err != nil {
+			g.log.Fatalf("failed to serve HTTPS endpoint: %s", err)
+		}
+	} else {
+		if err := server.Serve(g.lis); err != nil {
+			g.log.Fatalf("failed to serve HTTP endpoint: %s", err)
+		}
 	}
 }
 
