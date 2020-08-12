@@ -22,49 +22,48 @@ import (
 
 const defaultLogMessage = `145 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [tags@47450 key="value" source_type="actual-source-type"] just a test` + "\n"
 
-var _ = Describe("Syslog", func() {
-	var (
-		server     *syslog.Server
-		spyMetrics *testhelpers.SpyMetricsRegistry
-		loggr      *log.Logger
+func newTlsServerTestSetup() (*syslog.Server, *testhelpers.SpyMetricsRegistry, *log.Logger) {
+	spyMetrics := testhelpers.NewMetricsRegistry()
+	loggr := log.New(GinkgoWriter, "", log.LstdFlags)
+
+	server := syslog.NewServer(
+		loggr,
+		spyMetrics,
+		syslog.WithServerTLS(testing.LogCacheTestCerts.Cert("log-cache"), testing.LogCacheTestCerts.Key("log-cache")),
+		syslog.WithServerPort(0),
+		syslog.WithIdleTimeout(100*time.Millisecond),
 	)
 
-	BeforeEach(func() {
-		spyMetrics = testhelpers.NewMetricsRegistry()
-		loggr = log.New(GinkgoWriter, "", log.LstdFlags)
+	go server.Start()
+	waitForServerToStart(server)
+	return server, spyMetrics, loggr
+}
 
-		server = syslog.NewServer(
-			loggr,
-			spyMetrics,
-			testing.LogCacheTestCerts.Cert("log-cache"),
-			testing.LogCacheTestCerts.Key("log-cache"),
-			syslog.WithServerPort(0),
-		)
+func newServerTestSetup() (*syslog.Server, *testhelpers.SpyMetricsRegistry, *log.Logger) {
+	spyMetrics := testhelpers.NewMetricsRegistry()
+	loggr := log.New(GinkgoWriter, "", log.LstdFlags)
 
+	server := syslog.NewServer(
+		loggr,
+		spyMetrics,
+		syslog.WithIdleTimeout(100*time.Millisecond),
+	)
+
+	go server.Start()
+	waitForServerToStart(server)
+	return server, spyMetrics, loggr
+}
+
+var _ = Describe("Syslog", func() {
+	It("closes connection after idle timeout", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		go server.Start()
 		waitForServerToStart(server)
-	})
-
-	AfterEach(func() {
-		server.Stop()
-	})
-
-	It("closes connection after idle timeout", func() {
-		timeoutServer := syslog.NewServer(
-			loggr,
-			spyMetrics,
-			testing.LogCacheTestCerts.Cert("log-cache"),
-			testing.LogCacheTestCerts.Key("log-cache"),
-			syslog.WithServerPort(0),
-			syslog.WithIdleTimeout(100*time.Millisecond),
-		)
-
-		go timeoutServer.Start()
-		waitForServerToStart(timeoutServer)
-		defer timeoutServer.Stop()
+		defer server.Stop()
 
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
-		conn, err := tlsClientConnection(timeoutServer.Addr(), tlsConfig)
+		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
 
 		readErrs := make(chan error, 1)
@@ -77,20 +76,14 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("keeps the connection open if writes are occurring", func() {
-		timeoutServer := syslog.NewServer(
-			loggr,
-			spyMetrics,
-			testing.LogCacheTestCerts.Cert("log-cache"),
-			testing.LogCacheTestCerts.Key("log-cache"),
-			syslog.WithServerPort(0),
-			syslog.WithIdleTimeout(100*time.Millisecond),
-		)
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 
-		go timeoutServer.Start()
-		waitForServerToStart(timeoutServer)
+		go server.Start()
+		waitForServerToStart(server)
 
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
-		conn, err := tlsClientConnection(timeoutServer.Addr(), tlsConfig)
+		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
 
 		Consistently(func() error {
@@ -100,6 +93,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("counts incoming messages", func() {
+		server, spyMetrics, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -120,6 +115,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("streams log messages", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -148,9 +145,10 @@ var _ = Describe("Syslog", func() {
 		))
 	})
 
-	It("streams log messages", func() {
-		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
-		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
+	It("streams log messages no tls", func() {
+		server, _, _ := newServerTestSetup()
+		defer server.Stop()
+		conn, err := tcpClientConnection(server.Addr())
 		Expect(err).ToNot(HaveOccurred())
 
 		_, err = fmt.Fprint(conn, defaultLogMessage)
@@ -178,6 +176,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("streams counter messages", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -207,6 +207,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("streams gauge messages", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -234,6 +236,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("streams event messages", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -260,6 +264,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("streams timer messages", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -287,6 +293,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("can cancel the context of stream", func() {
+		server, _, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		_, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -305,6 +313,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("increments invalid message metric when there is an invalid syslog message", func() {
+		server, spyMetrics, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -334,6 +344,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("increments invalid message metric when there is missing data", func() {
+		server, spyMetrics, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -372,6 +384,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	It("closes syslog connection when invalid envelope is sent", func() {
+		server, spyMetrics, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -391,6 +405,8 @@ var _ = Describe("Syslog", func() {
 	})
 
 	DescribeTable("increments invalid ingress on invalid envelope data", func(rfc5424Log string) {
+		server, spyMetrics, _ := newTlsServerTestSetup()
+		defer server.Stop()
 		tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
 		conn, err := tlsClientConnection(server.Addr(), tlsConfig)
 		Expect(err).ToNot(HaveOccurred())
@@ -414,6 +430,8 @@ var _ = Describe("Syslog", func() {
 
 	Describe("TLS security", func() {
 		DescribeTable("allows only supported TLS versions", func(clientTLSVersion int, serverShouldAllow bool) {
+			server, _, _ := newTlsServerTestSetup()
+			defer server.Stop()
 			tlsConfig := buildClientTLSConfig(uint16(clientTLSVersion), tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)
 			_, err := tlsClientConnection(server.Addr(), tlsConfig)
 
@@ -430,6 +448,8 @@ var _ = Describe("Syslog", func() {
 		)
 
 		DescribeTable("allows only supported TLS versions", func(cipherSuite uint16, serverShouldAllow bool) {
+			server, _, _ := newTlsServerTestSetup()
+			defer server.Stop()
 			tlsConfig := buildClientTLSConfig(tls.VersionTLS12, cipherSuite)
 			_, err := tlsClientConnection(server.Addr(), tlsConfig)
 
@@ -503,4 +523,8 @@ func tlsClientConnection(addr string, tlsConf *tls.Config) (*tls.Conn, error) {
 	dialer := &net.Dialer{}
 	dialer.Timeout = time.Second
 	return tls.DialWithDialer(dialer, "tcp", addr, tlsConf)
+}
+
+func tcpClientConnection(addr string) (net.Conn, error) {
+	return net.Dial("tcp", addr)
 }

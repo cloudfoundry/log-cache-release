@@ -1,10 +1,11 @@
 package main
 
 import (
+	"time"
+
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/internal/config"
 	"code.cloudfoundry.org/log-cache/internal/tls"
-	"time"
 )
 
 // Config is the configuration for a Syslog Server
@@ -13,8 +14,8 @@ type Config struct {
 	SyslogPort   int    `env:"SYSLOG_PORT, required, report"`
 
 	LogCacheTLS       tls.TLS
-	SyslogTLSCertPath string `env:"SYSLOG_TLS_CERT_PATH, required, report"`
-	SyslogTLSKeyPath  string `env:"SYSLOG_TLS_KEY_PATH, required, report"`
+	SyslogTLSCertPath string `env:"SYSLOG_TLS_CERT_PATH, report"`
+	SyslogTLSKeyPath  string `env:"SYSLOG_TLS_KEY_PATH, report"`
 
 	SyslogIdleTimeout time.Duration `env:"SYSLOG_IDLE_TIMEOUT, report"`
 	MetricsServer     config.MetricsServer

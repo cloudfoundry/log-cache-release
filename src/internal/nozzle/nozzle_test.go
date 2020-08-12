@@ -26,6 +26,33 @@ var _ = Describe("Nozzle", func() {
 		spyMetrics      *testhelpers.SpyMetricsRegistry
 		logger          *log.Logger
 	)
+	Context("Without tls", func() {
+		BeforeEach(func() {
+			streamConnector = newSpyStreamConnector()
+			spyMetrics = testhelpers.NewMetricsRegistry()
+			logCache = testing.NewSpyLogCache(nil)
+			logger = log.New(GinkgoWriter, "", log.LstdFlags)
+			addr := logCache.Start()
+
+			n = NewNozzle(streamConnector, addr, spyMetrics, logger,
+				WithDialOpts(grpc.WithInsecure()),
+				WithSelectors("gauge", "timer", "event"),
+				WithShardID("log-cache"),
+			)
+			go n.Start()
+		})
+
+		It("writes each envelope to the LogCache", func() {
+			addEnvelope(1, "some-source-id", streamConnector)
+			addEnvelope(2, "some-source-id", streamConnector)
+			addEnvelope(3, "some-source-id", streamConnector)
+
+			Eventually(logCache.GetEnvelopes).Should(HaveLen(3))
+			Expect(logCache.GetEnvelopes()[0].Timestamp).To(Equal(int64(1)))
+			Expect(logCache.GetEnvelopes()[1].Timestamp).To(Equal(int64(2)))
+			Expect(logCache.GetEnvelopes()[2].Timestamp).To(Equal(int64(3)))
+		})
+	})
 
 	Context("With custom envelope selectors", func() {
 		BeforeEach(func() {

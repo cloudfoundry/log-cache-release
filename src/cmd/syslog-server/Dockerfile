@@ -43,12 +43,7 @@ USER 1000:1000
 WORKDIR /srv
 
 ENV SYSLOG_PORT=8082 \
-    LOG_CACHE_ADDR=log-cache:8080 \
-    CA_PATH="/ca/tls.crt" \
-    CERT_PATH="/log-cache-certs/tls.crt" \
-    KEY_PATH="/log-cache-certs/tls.key" \
-    SYSLOG_TLS_CERT_PATH="/syslog-server-certs/tls.crt" \
-    SYSLOG_TLS_KEY_PATH="/syslog-server-certs/tls.key"
+    LOG_CACHE_ADDR=log-cache:8080
 
 EXPOSE 8082
 CMD [ "/srv/syslog-server" ]

@@ -42,27 +42,35 @@ func main() {
 		metricServerOption,
 	)
 
+	serverOptions := []syslog.ServerOption{
+		syslog.WithServerPort(cfg.SyslogPort),
+		syslog.WithIdleTimeout(cfg.SyslogIdleTimeout),
+	}
+	if cfg.SyslogTLSCertPath != "" || cfg.SyslogTLSKeyPath != "" {
+		serverOptions = append(serverOptions, syslog.WithServerTLS(cfg.SyslogTLSCertPath, cfg.SyslogTLSKeyPath))
+	}
+
 	server := syslog.NewServer(
 		loggr,
 		m,
-		cfg.SyslogTLSCertPath,
-		cfg.SyslogTLSKeyPath,
-		syslog.WithServerPort(cfg.SyslogPort),
-		syslog.WithIdleTimeout(cfg.SyslogIdleTimeout),
+		serverOptions...,
 	)
 
 	go server.Start()
+
+	nozzleOptions := []NozzleOption{}
+	if cfg.LogCacheTLS.HasAnyCredential() {
+		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(cfg.LogCacheTLS.Credentials("log-cache"))))
+	} else {
+		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithInsecure()))
+	}
 
 	nozzle := NewNozzle(
 		server,
 		cfg.LogCacheAddr,
 		m,
 		loggr,
-		WithDialOpts(
-			grpc.WithTransportCredentials(
-				cfg.LogCacheTLS.Credentials("log-cache"),
-			),
-		),
+		nozzleOptions...,
 	)
 
 	nozzle.Start()

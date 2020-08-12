@@ -46,14 +46,10 @@ type ServerOption func(s *Server)
 func NewServer(
 	loggr *log.Logger,
 	m MetricsRegistry,
-	cert string,
-	key string,
 	opts ...ServerOption,
 ) *Server {
 	s := &Server{
 		loggr:       loggr,
-		syslogCert:  cert,
-		syslogKey:   key,
 		envelopes:   make(chan *loggregator_v2.Envelope, 100),
 		idleTimeout: 2 * time.Minute,
 	}
@@ -80,6 +76,13 @@ func WithServerPort(p int) ServerOption {
 	}
 }
 
+func WithServerTLS(cert, key string) ServerOption {
+	return func(s *Server) {
+		s.syslogCert = cert
+		s.syslogKey = key
+	}
+}
+
 func WithIdleTimeout(d time.Duration) ServerOption {
 	return func(s *Server) {
 		s.idleTimeout = d
@@ -87,10 +90,19 @@ func WithIdleTimeout(d time.Duration) ServerOption {
 }
 
 func (s *Server) Start() {
-	tlsConfig := s.buildTLSConfig()
-	l, err := tls.Listen("tcp", fmt.Sprintf(":%d", s.port), tlsConfig)
-	if err != nil {
-		s.loggr.Fatalf("unable to start syslog server: %s", err)
+	var l net.Listener
+	var err error
+	if s.syslogKey != "" || s.syslogCert != "" {
+		tlsConfig := s.buildTLSConfig()
+		l, err = tls.Listen("tcp", fmt.Sprintf(":%d", s.port), tlsConfig)
+		if err != nil {
+			s.loggr.Fatalf("unable to start syslog server: %s", err)
+		}
+	} else {
+		l, err = net.Listen("tcp", fmt.Sprintf(":%d", s.port))
+		if err != nil {
+			s.loggr.Fatalf("unable to start syslog server: %s", err)
+		}
 	}
 	defer s.Stop()
 
