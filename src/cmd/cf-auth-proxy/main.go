@@ -72,10 +72,6 @@ func main() {
 		loggr.Fatalf("failed to parse gateway address: %s", err)
 	}
 
-	// Force communication with the gateway to happen via HTTPS, regardless of
-	// the scheme provided in the config
-	gatewayURL.Scheme = "https"
-
 	capiClient := auth.NewCAPIClient(
 		cfg.CAPI.Addr,
 		buildCAPIClient(cfg, loggr),
