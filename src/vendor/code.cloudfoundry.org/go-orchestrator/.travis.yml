@@ -1,0 +1,18 @@
+language: go
+
+go:
+- 1.10.x
+- 1.11.x
+- master
+
+install: |
+  mkdir -p $HOME/gopath/src/code.cloudfoundry.org/go-orchestrator
+  rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/code.cloudfoundry.org/go-orchestrator/
+  export TRAVIS_BUILD_DIR=$GOPATH/src/code.cloudfoundry.org/go-orchestrator
+  go get -t -d -v code.cloudfoundry.org/go-orchestrator/...
+
+script: go test code.cloudfoundry.org/go-orchestrator/...
+
+matrix:
+  allow_failures:
+  - go: master
