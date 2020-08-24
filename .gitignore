@@ -15,7 +15,6 @@ releases/**/*.tgz
 
 # Golang
 bin/
-pkg/
 
 # Sync Package Specs
 src/github.com/codegangsta/cli
