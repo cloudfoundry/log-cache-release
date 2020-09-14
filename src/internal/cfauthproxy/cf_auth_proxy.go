@@ -13,6 +13,7 @@ import (
 
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
+	"github.com/gorilla/mux"
 )
 
 type CFAuthProxy struct {
@@ -21,6 +22,7 @@ type CFAuthProxy struct {
 	ln           net.Listener
 
 	gatewayURL      *url.URL
+	metricsURL      *url.URL
 	addr            string
 	certPath        string
 	keyPath         string
@@ -30,14 +32,24 @@ type CFAuthProxy struct {
 	accessMiddleware func(http.Handler) *auth.AccessHandler
 }
 
-func NewCFAuthProxy(gatewayAddr, addr string, opts ...CFAuthProxyOption) *CFAuthProxy {
+func NewCFAuthProxy(gatewayAddr, metricAddr, addr string, opts ...CFAuthProxyOption) *CFAuthProxy {
 	gatewayURL, err := url.Parse(gatewayAddr)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't parse gateway address: %s", err))
 	}
 
+	metricURL, err := url.Parse(metricAddr)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't parse gateway address: %s", err))
+	}
+
+	fmt.Println("************************")
+	fmt.Println(metricURL)
+	fmt.Println("************************")
+
 	p := &CFAuthProxy{
 		gatewayURL: gatewayURL,
+		metricsURL: metricURL,
 		addr:       addr,
 		authMiddleware: func(h http.Handler) http.Handler {
 			return h
@@ -122,8 +134,14 @@ func (p *CFAuthProxy) Start() {
 }
 
 func (p *CFAuthProxy) startServer() {
+	h := mux.NewRouter()
+	h.HandleFunc("/api/v1/query", p.metricReverseProxy().ServeHTTP)
+	h.PathPrefix("/").HandlerFunc(p.accessMiddleware(p.authMiddleware(p.logReverseProxy())).ServeHTTP)
+
+	fmt.Println("I Should be proxying back to the metrics server")
+
 	server := http.Server{
-		Handler:   p.accessMiddleware(p.authMiddleware(p.reverseProxy())),
+		Handler:   h,
 		TLSConfig: sharedtls.NewBaseTLSConfig(),
 	}
 
@@ -139,13 +157,18 @@ func (p *CFAuthProxy) Addr() string {
 	return p.ln.Addr().String()
 }
 
-func (p *CFAuthProxy) reverseProxy() *httputil.ReverseProxy {
+func (p *CFAuthProxy) logReverseProxy() *httputil.ReverseProxy {
 	proxy := httputil.NewSingleHostReverseProxy(p.gatewayURL)
 
 	if p.proxyCACertPool != nil {
 		proxy.Transport = NewTransportWithRootCA(p.proxyCACertPool)
 	}
 
+	return proxy
+}
+
+func (p *CFAuthProxy) metricReverseProxy() *httputil.ReverseProxy {
+	proxy := httputil.NewSingleHostReverseProxy(p.metricsURL)
 	return proxy
 }
 

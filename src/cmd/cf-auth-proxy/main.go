@@ -72,6 +72,11 @@ func main() {
 		loggr.Fatalf("failed to parse gateway address: %s", err)
 	}
 
+	metricURL, err := url.Parse(cfg.LogCacheMetricsSourceAddr)
+	if err != nil {
+		loggr.Fatalf("failed to parse metric address: %s", err)
+	}
+
 	capiClient := auth.NewCAPIClient(
 		cfg.CAPI.Addr,
 		buildCAPIClient(cfg, loggr),
@@ -123,6 +128,7 @@ func main() {
 
 	proxy := NewCFAuthProxy(
 		gatewayURL.String(),
+		metricURL.String(),
 		cfg.Addr,
 		proxyOptions...,
 	)

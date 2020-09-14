@@ -21,16 +21,17 @@ type UAA struct {
 }
 
 type Config struct {
-	LogCacheGatewayAddr     string        `env:"LOG_CACHE_GATEWAY_ADDR, required, report"`
-	Addr                    string        `env:"ADDR,                   required, report"`
-	InternalIP              string        `env:"INTERNAL_IP,                      report"`
-	CertPath                string        `env:"EXTERNAL_CERT,                    report"`
-	KeyPath                 string        `env:"EXTERNAL_KEY,                     report"`
-	SkipCertVerify          bool          `env:"SKIP_CERT_VERIFY,                 report"`
-	ProxyCAPath             string        `env:"PROXY_CA_PATH,					  report"`
-	SecurityEventLog        string        `env:"SECURITY_EVENT_LOG,               report"`
-	TokenPruningInterval    time.Duration `env:"TOKEN_PRUNING_INTERVAL,           report"`
-	CacheExpirationInterval time.Duration `env:"CACHE_EXPIRATION_INTERVAL,        report"`
+	LogCacheGatewayAddr       string        `env:"LOG_CACHE_GATEWAY_ADDR,        required, report"`
+	LogCacheMetricsSourceAddr string        `env:"LOG_CACHE_METRICS_SOURCE_ADDR,           report"`
+	Addr                      string        `env:"ADDR,                          required, report"`
+	InternalIP                string        `env:"INTERNAL_IP,                             report"`
+	CertPath                  string        `env:"EXTERNAL_CERT,                           report"`
+	KeyPath                   string        `env:"EXTERNAL_KEY,                            report"`
+	SkipCertVerify            bool          `env:"SKIP_CERT_VERIFY,                        report"`
+	ProxyCAPath               string        `env:"PROXY_CA_PATH,					       report"`
+	SecurityEventLog          string        `env:"SECURITY_EVENT_LOG,                      report"`
+	TokenPruningInterval      time.Duration `env:"TOKEN_PRUNING_INTERVAL,                  report"`
+	CacheExpirationInterval   time.Duration `env:"CACHE_EXPIRATION_INTERVAL,               report"`
 
 	CAPI          CAPI
 	UAA           UAA
