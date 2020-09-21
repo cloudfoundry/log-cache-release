@@ -22,5 +22,6 @@ processes:
     METRICS_CA_FILE_PATH: "<%= certDir %>/metrics_ca.crt"
     METRICS_CERT_FILE_PATH: "<%= certDir %>/metrics.crt"
     METRICS_KEY_FILE_PATH: "<%= certDir %>/metrics.key"
+    GODEBUG: "x509ignoreCN=0"
   limits:
     open_files: 8192
