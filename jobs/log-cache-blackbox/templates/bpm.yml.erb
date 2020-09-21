@@ -30,6 +30,7 @@ processes:
     CLIENT_ID:       "<%= p('cf_blackbox.client_id') %>"
     CLIENT_SECRET:   "<%= p('cf_blackbox.client_secret') %>"
     SKIP_TLS_VERIFY: "<%= p('cf_blackbox.skip_tls_verify') %>"
+    GODEBUG: "x509ignoreCN=0"
 
   limits:
     open_files: 8192
