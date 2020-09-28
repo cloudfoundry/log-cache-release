@@ -45,6 +45,6 @@ func newSpyMemory() *spyMemory {
 	return &spyMemory{}
 }
 
-func (s *spyMemory) Memory() (uint64, uint64, uint64) {
-	return s.heap, s.avail, s.total
+func (s *spyMemory) Memory() (uint64, uint64) {
+	return s.heap, s.total
 }

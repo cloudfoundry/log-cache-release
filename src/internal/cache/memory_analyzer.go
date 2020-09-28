@@ -46,7 +46,7 @@ func NewMemoryAnalyzer(m Metrics) *MemoryAnalyzer {
 }
 
 // Memory returns the heap memory and total system memory.
-func (a *MemoryAnalyzer) Memory() (heapInUse, available, total uint64) {
+func (a *MemoryAnalyzer) Memory() (heapInUse, total uint64) {
 	a.Lock()
 	defer a.Unlock()
 
@@ -65,5 +65,46 @@ func (a *MemoryAnalyzer) Memory() (heapInUse, available, total uint64) {
 	a.heap = rm.HeapInuse
 	a.setHeap.Set(float64(a.heap))
 
-	return a.heap, a.avail, a.total
+	return a.heap, a.total
+}
+
+// StaticMemoryAnalyzer reports the available and total memory.
+type StaticMemoryAnalyzer struct {
+	// metrics
+	setTotal metrics.Gauge
+	setHeap  metrics.Gauge
+
+	// cache
+	limit uint64
+
+	sync.Mutex
+}
+
+// NewStaticMemoryAnalyzer creates and returns a new StaticMemoryAnalyzer.
+func NewStaticMemoryAnalyzer(m Metrics, limit uint64) *StaticMemoryAnalyzer {
+	return &StaticMemoryAnalyzer{
+		setHeap: m.NewGauge(
+			"log_cache_heap_in_use_memory",
+			"Current heap memory usage.",
+			metrics.WithMetricLabels(map[string]string{"unit": "bytes"}),
+		),
+		setTotal: m.NewGauge(
+			"log_cache_total_system_memory",
+			"Total system memory.",
+			metrics.WithMetricLabels(map[string]string{"unit": "bytes"}),
+		),
+		limit: limit,
+	}
+}
+
+// Memory returns the heap memory limit.
+func (a *StaticMemoryAnalyzer) Memory() (heapInUse, total uint64) {
+	a.setTotal.Set(float64(a.limit))
+
+	var rm runtime.MemStats
+	runtime.ReadMemStats(&rm)
+
+	a.setHeap.Set(float64(rm.HeapInuse))
+
+	return rm.HeapInuse, a.limit
 }

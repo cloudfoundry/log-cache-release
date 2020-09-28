@@ -38,6 +38,7 @@ type LogCache struct {
 
 	maxPerSource       int
 	memoryLimitPercent float64
+	memoryLimit        uint64
 	queryTimeout       time.Duration
 
 	// Cluster Properties
@@ -105,11 +106,19 @@ func WithServerOpts(opts ...grpc.ServerOption) LogCacheOption {
 	}
 }
 
-// WithMemoryLimit sets the percentage of total system memory to use for the
+// WithMemoryLimitPercent sets the percentage of total system memory to use for the
 // cache. If exceeded, the cache will prune. Default is 50%.
-func WithMemoryLimit(memoryPercent float64) LogCacheOption {
+func WithMemoryLimitPercent(memoryPercent float64) LogCacheOption {
 	return func(c *LogCache) {
 		c.memoryLimitPercent = memoryPercent
+	}
+}
+
+// WithMemoryLimit sets total system memory to use for the
+// cache. Is used in conjunction with MemoryLimitPercent
+func WithMemoryLimit(memoryLimit uint64) LogCacheOption {
+	return func(c *LogCache) {
+		c.memoryLimit = memoryLimit
 	}
 }
 
@@ -139,7 +148,13 @@ func WithClustered(nodeIndex int, nodeAddrs []string, opts ...grpc.DialOption) L
 // Start starts the LogCache. It has an internal go-routine that it creates
 // and therefore does not block.
 func (c *LogCache) Start() {
-	p := store.NewPruneConsultant(2, c.memoryLimitPercent, NewMemoryAnalyzer(c.metrics))
+	var analyzer store.Memory
+	if c.memoryLimit != 0 {
+		analyzer = NewStaticMemoryAnalyzer(c.metrics, c.memoryLimit)
+	} else {
+		analyzer = NewMemoryAnalyzer(c.metrics)
+	}
+	p := store.NewPruneConsultant(2, c.memoryLimitPercent, analyzer)
 	store := store.NewStore(c.maxPerSource, p, c.metrics)
 	c.setupRouting(store)
 }

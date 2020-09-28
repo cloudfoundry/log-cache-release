@@ -63,7 +63,8 @@ func main() {
 
 	logCacheOptions := []LogCacheOption{
 		WithAddr(cfg.Addr),
-		WithMemoryLimit(float64(cfg.MemoryLimit)),
+		WithMemoryLimitPercent(float64(cfg.MemoryLimitPercent)),
+		WithMemoryLimit(cfg.MemoryLimit),
 		WithMaxPerSource(cfg.MaxPerSource),
 		WithQueryTimeout(cfg.QueryTimeout),
 	}

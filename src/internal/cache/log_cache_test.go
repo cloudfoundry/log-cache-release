@@ -405,6 +405,67 @@ var _ = Describe("LogCache", func() {
 		Expect(req.EnvelopeTypes).To(ConsistOf(rpc.EnvelopeType_LOG))
 	})
 
+	It("prunes envelopes against a static limit", func() {
+		var err error
+		Expect(err).ToNot(HaveOccurred())
+
+		peer := testing.NewSpyLogCache(nil)
+		peerAddr := peer.Start()
+		spyMetrics := testhelpers.NewMetricsRegistry()
+
+		cache := New(
+			spyMetrics,
+			log.New(ioutil.Discard, "", 0),
+			WithAddr("127.0.0.1:0"),
+			WithClustered(0, []string{"my-addr", peerAddr},
+				grpc.WithInsecure(),
+			),
+			WithMemoryLimit(1),
+		)
+		cache.Start()
+		defer cache.Close()
+		peer.MetaResponses = map[string]*rpc.MetaInfo{}
+
+		conn, err := grpc.Dial(cache.Addr(),
+			grpc.WithInsecure(),
+		)
+		Expect(err).ToNot(HaveOccurred())
+		defer conn.Close()
+		ingressClient := rpc.NewIngressClient(conn)
+		egressClient := rpc.NewEgressClient(conn)
+
+		sendRequest := &rpc.SendRequest{
+			Envelopes: &loggregator_v2.EnvelopeBatch{
+				Batch: []*loggregator_v2.Envelope{
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+					{SourceId: "src-zero"},
+				},
+			},
+		}
+
+		ingressClient.Send(context.Background(), sendRequest)
+		Eventually(func() map[string]*rpc.MetaInfo {
+			resp, err := egressClient.Meta(context.Background(), &rpc.MetaRequest{})
+			if err != nil {
+				return nil
+			}
+
+			return resp.Meta
+		}, 10).Should(And(
+			HaveKeyWithValue("src-zero", &rpc.MetaInfo{
+				Count:           1,
+				Expired:         7,
+				OldestTimestamp: 7,
+			}),
+		))
+	})
+
 	It("returns all meta information", func() {
 		cache, peer, _, tlsConfig := tlsLogCacheTestSetup()
 		defer cache.Close()
