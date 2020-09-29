@@ -23,11 +23,12 @@ type CFAuthProxy struct {
 	server      http.Server
 	mu          sync.Mutex
 
-	gatewayURL      *url.URL
-	addr            string
-	certPath        string
-	keyPath         string
-	proxyCACertPool *x509.CertPool
+	gatewayURL        *url.URL
+	addr              string
+	certPath          string
+	keyPath           string
+	proxyCACertPool   *x509.CertPool
+	readinessInterval time.Duration
 
 	authMiddleware   func(http.Handler) http.Handler
 	accessMiddleware func(http.Handler) *auth.AccessHandler
@@ -96,8 +97,20 @@ func WithCFAuthProxyCACertPool(certPool *x509.CertPool) CFAuthProxyOption {
 	}
 }
 
-// Start starts the HTTP listener and serves the HTTP server. If the
-func (p *CFAuthProxy) Start() {
+func WithCFAuthProxyReadyCheckInterval(interval time.Duration) CFAuthProxyOption {
+	return func(p *CFAuthProxy) {
+		p.readinessInterval = interval
+	}
+}
+
+// CFAuthProxy was initialized with the WithCFAuthProxyBlock option this
+// method will block.
+func (p *CFAuthProxy) Start(readyChecker func() error) {
+	for err := readyChecker(); err != nil; err = readyChecker() {
+		log.Printf("Not ready to start: %s", err)
+		time.Sleep(p.readinessInterval)
+	}
+
 	ln, err := net.Listen("tcp", p.addr)
 	if err != nil {
 		log.Fatalf("failed to start listener: %s", err)

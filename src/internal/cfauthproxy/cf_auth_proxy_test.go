@@ -2,6 +2,7 @@ package cfauthproxy_test
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -25,7 +26,38 @@ var _ = Describe("CFAuthProxy", func() {
 
 		proxy := newSecureCFAuthProxy(gateway.URL)
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
+
+		resp, err := makeTLSReq(proxy.Addr())
+		Expect(err).ToNot(HaveOccurred())
+
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		body, _ := ioutil.ReadAll(resp.Body)
+		Expect(body).To(Equal([]byte("Hello World!")))
+	})
+
+	It("doesn't start the api until the readychecker returns nil", func() {
+		gateway := startSecureGateway("Hello World!")
+		defer gateway.Close()
+
+		isReady := make(chan struct{})
+		almostReadyChecker := func() error {
+			select {
+			case <-isReady:
+				return nil
+			default:
+				return errors.New("Not Ready")
+			}
+		}
+
+		proxy := newSecureCFAuthProxy(gateway.URL)
+		defer proxy.Stop()
+		go proxy.Start(almostReadyChecker)
+
+		Consistently(proxy.Addr, time.Second).Should(BeEmpty())
+
+		close(isReady)
+		Eventually(proxy.Addr).ShouldNot(BeEmpty())
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -41,7 +73,7 @@ var _ = Describe("CFAuthProxy", func() {
 
 		proxy := newInsecureCFAuthProxy(gateway.URL)
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -66,7 +98,7 @@ var _ = Describe("CFAuthProxy", func() {
 
 		proxy := newSecureCFAuthProxy(testGatewayURL.String())
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -88,7 +120,7 @@ var _ = Describe("CFAuthProxy", func() {
 			}),
 		)
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -111,7 +143,7 @@ var _ = Describe("CFAuthProxy", func() {
 			}),
 		)
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -126,7 +158,7 @@ var _ = Describe("CFAuthProxy", func() {
 		)
 		proxy := newSecureCFAuthProxy(testServer.URL)
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeReq(proxy.Addr())
 		Expect(err).NotTo(HaveOccurred())
@@ -140,7 +172,7 @@ var _ = Describe("CFAuthProxy", func() {
 
 		proxy := newSecureCFAuthProxy(gateway.URL, WithCFAuthProxyTLSDisabled())
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -153,6 +185,10 @@ var _ = Describe("CFAuthProxy", func() {
 
 var localhostCerts = testing.GenerateCerts("localhost-ca")
 
+func alwaysReadyChecker() error {
+	return nil
+}
+
 func newSecureCFAuthProxy(gatewayURL string, opts ...CFAuthProxyOption) *CFAuthProxy {
 	parsedURL, err := url.Parse(gatewayURL)
 	if err != nil {
@@ -160,6 +196,7 @@ func newSecureCFAuthProxy(gatewayURL string, opts ...CFAuthProxyOption) *CFAuthP
 	}
 
 	opts = append(opts, WithCFAuthProxyCACertPool(localhostCerts.Pool()))
+	opts = append(opts, WithCFAuthProxyReadyCheckInterval(100*time.Millisecond))
 	opts = append(opts, WithCFAuthProxyTLSServer(localhostCerts.Cert("localhost"), localhostCerts.Key("localhost")))
 	return NewCFAuthProxy(
 		parsedURL.String(),
@@ -168,8 +205,8 @@ func newSecureCFAuthProxy(gatewayURL string, opts ...CFAuthProxyOption) *CFAuthP
 	)
 }
 
-func startProxy(proxy *CFAuthProxy) {
-	go proxy.Start()
+func startProxy(proxy *CFAuthProxy, readyChecker func() error) {
+	go proxy.Start(readyChecker)
 	for proxy.Addr() == "" {
 		time.Sleep(100 * time.Millisecond)
 	}
