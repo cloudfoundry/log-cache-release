@@ -107,7 +107,6 @@ func main() {
 
 	proxyOptions := []CFAuthProxyOption{
 		WithAuthMiddleware(middlewareProvider.Middleware),
-		WithCFAuthProxyBlock(),
 	}
 
 	if cfg.ProxyCAPath != "" {

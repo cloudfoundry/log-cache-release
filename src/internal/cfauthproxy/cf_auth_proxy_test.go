@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"time"
 
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
@@ -23,7 +24,8 @@ var _ = Describe("CFAuthProxy", func() {
 		defer gateway.Close()
 
 		proxy := newSecureCFAuthProxy(gateway.URL)
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -38,7 +40,8 @@ var _ = Describe("CFAuthProxy", func() {
 		defer gateway.Close()
 
 		proxy := newInsecureCFAuthProxy(gateway.URL)
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -62,7 +65,8 @@ var _ = Describe("CFAuthProxy", func() {
 		testGatewayURL.Scheme = "https"
 
 		proxy := newSecureCFAuthProxy(testGatewayURL.String())
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -83,7 +87,8 @@ var _ = Describe("CFAuthProxy", func() {
 				return middleware
 			}),
 		)
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -105,7 +110,8 @@ var _ = Describe("CFAuthProxy", func() {
 				return auth.NewAccessHandler(middleware, auth.NewNullAccessLogger(), "0.0.0.0", "1234")
 			}),
 		)
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -119,7 +125,8 @@ var _ = Describe("CFAuthProxy", func() {
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}),
 		)
 		proxy := newSecureCFAuthProxy(testServer.URL)
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeReq(proxy.Addr())
 		Expect(err).NotTo(HaveOccurred())
@@ -132,7 +139,8 @@ var _ = Describe("CFAuthProxy", func() {
 		defer gateway.Close()
 
 		proxy := newSecureCFAuthProxy(gateway.URL, WithCFAuthProxyTLSDisabled())
-		proxy.Start()
+		defer proxy.Stop()
+		startProxy(proxy)
 
 		resp, err := makeReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
@@ -158,6 +166,13 @@ func newSecureCFAuthProxy(gatewayURL string, opts ...CFAuthProxyOption) *CFAuthP
 		"127.0.0.1:0",
 		opts...,
 	)
+}
+
+func startProxy(proxy *CFAuthProxy) {
+	go proxy.Start()
+	for proxy.Addr() == "" {
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 func newInsecureCFAuthProxy(gatewayURL string, opts ...CFAuthProxyOption) *CFAuthProxy {
