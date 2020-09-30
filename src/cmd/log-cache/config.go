@@ -21,8 +21,9 @@ type Config struct {
 	// cache. If exceeded, the cache will prune. Default is 50%.
 	MemoryLimitPercent uint `env:"MEMORY_LIMIT_PERCENT, report"`
 
-	// MemoryLimit overrides the amount of system memory to a static limit
-	MemoryLimit uint64 `env:"MEMORY_LIMIT, report"`
+	// MemoryLimit sets the limit of system memory used to a static number of bytes,
+	// overriding MemoryLimitPercent. If exceeded, the cache will prune.
+	MemoryLimit uint64 `env:"MEMORY_LIMIT_BYTES, report"`
 
 	// MaxPerSource sets the maximum number of items stored per source.
 	// Because autoscaler requires a minute of data, apps with more than 1000
