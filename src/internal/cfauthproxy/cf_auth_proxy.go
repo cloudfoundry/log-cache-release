@@ -47,7 +47,7 @@ func NewCFAuthProxy(gatewayAddr, addr string, opts ...CFAuthProxyOption) *CFAuth
 			return h
 		},
 		accessMiddleware:  auth.NewNullAccessMiddleware(),
-		readinessInterval: time.Second,
+		readinessInterval: 10 * time.Second,
 	}
 
 	for _, o := range opts {
