@@ -60,7 +60,7 @@ func NewUAAClient(
 		httpClient:             httpClient,
 		log:                    log,
 		publicKeys:             sync.Map{},
-		minimumRefreshInterval: 30 * time.Second,
+		minimumRefreshInterval: 5 * time.Second,
 	}
 
 	for _, opt := range opts {
