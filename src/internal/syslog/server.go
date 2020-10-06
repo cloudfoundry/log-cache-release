@@ -25,12 +25,13 @@ import (
 
 type Server struct {
 	sync.Mutex
-	port        int
-	l           net.Listener
-	envelopes   chan *loggregator_v2.Envelope
-	syslogCert  string
-	syslogKey   string
-	idleTimeout time.Duration
+	port             int
+	l                net.Listener
+	envelopes        chan *loggregator_v2.Envelope
+	syslogCert       string
+	syslogKey        string
+	idleTimeout      time.Duration
+	maxMessageLength int
 
 	ingress        metrics.Counter
 	invalidIngress metrics.Counter
@@ -50,9 +51,10 @@ func NewServer(
 	opts ...ServerOption,
 ) *Server {
 	s := &Server{
-		loggr:       loggr,
-		envelopes:   make(chan *loggregator_v2.Envelope, 100),
-		idleTimeout: 2 * time.Minute,
+		loggr:            loggr,
+		envelopes:        make(chan *loggregator_v2.Envelope, 100),
+		idleTimeout:      2 * time.Minute,
+		maxMessageLength: 60 * 1024,
 	}
 
 	for _, o := range opts {
@@ -74,6 +76,12 @@ func NewServer(
 func WithServerPort(p int) ServerOption {
 	return func(s *Server) {
 		s.port = p
+	}
+}
+
+func WithServerMaxMessageLength(l int) ServerOption {
+	return func(s *Server) {
+		s.maxMessageLength = l
 	}
 }
 
@@ -136,8 +144,10 @@ func (s *Server) handleConnection(conn net.Conn) {
 	defer conn.Close()
 	s.setReadDeadline(conn)
 
-	p := octetcounting.NewParser()
-	p.WithListener(s.parseListenerForConnection(conn))
+	p := octetcounting.NewParser(
+		syslog.WithMaxMessageLength(s.maxMessageLength),
+		syslog.WithListener(s.parseListenerForConnection(conn)),
+	)
 	p.Parse(conn)
 }
 
