@@ -25,7 +25,7 @@ require (
 	github.com/golang/protobuf v1.4.2 // pinned
 	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/grpc-gateway v1.14.6
-	github.com/influxdata/go-syslog/v2 v2.0.1
+	github.com/influxdata/go-syslog/v3 v3.0.1-0.20201006113939-efe45e3cff92
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/onsi/ginkgo v1.13.0

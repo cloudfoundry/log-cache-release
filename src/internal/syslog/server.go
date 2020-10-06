@@ -11,8 +11,9 @@ import (
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/tlsconfig"
-	"github.com/influxdata/go-syslog/v2"
-	"github.com/influxdata/go-syslog/v2/octetcounting"
+	"github.com/influxdata/go-syslog/v3"
+	"github.com/influxdata/go-syslog/v3/octetcounting"
+	"github.com/influxdata/go-syslog/v3/rfc5424"
 
 	"net"
 	"strconv"
@@ -161,7 +162,12 @@ func (s *Server) parseListener(res *syslog.Result) {
 		return
 	}
 
-	msg := res.Message
+	msg, ok := res.Message.(*rfc5424.SyslogMessage)
+	if !ok {
+		s.invalidIngress.Add(1)
+		s.loggr.Printf("invalid message format: not rfc5424")
+	}
+
 	env, err := s.convertToEnvelope(msg)
 	if err != nil {
 		s.invalidIngress.Add(1)
@@ -174,27 +180,27 @@ func (s *Server) parseListener(res *syslog.Result) {
 	s.ingress.Add(1)
 }
 
-func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope, error) {
-	procID := msg.ProcID()
+func (s *Server) convertToEnvelope(msg *rfc5424.SyslogMessage) (*loggregator_v2.Envelope, error) {
+	procID := msg.ProcID
 	if procID == nil {
 		return nil, fmt.Errorf("missing proc ID in syslog message")
 	}
 
 	instanceId := s.instanceIdFromPID(*procID)
-	sourceID := msg.Appname()
+	sourceID := msg.Appname
 	if sourceID == nil {
 		return nil, fmt.Errorf("missing app name in syslog message")
 	}
 
 	env := &loggregator_v2.Envelope{
 		SourceId:   *sourceID,
-		Timestamp:  msg.Timestamp().UnixNano(),
+		Timestamp:  msg.Timestamp.UnixNano(),
 		InstanceId: instanceId,
 		Tags:       map[string]string{},
 	}
 
-	if msg.StructuredData() != nil {
-		for envType, payload := range *msg.StructuredData() {
+	if msg.StructuredData != nil {
+		for envType, payload := range *msg.StructuredData {
 			var err error
 			env, err = convertStructuredData(env, envType, payload)
 			if err != nil {
@@ -203,7 +209,7 @@ func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope
 		}
 	}
 
-	if env.GetMessage() == nil && msg.Message() != nil {
+	if env.GetMessage() == nil && msg.Message != nil {
 		env = s.convertMessage(env, msg)
 	}
 
@@ -214,11 +220,11 @@ func (s *Server) convertToEnvelope(msg syslog.Message) (*loggregator_v2.Envelope
 	return env, nil
 }
 
-func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg syslog.Message) *loggregator_v2.Envelope {
+func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg *rfc5424.SyslogMessage) *loggregator_v2.Envelope {
 	env.Message = &loggregator_v2.Envelope_Log{
 		Log: &loggregator_v2.Log{
-			Payload: []byte(strings.TrimSpace(*msg.Message())),
-			Type:    s.typeFromPriority(int(*msg.Priority())),
+			Payload: []byte(strings.TrimSpace(*msg.Message)),
+			Type:    s.typeFromPriority(int(*msg.Priority)),
 		},
 	}
 
