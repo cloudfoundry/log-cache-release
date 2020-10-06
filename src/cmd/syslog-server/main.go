@@ -45,6 +45,7 @@ func main() {
 	serverOptions := []syslog.ServerOption{
 		syslog.WithServerPort(cfg.SyslogPort),
 		syslog.WithIdleTimeout(cfg.SyslogIdleTimeout),
+		syslog.WithServerMaxMessageLength(cfg.SyslogMaxMessageLength),
 	}
 	if cfg.SyslogTLSCertPath != "" || cfg.SyslogTLSKeyPath != "" {
 		serverOptions = append(serverOptions, syslog.WithServerTLS(cfg.SyslogTLSCertPath, cfg.SyslogTLSKeyPath))
