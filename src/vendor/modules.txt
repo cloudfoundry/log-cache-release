@@ -80,11 +80,11 @@ github.com/gorilla/mux
 github.com/grpc-ecosystem/grpc-gateway/internal
 github.com/grpc-ecosystem/grpc-gateway/runtime
 github.com/grpc-ecosystem/grpc-gateway/utilities
-# github.com/influxdata/go-syslog/v2 v2.0.1
-github.com/influxdata/go-syslog/v2
-github.com/influxdata/go-syslog/v2/common
-github.com/influxdata/go-syslog/v2/octetcounting
-github.com/influxdata/go-syslog/v2/rfc5424
+# github.com/influxdata/go-syslog/v3 v3.0.1-0.20201006113939-efe45e3cff92
+github.com/influxdata/go-syslog/v3
+github.com/influxdata/go-syslog/v3/common
+github.com/influxdata/go-syslog/v3/octetcounting
+github.com/influxdata/go-syslog/v3/rfc5424
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/nxadm/tail v1.4.4
