@@ -27,6 +27,7 @@ type Config struct {
 	CertPath                string        `env:"EXTERNAL_CERT,                    report"`
 	KeyPath                 string        `env:"EXTERNAL_KEY,                     report"`
 	SkipCertVerify          bool          `env:"SKIP_CERT_VERIFY,                 report"`
+	PromQLUnimplemented     bool          `env:"PROMQL_UNIMPLEMENTED,             report"`
 	ProxyCAPath             string        `env:"PROXY_CA_PATH,					  report"`
 	SecurityEventLog        string        `env:"SECURITY_EVENT_LOG,               report"`
 	TokenPruningInterval    time.Duration `env:"TOKEN_PRUNING_INTERVAL,           report"`
@@ -40,6 +41,7 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	cfg := Config{
 		SkipCertVerify:          false,
+		PromQLUnimplemented:     false,
 		Addr:                    ":8083",
 		InternalIP:              "0.0.0.0",
 		LogCacheGatewayAddr:     "localhost:8081",

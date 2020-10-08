@@ -31,6 +31,7 @@ type CFAuthProxy struct {
 
 	authMiddleware   func(http.Handler) http.Handler
 	accessMiddleware func(http.Handler) *auth.AccessHandler
+	promMiddleware   func(http.Handler) http.Handler
 }
 
 func NewCFAuthProxy(gatewayAddr, addr string, opts ...CFAuthProxyOption) *CFAuthProxy {
@@ -45,6 +46,10 @@ func NewCFAuthProxy(gatewayAddr, addr string, opts ...CFAuthProxyOption) *CFAuth
 		authMiddleware: func(h http.Handler) http.Handler {
 			return h
 		},
+		promMiddleware: func(h http.Handler) http.Handler {
+			return h
+		},
+
 		accessMiddleware: auth.NewNullAccessMiddleware(),
 	}
 
@@ -79,6 +84,12 @@ func WithAccessMiddleware(accessMiddleware func(http.Handler) *auth.AccessHandle
 	}
 }
 
+func WithPromMiddleware(promMiddleware func(http.Handler) http.Handler) CFAuthProxyOption {
+	return func(p *CFAuthProxy) {
+		p.promMiddleware = promMiddleware
+	}
+}
+
 // WithCFAuthProxyTLSDisabled returns a CFAuthProxyOption that sets the CFAuthProxy
 // to accept insecure plain text communication
 func WithCFAuthProxyTLSDisabled() CFAuthProxyOption {
@@ -104,7 +115,7 @@ func (p *CFAuthProxy) Start() {
 	}
 
 	server := http.Server{
-		Handler:   p.accessMiddleware(p.authMiddleware(p.reverseProxy())),
+		Handler:   p.accessMiddleware(p.promMiddleware(p.authMiddleware(p.reverseProxy()))),
 		TLSConfig: sharedtls.NewBaseTLSConfig(),
 	}
 

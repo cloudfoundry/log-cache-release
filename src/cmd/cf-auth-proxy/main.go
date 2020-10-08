@@ -114,6 +114,10 @@ func main() {
 		proxyOptions = append(proxyOptions, WithCFAuthProxyCACertPool(proxyCACertPool))
 	}
 
+	if cfg.PromQLUnimplemented {
+		proxyOptions = append(proxyOptions, WithPromMiddleware(promql.UnimplementedMiddleware))
+	}
+
 	if cfg.CertPath == "" && cfg.KeyPath == "" {
 		proxyOptions = append(proxyOptions, WithCFAuthProxyTLSDisabled())
 	} else {

@@ -120,6 +120,29 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(middlewareCalled).To(BeTrue())
 	})
 
+	It("delegates to the prom middleware", func() {
+		var middlewareCalled bool
+		middleware := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			middlewareCalled = true
+			w.WriteHeader(http.StatusNotFound)
+		})
+
+		proxy := newSecureCFAuthProxy(
+			"https://127.0.0.1",
+			WithPromMiddleware(func(http.Handler) http.Handler {
+				return middleware
+			}),
+		)
+		defer proxy.Stop()
+		startProxy(proxy)
+
+		resp, err := makeTLSReq(proxy.Addr())
+		Expect(err).ToNot(HaveOccurred())
+
+		Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+		Expect(middlewareCalled).To(BeTrue())
+	})
+
 	It("does not accept unencrypted connections when configured for TLS", func() {
 		testServer := httptest.NewTLSServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}),
