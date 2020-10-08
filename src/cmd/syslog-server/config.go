@@ -31,7 +31,7 @@ func LoadConfig() (*Config, error) {
 		MetricsServer: config.MetricsServer{
 			Port: 6061,
 		},
-		SyslogMaxMessageLength: 60 * 1024,
+		SyslogMaxMessageLength: 65 * 1024, // Diego should never send logs bigger than 64Kib
 	}
 
 	if err := envstruct.Load(&c); err != nil {

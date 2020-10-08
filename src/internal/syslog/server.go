@@ -54,7 +54,7 @@ func NewServer(
 		loggr:            loggr,
 		envelopes:        make(chan *loggregator_v2.Envelope, 100),
 		idleTimeout:      2 * time.Minute,
-		maxMessageLength: 60 * 1024,
+		maxMessageLength: 65 * 1024, // Diego should never send logs bigger than 64Kib
 	}
 
 	for _, o := range opts {
