@@ -422,7 +422,8 @@ var _ = Describe("UAAClient", func() {
 			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
 
 			time.Sleep(100 * time.Millisecond)
-			tc.uaaClient.RefreshTokenKeys()
+			err := tc.uaaClient.RefreshTokenKeys()
+			Expect(err).To(HaveOccurred())
 			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
 
 			time.Sleep(101 * time.Millisecond)

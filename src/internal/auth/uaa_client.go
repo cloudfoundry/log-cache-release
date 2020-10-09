@@ -60,7 +60,7 @@ func NewUAAClient(
 		httpClient:             httpClient,
 		log:                    log,
 		publicKeys:             sync.Map{},
-		minimumRefreshInterval: 30 * time.Second,
+		minimumRefreshInterval: 5 * time.Second,
 	}
 
 	for _, opt := range opts {
@@ -89,12 +89,13 @@ func (c *UAAClient) RefreshTokenKeys() error {
 	lastQueryTime := atomic.LoadInt64(&c.lastQueryTime)
 	nextAllowedRefreshTime := time.Unix(0, lastQueryTime).Add(c.minimumRefreshInterval)
 	if time.Now().Before(nextAllowedRefreshTime) {
-		c.log.Printf(
+		err := fmt.Errorf(
 			"UAA TokenKey refresh throttled to every %s, try again in %s",
 			c.minimumRefreshInterval,
 			time.Until(nextAllowedRefreshTime).Round(time.Millisecond),
 		)
-		return nil
+		c.log.Println(err)
+		return err
 	}
 	atomic.CompareAndSwapInt64(&c.lastQueryTime, lastQueryTime, time.Now().UnixNano())
 
@@ -109,7 +110,6 @@ func (c *UAAClient) RefreshTokenKeys() error {
 	}
 
 	resp, err := c.httpClient.Do(req)
-
 	if err != nil {
 		return fmt.Errorf("failed to get token keys from UAA: %s", err)
 	}
