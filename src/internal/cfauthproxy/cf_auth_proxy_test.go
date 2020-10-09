@@ -166,7 +166,7 @@ var _ = Describe("CFAuthProxy", func() {
 			}),
 		)
 		defer proxy.Stop()
-		startProxy(proxy)
+		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
 		Expect(err).ToNot(HaveOccurred())
