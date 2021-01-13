@@ -66,3 +66,7 @@ properties:
   disabled:
     default: false
     description: "Turns off log cache."
+
+  logging.format.timestamp:
+    description: "Format for timestamp in component logs. Valid values are 'deprecated' and 'rfc3339'."
+    default: "deprecated"

@@ -11,21 +11,31 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/nozzle"
+	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 
 	loggregator "code.cloudfoundry.org/go-loggregator"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-
-	log.Print("Starting LogCache Nozzle...")
-	defer log.Print("Closing LogCache Nozzle.")
+	var loggr *log.Logger
 
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Fatalf("invalid configuration: %s", err)
 	}
+
+	if cfg.UseRFC339 {
+		loggr = log.New(new(plumbing.LogWriter), "[LOGGR] ", 0)
+		log.SetOutput(new(plumbing.LogWriter))
+		log.SetFlags(0)
+	} else {
+		loggr = log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
+		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	}
+
+	log.Print("Starting LogCache Nozzle...")
+	defer log.Print("Closing LogCache Nozzle.")
 
 	envstruct.WriteReport(cfg)
 
@@ -38,7 +48,6 @@ func main() {
 		log.Fatalf("invalid LogsProviderTLS configuration: %s", err)
 	}
 
-	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
 	m := metrics.NewRegistry(loggr)
 
 	dropped := m.NewCounter(

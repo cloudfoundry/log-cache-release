@@ -37,5 +37,6 @@ processes:
     METRICS_CERT_FILE_PATH: "<%= certDir %>/metrics.crt"
     METRICS_KEY_FILE_PATH: "<%= certDir %>/metrics.key"
     GODEBUG: "x509ignoreCN=0"
+    USE_RFC339: "<%= p("logging.format.timestamp") == "rfc3339" %>"
   limits:
     open_files: 8192

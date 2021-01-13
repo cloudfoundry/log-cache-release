@@ -45,6 +45,7 @@ type Config struct {
 
 	TLS           tls.TLS
 	MetricsServer config.MetricsServer
+	UseRFC339     bool `env:"USE_RFC339"`
 }
 
 // LoadConfig creates Config object from environment variables

@@ -12,23 +12,31 @@ import (
 
 	"code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/cache"
+	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-
-	log.Print("Starting Log Cache...")
-	defer log.Print("Closing Log Cache.")
+	var logger *log.Logger
 
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Fatalf("invalid configuration: %s", err)
 	}
 
-	envstruct.WriteReport(cfg)
+	if cfg.UseRFC339 {
+		logger = log.New(new(plumbing.LogWriter), "", 0)
+		log.SetOutput(new(plumbing.LogWriter))
+		log.SetFlags(0)
+	} else {
+		logger = log.New(os.Stderr, "", log.LstdFlags)
+		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	}
 
-	logger := log.New(os.Stderr, "", log.LstdFlags)
+	log.Print("Starting Log Cache...")
+	defer log.Print("Closing Log Cache.")
+
+	envstruct.WriteReport(cfg)
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),

@@ -23,6 +23,7 @@ type Config struct {
 
 	DataSourceGrpcAddr string `env:"DATA_SOURCE_GRPC_ADDR, report"`
 	TLS                tls.TLS
+	UseRFC339          bool `env:"USE_RFC339"`
 }
 
 func LoadConfig() (*Config, error) {

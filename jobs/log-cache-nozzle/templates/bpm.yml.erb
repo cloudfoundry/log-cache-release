@@ -26,6 +26,7 @@ processes:
     SHARD_ID:       "<%= p('shard_id') %>"
     SELECTORS:      "<%= p('selectors').join(',') %>"
     GODEBUG: "x509ignoreCN=0"
+    USE_RFC339: "<%= p("logging.format.timestamp") == "rfc3339" %>"
 
   limits:
     open_files: 8192

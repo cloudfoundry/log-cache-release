@@ -9,19 +9,32 @@ import (
 	_ "net/http/pprof"
 
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
+	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-
-	log.Print("Starting Log Cache Gateway...")
-	defer log.Print("Closing Log Cache Gateway.")
+	var metricsLoggr *log.Logger
+	var gatewayLoggr *log.Logger
 
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Fatalf("invalid configuration: %s", err)
 	}
+
+	if cfg.UseRFC339 {
+		metricsLoggr = log.New(new(plumbing.LogWriter), "[METRICS] ", 0)
+		gatewayLoggr = log.New(new(plumbing.LogWriter), "[GATEWAY] ", 0)
+		log.SetOutput(new(plumbing.LogWriter))
+		log.SetFlags(0)
+	} else {
+		metricsLoggr = log.New(os.Stderr, "[METRICS] ", log.LstdFlags)
+		gatewayLoggr = log.New(os.Stderr, "[GATEWAY] ", log.LstdFlags)
+		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	}
+
+	log.Print("Starting Log Cache Gateway...")
+	defer log.Print("Closing Log Cache Gateway.")
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),
@@ -33,12 +46,12 @@ func main() {
 		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
 	metrics.NewRegistry(
-		log.New(os.Stderr, "[METRICS] ", log.LstdFlags),
+		metricsLoggr,
 		metricServerOption,
 	)
 
 	gatewayOptions := []GatewayOption{
-		WithGatewayLogger(log.New(os.Stderr, "[GATEWAY] ", log.LstdFlags)),
+		WithGatewayLogger(gatewayLoggr),
 		WithGatewayVersion(cfg.Version),
 		WithGatewayBlock(),
 	}

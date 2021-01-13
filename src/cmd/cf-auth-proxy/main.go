@@ -17,22 +17,32 @@ import (
 	"code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
+	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
 	"code.cloudfoundry.org/log-cache/pkg/client"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-
-	loggr := log.New(os.Stderr, "", log.LstdFlags)
-	loggr.Print("Starting Log Cache CF Auth Reverse Proxy...")
-	defer loggr.Print("Closing Log Cache CF Auth Reverse Proxy.")
+	var loggr *log.Logger
 
 	cfg, err := LoadConfig()
 	if err != nil {
-		loggr.Fatalf("failed to load config: %s", err)
+		log.Fatalf("failed to load config: %s", err)
 	}
+
+	if cfg.UseRFC339 {
+		loggr = log.New(new(plumbing.LogWriter), "", 0)
+		log.SetOutput(new(plumbing.LogWriter))
+		log.SetFlags(0)
+	} else {
+		loggr = log.New(os.Stderr, "", log.LstdFlags)
+		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	}
+
+	loggr.Print("Starting Log Cache CF Auth Reverse Proxy...")
+	defer loggr.Print("Closing Log Cache CF Auth Reverse Proxy.")
+
 	envstruct.WriteReport(cfg)
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),

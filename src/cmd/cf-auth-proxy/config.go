@@ -36,6 +36,7 @@ type Config struct {
 	CAPI          CAPI
 	UAA           UAA
 	MetricsServer config.MetricsServer
+	UseRFC339     bool `env:"USE_RFC339"`
 }
 
 func LoadConfig() (*Config, error) {

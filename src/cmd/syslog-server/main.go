@@ -5,28 +5,35 @@ import (
 	_ "net/http/pprof"
 	"os"
 
+	"code.cloudfoundry.org/go-envstruct"
 	metrics "code.cloudfoundry.org/go-metric-registry"
 	. "code.cloudfoundry.org/log-cache/internal/nozzle"
+	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
-
-	"code.cloudfoundry.org/go-envstruct"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-
-	log.Print("Starting Syslog Server...")
-	defer log.Print("Closing Syslog Server.")
+	var loggr *log.Logger
 
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Fatalf("invalid configuration: %s", err)
 	}
 
-	envstruct.WriteReport(cfg)
+	if cfg.UseRFC339 {
+		loggr = log.New(new(plumbing.LogWriter), "[LOGGR] ", 0)
+		log.SetOutput(new(plumbing.LogWriter))
+		log.SetFlags(0)
+	} else {
+		loggr = log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
+		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	}
 
-	loggr := log.New(os.Stderr, "[LOGGR] ", log.LstdFlags)
+	log.Print("Starting Syslog Server...")
+	defer log.Print("Closing Syslog Server.")
+
+	envstruct.WriteReport(cfg)
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),

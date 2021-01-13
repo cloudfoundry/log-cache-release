@@ -6,17 +6,29 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/log-cache/internal/blackbox"
+	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/naming"
 )
 
 func main() {
-	infoLogger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds)
-	errorLogger := log.New(os.Stderr, "", log.LstdFlags|log.Lmicroseconds)
+	var infoLogger *log.Logger
+	var errorLogger *log.Logger
 
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Fatalf("failed to load configuration: %s", err)
+	}
+
+	if cfg.UseRFC339 {
+		infoLogger = log.New(new(plumbing.LogWriter), "", 0)
+		errorLogger = log.New(new(plumbing.LogWriter), "", 0)
+		log.SetOutput(new(plumbing.LogWriter))
+		log.SetFlags(0)
+	} else {
+		infoLogger = log.New(os.Stderr, "", log.LstdFlags|log.Lmicroseconds)
+		errorLogger = log.New(os.Stderr, "", log.LstdFlags|log.Lmicroseconds)
+		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	}
 
 	resolver, _ := naming.NewDNSResolverWithFreq(1 * time.Minute)

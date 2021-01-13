@@ -16,6 +16,7 @@ type Config struct {
 	Selectors    []string `env:"SELECTORS, required, report"`
 
 	LogCacheTLS tls.TLS
+	UseRFC339   bool `env:"USE_RFC339"`
 }
 
 // LogsProviderTLS is the LogsProviderTLS configuration for a LogCache.

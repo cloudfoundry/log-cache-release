@@ -20,6 +20,7 @@ type Config struct {
 	SyslogIdleTimeout      time.Duration `env:"SYSLOG_IDLE_TIMEOUT, report"`
 	SyslogMaxMessageLength int           `env:"SYSLOG_MAX_MESSAGE_LENGTH, report"`
 	MetricsServer          config.MetricsServer
+	UseRFC339              bool `env:"USE_RFC339"`
 }
 
 // LoadConfig creates Config object from environment variables

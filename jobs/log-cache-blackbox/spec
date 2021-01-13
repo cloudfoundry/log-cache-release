@@ -47,3 +47,7 @@ properties:
   cf_blackbox.skip_tls_verify:
     description: "Skip certificate validation when testing HTTP egress"
     default: false
+
+  logging.format.timestamp:
+    description: "Format for timestamp in component logs. Valid values are 'deprecated' and 'rfc3339'."
+    default: "deprecated"
