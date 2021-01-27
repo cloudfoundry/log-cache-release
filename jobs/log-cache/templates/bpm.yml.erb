@@ -5,10 +5,18 @@
   lc = link("log-cache")
 
   sorted_cache_instances = lc.instances.sort_by {|i| i.address}
-  cache_addrs = sorted_cache_instances.map {|i| "#{i.address}:#{p('port')}"}
   index = sorted_cache_instances.index(
       sorted_cache_instances.find {|i| i.id == spec.id}
   )
+  cache_addrs = []
+  if_p("prepend_node_addresses") do |paddrs|
+    cache_addrs += paddrs.map{|addr| "#{addr}:#{p('port')}"}
+    index += cache_addrs.length()
+  end
+  cache_addrs += sorted_cache_instances.map {|i| "#{i.address}:#{p('port')}"}
+  if_p("append_node_addresses") do |paddrs|
+    cache_addrs += paddrs.map{|addr| "#{addr}:#{p('port')}"}
+  end
 %>
 ---
 processes:

@@ -4,6 +4,14 @@
 
   gw = link('log-cache-gateway')
   cc = link('cloud_controller')
+  cc_address = ""
+  if_p("cc.address") { |addr|
+    cc_address = addr
+  }.else_if_link('cloud_controller') { |cc|
+    cc = link('cloud_controller')
+    cc_address = cc.addr
+  }
+
 %>
 ---
 processes:
@@ -22,7 +30,7 @@ processes:
     TOKEN_PRUNING_INTERVAL:    "<%= p('token_pruning_interval') %>"
     CACHE_EXPIRATION_INTERVAL: "<%= p('cache_expiration_interval') %>"
 
-    CAPI_ADDR:          "<%= "https://#{cc.address}:9024" %>"
+    CAPI_ADDR:          "<%= "https://#{cc_address}:9024" %>"
     CAPI_CA_PATH:       "<%= "#{certDir}/cc_ca.crt" %>"
     CAPI_COMMON_NAME:   "<%= p('cc.common_name') %>"
 

@@ -48,3 +48,5 @@ properties:
   logging.format.timestamp:
     description: "Format for timestamp in component logs. Valid values are 'deprecated' and 'rfc3339'."
     default: "deprecated"
+  rlp.override_address:
+    description: "Override of bosh links for reverse-log-proxy url"
