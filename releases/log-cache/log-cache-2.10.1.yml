@@ -1,0 +1,87 @@
+name: log-cache
+version: 2.10.1
+commit_hash: bd35477
+uncommitted_changes: false
+jobs:
+- name: log-cache
+  version: 7fdd8746941418627946c4bdc6f24cccafc7c7989456ece55a4f80adb5c126e1
+  fingerprint: 7fdd8746941418627946c4bdc6f24cccafc7c7989456ece55a4f80adb5c126e1
+  sha1: sha256:d1eec065c6c9ee8c3136f973dd7bf5a408df4ce4fb6fe845eb03ac3e07cde582
+  packages:
+  - log-cache
+- name: log-cache-blackbox
+  version: 0d71b546938932c8c97152a99c1e1afc7c15d33d0bf621b7e8b6a7a6a416638c
+  fingerprint: 0d71b546938932c8c97152a99c1e1afc7c15d33d0bf621b7e8b6a7a6a416638c
+  sha1: sha256:d7f1f228d562a7346ccceadec4572f8a01075e12146e02805ca61aaca6f60cb9
+  packages:
+  - log-cache-blackbox
+- name: log-cache-cf-auth-proxy
+  version: 17b3d7d96c6977a2a187677bf4f313d631fbfae99c2ab732ae6a7ee5c48536f2
+  fingerprint: 17b3d7d96c6977a2a187677bf4f313d631fbfae99c2ab732ae6a7ee5c48536f2
+  sha1: sha256:ee56722869f3853f8715f8618eae5555f1ca0894e9cc8676a55c2a12623bf10b
+  packages:
+  - log-cache-cf-auth-proxy
+- name: log-cache-gateway
+  version: 438deb4c7b5f748935f02a1a2f6b340bd28a09a332a20bc2e8cc8736c5490d6b
+  fingerprint: 438deb4c7b5f748935f02a1a2f6b340bd28a09a332a20bc2e8cc8736c5490d6b
+  sha1: sha256:5f0d470972a8b19086ac8c33808aee8bcc2072895326481bde7887de3c7c1ee4
+  packages:
+  - log-cache-gateway
+- name: log-cache-nozzle
+  version: 64c18590f3736272cea68cae9803d294d91138f68d85212a596202e2bc34e04d
+  fingerprint: 64c18590f3736272cea68cae9803d294d91138f68d85212a596202e2bc34e04d
+  sha1: sha256:e10a4e8fd919b6a2dd9713e7994c1e18a01986d77b9ae3694078a92dfaa9bd0c
+  packages:
+  - log-cache-nozzle
+- name: log-cache-syslog-server
+  version: 8abf7f7086665282d757c78c5ddfc54f77040658f151ab6549a4cb28e4aff9ef
+  fingerprint: 8abf7f7086665282d757c78c5ddfc54f77040658f151ab6549a4cb28e4aff9ef
+  sha1: sha256:f911b0bddfca82772ffab81c9aadb8b92fd142af731366ee8305a3e46504309b
+  packages:
+  - log-cache-syslog-server
+packages:
+- name: golang-1-linux
+  version: ca97cfe251e36c5603a03c4d8f67e78dd93887e1ab8a71426834986fe14ce4a1
+  fingerprint: ca97cfe251e36c5603a03c4d8f67e78dd93887e1ab8a71426834986fe14ce4a1
+  sha1: sha256:757d20dee2b0d87da9263dcc34ba62d4f6d7becab1443ada0c2552c911432b37
+  dependencies: []
+- name: log-cache
+  version: 5ec1975a9b7f42f8707ab5e9331e8c2f272d1adbcf6440c3f7a15928177db3c2
+  fingerprint: 5ec1975a9b7f42f8707ab5e9331e8c2f272d1adbcf6440c3f7a15928177db3c2
+  sha1: sha256:22f2a9554f17463bd2e407b77f32259e7705dfab033966dc0e689314e90494e9
+  dependencies:
+  - golang-1-linux
+- name: log-cache-blackbox
+  version: 2e292eb8aab42cc9e7703899d437726768363201a0748bd66366377e14678614
+  fingerprint: 2e292eb8aab42cc9e7703899d437726768363201a0748bd66366377e14678614
+  sha1: sha256:a04182bcdff9f3aac8c2446a1831266eb9b1a86fefa76c160400943c4628a2e9
+  dependencies:
+  - golang-1-linux
+- name: log-cache-cf-auth-proxy
+  version: e6d4e1dc5f0050e65c2ad6cd91f5fa0c2df960e128926d542c04a01effa1ae84
+  fingerprint: e6d4e1dc5f0050e65c2ad6cd91f5fa0c2df960e128926d542c04a01effa1ae84
+  sha1: sha256:3bbf35ffb9d285c0282c06ac06f556750bfdee4bf2229e5a9b1197f8f3a564cb
+  dependencies:
+  - golang-1-linux
+- name: log-cache-gateway
+  version: 53b829669ed5b09133d57133832eac9e1328f71d2ce1e303ca6eb4dbab2c33a0
+  fingerprint: 53b829669ed5b09133d57133832eac9e1328f71d2ce1e303ca6eb4dbab2c33a0
+  sha1: sha256:0cb74e9d692ae7169891def164bb5cbea0d7b11066a87010e9dcbb653cbf6051
+  dependencies:
+  - golang-1-linux
+- name: log-cache-nozzle
+  version: 2fa2d51f2a296920dfaa77146312a6bf1fdf2f808acdcc5fedf58c05744002cd
+  fingerprint: 2fa2d51f2a296920dfaa77146312a6bf1fdf2f808acdcc5fedf58c05744002cd
+  sha1: sha256:99d983b646a1a0650a9def7ce5bf0f17e2f7671f379c9a4ca9bf23b45f116c02
+  dependencies:
+  - golang-1-linux
+- name: log-cache-syslog-server
+  version: 902089a269cd26069143223c44db3f9aa60a16ac7ce83aaaf8ce6aa46454008a
+  fingerprint: 902089a269cd26069143223c44db3f9aa60a16ac7ce83aaaf8ce6aa46454008a
+  sha1: sha256:a30538b773456e857fb18676f11a6ccac51f463f1a31e5cedc77aace69a59f01
+  dependencies:
+  - golang-1-linux
+license:
+  version: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
+  fingerprint: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
+  sha1: sha256:2000a9108971515512266634e3df558eb6884951e0d5074d05b9a9c0e8115498
