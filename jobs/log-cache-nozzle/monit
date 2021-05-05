@@ -1,7 +1,0 @@
-<% if p('enabled') %>
-check process log-cache-nozzle
-  with pidfile /var/vcap/sys/run/bpm/log-cache-nozzle/log-cache-nozzle.pid
-  start program "/var/vcap/jobs/bpm/bin/bpm start log-cache-nozzle"
-  stop program "/var/vcap/jobs/bpm/bin/bpm stop log-cache-nozzle"
-  group vcap
-<% end %>

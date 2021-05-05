@@ -1,7 +1,0 @@
-<% if p('enabled') %>
-check process log-cache-syslog-server
-  with pidfile /var/vcap/sys/run/bpm/log-cache-syslog-server/log-cache-syslog-server.pid
-  start program "/var/vcap/jobs/bpm/bin/bpm start log-cache-syslog-server"
-  stop program "/var/vcap/jobs/bpm/bin/bpm stop log-cache-syslog-server"
-  group vcap
-<% end %>
