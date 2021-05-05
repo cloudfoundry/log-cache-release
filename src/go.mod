@@ -17,7 +17,7 @@ require (
 	github.com/benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea // indirect
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/xxhash v1.1.0
-	github.com/cloudfoundry/gosigar v1.1.0
+	github.com/cloudfoundry/gosigar v1.2.0
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/emirpasic/gods v1.12.0
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
