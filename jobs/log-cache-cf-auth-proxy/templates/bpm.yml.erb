@@ -4,11 +4,11 @@
 
   gw = link('log-cache-gateway')
   cc_address = ""
-  if_p("cc.address") { |addr|
+  if_p("cc.override_address") { |addr|
     cc_address = addr
   }.else_if_link('cloud_controller') { |cc|
     cc = link('cloud_controller')
-    cc_address = cc.addr
+    cc_address = cc.address
   }
 
 %>

@@ -78,5 +78,5 @@ properties:
     description: "Format for timestamp in component logs. Valid values are 'deprecated' and 'rfc3339'."
     default: "deprecated"
 
-  cc.address:
+  cc.override_address:
     description: "Override as alternative to using CC link"
