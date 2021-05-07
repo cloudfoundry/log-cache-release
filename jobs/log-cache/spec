@@ -28,6 +28,13 @@ consumes:
   type: log-cache
 
 properties:
+
+  append_node_addresses:
+    description: "Array of log-cache instances to add to bosh links"
+
+  prepend_node_addresses:
+    description: "Array of log-cache instances to add to bosh links"
+
   port:
     description: "The port for the log-cache to listen on"
     default: 8080
