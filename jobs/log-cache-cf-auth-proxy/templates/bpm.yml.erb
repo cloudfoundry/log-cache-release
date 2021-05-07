@@ -3,7 +3,6 @@
   certDir = "#{jobDir}/config/certs"
 
   gw = link('log-cache-gateway')
-  cc = link('cloud_controller')
   cc_address = ""
   if_p("cc.address") { |addr|
     cc_address = addr
