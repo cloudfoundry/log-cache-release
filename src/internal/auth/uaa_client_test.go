@@ -213,6 +213,18 @@ var _ = Describe("UAAClient", func() {
 
 	// If there's a problem, this test will fail when the -race flag is set
 	It("handles concurrent reads", func() {
+
+		httpClient := newSpyHTTPClient()
+		metrics := newSpyMetrics()
+		client := auth.NewUAAClient(
+			"https://uaa.com",
+			"some-client",
+			"some-client-secret",
+			httpClient,
+			metrics,
+			log.New(ioutil.Discard, "", 0),
+		)
+
 		done := make(chan struct{})
 		clientRead := func() {
 			data, err := json.Marshal(map[string]interface{}{
