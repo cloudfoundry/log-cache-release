@@ -5,7 +5,7 @@
 # altered to fit into the CF-Deployment manifest.
 
 - type: replace
-  path: /releases/log-cache?
+  path: /releases/name=log-cache?
   value:
     name: log-cache
     version: latest
