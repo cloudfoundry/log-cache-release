@@ -62,11 +62,13 @@ func main() {
 	if cfg.TLS.HasAnyCredential() {
 		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
 			grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*8)),
 		),
 		)
 	} else {
 		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
 			grpc.WithInsecure(),
+			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*8)),
 		),
 		)
 
