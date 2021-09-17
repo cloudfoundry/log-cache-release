@@ -75,6 +75,7 @@ func main() {
 		WithMemoryLimit(cfg.MemoryLimit),
 		WithMaxPerSource(cfg.MaxPerSource),
 		WithQueryTimeout(cfg.QueryTimeout),
+		WithTruncationInterval(cfg.TruncationInterval),
 	}
 	var transport grpc.DialOption
 	if cfg.TLS.HasAnyCredential() {

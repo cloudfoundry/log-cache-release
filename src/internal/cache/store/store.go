@@ -49,6 +49,8 @@ type Store struct {
 	mc      MemoryConsultant
 
 	truncationCompleted chan bool
+
+	truncationInterval time.Duration
 }
 
 type Metrics struct {
@@ -61,7 +63,7 @@ type Metrics struct {
 	memoryUtilization  metrics.Gauge
 }
 
-func NewStore(maxPerSource int, mc MemoryConsultant, m MetricsRegistry) *Store {
+func NewStore(maxPerSource int, truncationInterval time.Duration, mc MemoryConsultant, m MetricsRegistry) *Store {
 	store := &Store{
 		maxPerSource:      maxPerSource,
 		maxTimestampFudge: 4000,
@@ -71,11 +73,13 @@ func NewStore(maxPerSource int, mc MemoryConsultant, m MetricsRegistry) *Store {
 
 		mc:                  mc,
 		truncationCompleted: make(chan bool),
+
+		truncationInterval: truncationInterval,
 	}
 
 	store.mc.SetMemoryReporter(store.metrics.memoryUtilization)
 
-	go store.truncationLoop(500 * time.Millisecond)
+	go store.truncationLoop(store.truncationInterval)
 
 	return store
 }
