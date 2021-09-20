@@ -47,6 +47,10 @@ properties:
     description: "The maximum number of items stored in LogCache per source."
     default: 100000
 
+  truncation_interval:
+    description: "The amount of time between log-cache checking if it needs to prune"
+    default: "500ms"
+
   promql.query_timeout:
     description: "The maximum allowed runtime for a single PromQL query. Smaller timeouts are recommended."
     default: "10s"

@@ -40,6 +40,7 @@ type LogCache struct {
 	memoryLimitPercent float64
 	memoryLimit        uint64
 	queryTimeout       time.Duration
+	truncationInterval time.Duration
 
 	// Cluster Properties
 	addr     string
@@ -62,6 +63,7 @@ func New(m Metrics, logger *log.Logger, opts ...LogCacheOption) *LogCache {
 		maxPerSource:       100000,
 		memoryLimitPercent: 50,
 		queryTimeout:       10 * time.Second,
+		truncationInterval: 500 * time.Millisecond,
 
 		addr:     ":8080",
 		dialOpts: []grpc.DialOption{grpc.WithInsecure()},
@@ -87,6 +89,14 @@ type LogCacheOption func(*LogCache)
 func WithMaxPerSource(size int) LogCacheOption {
 	return func(c *LogCache) {
 		c.maxPerSource = size
+	}
+}
+
+// WithTruncationInterval returns a LogCacheOption that configures the
+// interval in ms on the store's truncation loop. Defaults to 500ms.
+func WithTruncationInterval(interval time.Duration) LogCacheOption {
+	return func(c *LogCache) {
+		c.truncationInterval = interval
 	}
 }
 
@@ -155,7 +165,7 @@ func (c *LogCache) Start() {
 		analyzer = NewMemoryAnalyzer(c.metrics)
 	}
 	p := store.NewPruneConsultant(2, c.memoryLimitPercent, analyzer)
-	store := store.NewStore(c.maxPerSource, p, c.metrics)
+	store := store.NewStore(c.maxPerSource, c.truncationInterval, p, c.metrics)
 	c.setupRouting(store)
 }
 

@@ -27,6 +27,7 @@ processes:
     MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
     MAX_PER_SOURCE: "<%= p('max_per_source') %>"
     QUERY_TIMEOUT: "<%= p('promql.query_timeout') %>"
+    TRUNCATION_INTERVAL: "<%= p('truncation_interval') %>"
 
     CA_PATH:   "<%= "#{certDir}/ca.crt" %>"
     CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"
