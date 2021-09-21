@@ -37,6 +37,14 @@ type Config struct {
 	// Default is 500ms.
 	TruncationInterval time.Duration `env:"TRUNCATION_INTERVAL, report"`
 
+	// PrunesPerGC sets the number of consecutive prunes needed to trigger
+	// a garbage collectionc call (GC). This setting is to guard against
+	// the cache pruning all envelopes before automatic GC updates the
+	// metric for memory used by the cache. Lowering the value increases CPU
+	// utilization.
+	// Default is 3
+	PrunesPerGC int64 `env:"PRUNES_PER_GC, report"`
+
 	// NodeIndex determines what data the node stores. It splits up the range
 	// of 0 - 18446744073709551615 evenly. If data falls out of range of the
 	// given node, it will be routed to theh correct one.
@@ -62,6 +70,7 @@ func LoadConfig() (*Config, error) {
 		MemoryLimitPercent: 50,
 		MaxPerSource:       100000,
 		TruncationInterval: 500 * time.Millisecond,
+		PrunesPerGC:        int64(3),
 		MetricsServer: config.MetricsServer{
 			Port: 6060,
 		},

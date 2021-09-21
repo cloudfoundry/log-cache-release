@@ -3,6 +3,7 @@ package store
 import (
 	"container/heap"
 	"regexp"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -49,8 +50,11 @@ type Store struct {
 	mc      MemoryConsultant
 
 	truncationCompleted chan bool
+	truncationInterval  time.Duration
 
-	truncationInterval time.Duration
+	prunesPerGC int64
+
+	consecutiveTruncation int64
 }
 
 type Metrics struct {
@@ -63,7 +67,7 @@ type Metrics struct {
 	memoryUtilization  metrics.Gauge
 }
 
-func NewStore(maxPerSource int, truncationInterval time.Duration, mc MemoryConsultant, m MetricsRegistry) *Store {
+func NewStore(maxPerSource int, truncationInterval time.Duration, prunesPerGC int64, mc MemoryConsultant, m MetricsRegistry) *Store {
 	store := &Store{
 		maxPerSource:      maxPerSource,
 		maxTimestampFudge: 4000,
@@ -75,6 +79,7 @@ func NewStore(maxPerSource int, truncationInterval time.Duration, mc MemoryConsu
 		truncationCompleted: make(chan bool),
 
 		truncationInterval: truncationInterval,
+		prunesPerGC:        prunesPerGC,
 	}
 
 	store.mc.SetMemoryReporter(store.metrics.memoryUtilization)
@@ -245,6 +250,7 @@ func (store *Store) truncate() {
 
 	if numberToPrune == 0 {
 		store.sendTruncationCompleted(false)
+		atomic.CompareAndSwapInt64(&store.consecutiveTruncation, store.consecutiveTruncation, 0)
 		return
 	}
 
@@ -283,6 +289,13 @@ func (store *Store) truncate() {
 		atomic.StoreInt64(&store.oldestTimestamp, oldest.(storageExpiration).timestamp)
 		cachePeriod := calculateCachePeriod(oldest.(storageExpiration).timestamp)
 		store.metrics.cachePeriod.Set(float64(cachePeriod))
+	}
+
+	atomic.AddInt64(&store.consecutiveTruncation, 1)
+
+	if store.consecutiveTruncation >= store.prunesPerGC {
+		runtime.GC()
+		atomic.CompareAndSwapInt64(&store.consecutiveTruncation, store.consecutiveTruncation, 0)
 	}
 }
 
@@ -575,4 +588,9 @@ func (h *ExpirationHeap) Pop() interface{} {
 
 func calculateCachePeriod(oldestTimestamp int64) int64 {
 	return (time.Now().UnixNano() - oldestTimestamp) / int64(time.Millisecond)
+}
+
+// Used in tests
+func (store *Store) GetConsecutiveTruncations() int64 {
+	return atomic.LoadInt64(&store.consecutiveTruncation)
 }

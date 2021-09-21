@@ -28,7 +28,7 @@ var _ = Describe("Store", func() {
 	BeforeEach(func() {
 		sp = newSpyPruner()
 		sm = testhelpers.NewMetricsRegistry()
-		s = store.NewStore(5, TruncationInterval, sp, sm)
+		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 	})
 
 	It("fetches data based on time and source ID", func() {
@@ -78,7 +78,7 @@ var _ = Describe("Store", func() {
 
 	Context("in ascending order", func() {
 		It("respects timestamp fudging when checking the time boundaries", func() {
-			s = store.NewStore(50, TruncationInterval, sp, sm)
+			s = store.NewStore(50, TruncationInterval, PrunesPerGC, sp, sm)
 
 			e0 := buildEnvelope(0, "a")
 			e1 := buildEnvelope(1, "a")
@@ -111,7 +111,7 @@ var _ = Describe("Store", func() {
 		})
 
 		It("intentionally exceeds the limit when it would otherwise break up a group of fudged timestamps", func() {
-			s = store.NewStore(50, TruncationInterval, sp, sm)
+			s = store.NewStore(50, TruncationInterval, PrunesPerGC, sp, sm)
 
 			e0 := buildEnvelope(0, "a")
 			e1 := buildEnvelope(1, "a")
@@ -132,7 +132,7 @@ var _ = Describe("Store", func() {
 
 	Context("in descending order", func() {
 		It("respects timestamp fudging when checking the time boundaries", func() {
-			s = store.NewStore(50, TruncationInterval, sp, sm)
+			s = store.NewStore(50, TruncationInterval, PrunesPerGC, sp, sm)
 
 			e0 := buildEnvelope(0, "a")
 			e1 := buildEnvelope(1, "a")
@@ -165,7 +165,7 @@ var _ = Describe("Store", func() {
 		})
 
 		It("intentionally exceeds the limit when it would otherwise break up a group of fudged timestamps", func() {
-			s = store.NewStore(50, TruncationInterval, sp, sm)
+			s = store.NewStore(50, TruncationInterval, PrunesPerGC, sp, sm)
 
 			e0 := buildEnvelope(0, "a")
 			e1 := buildEnvelope(1, "a")
@@ -313,7 +313,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("survives being over pruned", func() {
-		s = store.NewStore(10, TruncationInterval, sp, sm)
+		s = store.NewStore(10, TruncationInterval, PrunesPerGC, sp, sm)
 		e1 := buildTypedEnvelope(0, "b", &loggregator_v2.Log{})
 		s.Put(e1, e1.GetSourceId())
 		sp.SetNumberToPrune(1000)
@@ -321,7 +321,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("truncates older envelopes when max size is reached", func() {
-		s = store.NewStore(10, TruncationInterval, sp, sm)
+		s = store.NewStore(10, TruncationInterval, PrunesPerGC, sp, sm)
 		// e1 should be truncated and sourceID "b" should be forgotten.
 		e1 := buildTypedEnvelope(1, "b", &loggregator_v2.Log{})
 		// e2 should be truncated.
@@ -377,7 +377,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("truncates envelopes for a specific source-id if its max size is reached", func() {
-		s = store.NewStore(2, TruncationInterval, sp, sm)
+		s = store.NewStore(2, TruncationInterval, PrunesPerGC, sp, sm)
 		// e1 should not be truncated
 		e1 := buildTypedEnvelope(1, "b", &loggregator_v2.Log{})
 		// e2 should be truncated
@@ -414,7 +414,7 @@ var _ = Describe("Store", func() {
 	// })
 
 	It("uses the given index", func() {
-		s = store.NewStore(2, TruncationInterval, sp, sm)
+		s = store.NewStore(2, TruncationInterval, PrunesPerGC, sp, sm)
 		e := buildTypedEnvelope(0, "a", &loggregator_v2.Log{})
 		s.Put(e, "some-id")
 
@@ -426,7 +426,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("returns the indices in the store", func() {
-		s = store.NewStore(2, TruncationInterval, sp, sm)
+		s = store.NewStore(2, TruncationInterval, PrunesPerGC, sp, sm)
 
 		// Will be pruned by pruner
 		s.Put(buildTypedEnvelope(1, "index-0", &loggregator_v2.Log{}), "index-0")
@@ -468,7 +468,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("survives the just added entry from being pruned", func() {
-		s = store.NewStore(2, TruncationInterval, sp, sm)
+		s = store.NewStore(2, TruncationInterval, PrunesPerGC, sp, sm)
 
 		s.Put(buildTypedEnvelope(2, "index-0", &loggregator_v2.Log{}), "index-0")
 		s.Put(buildTypedEnvelope(3, "index-0", &loggregator_v2.Log{}), "index-0")
@@ -487,7 +487,7 @@ var _ = Describe("Store", func() {
 	It("demonstrates thread safety under heavy concurrent load", func() {
 		sp := newSpyPruner()
 		sp.SetNumberToPrune(10)
-		loadStore := store.NewStore(10000, TruncationInterval, sp, sm)
+		loadStore := store.NewStore(10000, TruncationInterval, PrunesPerGC, sp, sm)
 		start := time.Now()
 
 		for i := 0; i < 10; i++ {
@@ -507,6 +507,75 @@ var _ = Describe("Store", func() {
 			time.Sleep(500 * time.Millisecond)
 			return int64(len(envelopes))
 		}).Should(BeNumerically("<=", 10000))
+	})
+
+	It("calls garbage collect once every prunes_per_gc truncations", func() {
+
+		// Set PrunesPerGC to 2
+		s = store.NewStore(5, TruncationInterval, 2, sp, sm)
+
+		e1 := buildTypedEnvelope(1, "a", &loggregator_v2.Log{})
+		e2 := buildTypedEnvelope(2, "a", &loggregator_v2.Counter{})
+		e3 := buildTypedEnvelope(3, "a", &loggregator_v2.Gauge{})
+		e4 := buildTypedEnvelope(3, "a", &loggregator_v2.Timer{})
+
+		s.Put(e1, e1.GetSourceId())
+		s.Put(e2, e2.GetSourceId())
+		s.Put(e3, e3.GetSourceId())
+		s.Put(e4, e4.GetSourceId())
+
+		// first prune of 1 envelope won't call gc
+		sp.SetNumberToPrune(1)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(1)))
+		// second consecutive prune of 1 envelope triggers gc
+		sp.SetNumberToPrune(1)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(0)))
+		// next prune of 1 envelope won't call gc
+		sp.SetNumberToPrune(1)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(1)))
+		// no envelopes to prune resets the counter
+		sp.SetNumberToPrune(0)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(0)))
+	})
+
+	It("doesn't call garbage collect if for less than prunes_per_gc consecutive truncations", func() {
+
+		// Set PrunesPerGC to 2
+		s = store.NewStore(5, TruncationInterval, 2, sp, sm)
+
+		e1 := buildTypedEnvelope(1, "a", &loggregator_v2.Log{})
+		e2 := buildTypedEnvelope(2, "a", &loggregator_v2.Counter{})
+		e3 := buildTypedEnvelope(3, "a", &loggregator_v2.Gauge{})
+		e4 := buildTypedEnvelope(3, "a", &loggregator_v2.Timer{})
+		e5 := buildTypedEnvelope(3, "a", &loggregator_v2.Event{})
+
+		s.Put(e1, e1.GetSourceId())
+		s.Put(e2, e2.GetSourceId())
+		s.Put(e3, e3.GetSourceId())
+		s.Put(e4, e4.GetSourceId())
+		s.Put(e5, e5.GetSourceId())
+
+		// first prune of 1 envelope won't call gc
+		sp.SetNumberToPrune(1)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(1)))
+		// no envelopes to prune resets the counter
+		sp.SetNumberToPrune(0)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(0)))
+		// second prune of 1 envelope won't call gc
+		// since it wasn't consecutive
+		sp.SetNumberToPrune(1)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(1)))
+		// second consecutive prune of 1 envelope triggers gc
+		sp.SetNumberToPrune(1)
+		s.WaitForTruncationToComplete()
+		Expect(s.GetConsecutiveTruncations()).To(Equal(int64(0)))
 	})
 })
 
