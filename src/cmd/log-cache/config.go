@@ -53,7 +53,7 @@ type Config struct {
 	// NodeAddrs are all the LogCache addresses (including the current
 	// address). They are in order according to their NodeIndex.
 	//
-	// If NodeAddrs is emptpy or size 1, then data is not routed as it is
+	// If NodeAddrs is empty or size 1, then data is not routed as it is
 	// assumed that the current node is the only one.
 	NodeAddrs []string `env:"NODE_ADDRS, report"`
 
