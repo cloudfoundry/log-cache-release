@@ -16,7 +16,7 @@ import (
 
 const (
 	MaxPerSource       = 1000000
-	TruncationInterval = 500 * time.Millisecond
+	TruncationInterval = 1 * time.Second
 	PrunesPerGC        = int64(3)
 )
 

@@ -504,7 +504,7 @@ var _ = Describe("Store", func() {
 
 		Consistently(func() int64 {
 			envelopes := loadStore.Get("9", start, time.Now(), nil, nil, 100000, false)
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(1 * time.Second)
 			return int64(len(envelopes))
 		}).Should(BeNumerically("<=", 10000))
 	})
