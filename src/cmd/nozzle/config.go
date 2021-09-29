@@ -2,6 +2,7 @@ package main
 
 import (
 	envstruct "code.cloudfoundry.org/go-envstruct"
+	"code.cloudfoundry.org/log-cache/internal/config"
 	"code.cloudfoundry.org/log-cache/internal/tls"
 )
 
@@ -11,12 +12,12 @@ type Config struct {
 	LogsProviderTLS LogsProviderTLS
 
 	LogCacheAddr string   `env:"LOG_CACHE_ADDR, required, report"`
-	HealthPort   int      `env:"HEALTH_PORT, report"`
 	ShardId      string   `env:"SHARD_ID, required, report"`
 	Selectors    []string `env:"SELECTORS, required, report"`
 
-	LogCacheTLS tls.TLS
-	UseRFC339   bool `env:"USE_RFC339"`
+	LogCacheTLS   tls.TLS
+	MetricsServer config.MetricsServer
+	UseRFC339     bool `env:"USE_RFC339"`
 }
 
 // LogsProviderTLS is the LogsProviderTLS configuration for a LogCache.
@@ -30,9 +31,11 @@ type LogsProviderTLS struct {
 func LoadConfig() (*Config, error) {
 	c := Config{
 		LogCacheAddr: ":8080",
-		HealthPort:   6061,
 		ShardId:      "log-cache",
 		Selectors:    []string{"log", "gauge", "counter", "timer", "event"},
+		MetricsServer: config.MetricsServer{
+			Port: 6061,
+		},
 	}
 
 	if err := envstruct.Load(&c); err != nil {
