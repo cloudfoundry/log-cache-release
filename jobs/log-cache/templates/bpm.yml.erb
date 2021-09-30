@@ -28,6 +28,7 @@ processes:
     MAX_PER_SOURCE: "<%= p('max_per_source') %>"
     QUERY_TIMEOUT: "<%= p('promql.query_timeout') %>"
     TRUNCATION_INTERVAL: "<%= p('truncation_interval') %>"
+    PRUNES_PER_GC: "<%= p('prunes_per_gc') %>"
 
     CA_PATH:   "<%= "#{certDir}/ca.crt" %>"
     CERT_PATH: "<%= "#{certDir}/log_cache.crt" %>"

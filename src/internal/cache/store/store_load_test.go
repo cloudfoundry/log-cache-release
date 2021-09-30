@@ -25,7 +25,7 @@ var _ = Describe("store under high concurrent load", func() {
 		sp.numberToPrune = 128
 		sm := testhelpers.NewMetricsRegistry()
 
-		loadStore := store.NewStore(2500, TruncationInterval, sp, sm)
+		loadStore := store.NewStore(2500, TruncationInterval, PrunesPerGC, sp, sm)
 		start := time.Now()
 		var envelopesWritten uint64
 
