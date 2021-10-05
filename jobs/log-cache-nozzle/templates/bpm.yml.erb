@@ -32,9 +32,11 @@ processes:
     USE_RFC339: "<%= p("logging.format.timestamp") == "rfc3339" %>"
 
     METRICS_PORT: <%= p("metrics.port") %>
+    <% if_p("metrics.ca_cert") do |_| %>
     METRICS_CA_FILE_PATH: "<%= "#{certDir}/metrics_ca.crt" %>"
     METRICS_CERT_FILE_PATH: "<%= "#{certDir}/metrics.crt" %>"
     METRICS_KEY_FILE_PATH: "<%= "#{certDir}/metrics.key" %>"
+    <% end %>
 
   limits:
     open_files: 8192
