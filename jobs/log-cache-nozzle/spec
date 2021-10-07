@@ -10,6 +10,9 @@ templates:
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
   prom_scraper_config.yml.erb: config/prom_scraper_config.yml
+  metrics_ca.crt.erb: config/certs/metrics_ca.crt
+  metrics.crt.erb: config/certs/metrics.crt
+  metrics.key.erb: config/certs/metrics.key
 
 packages:
 - log-cache-nozzle
@@ -35,9 +38,6 @@ properties:
   logs_provider.tls.key:
     description: "TLS key for the logs-provider connection"
 
-  health_port:
-    description: "The port for the Nozzle to bind a health endpoint"
-    default: 6061
   shard_id:
     description: "The sharding group name to use for egress from RLP"
     default: "log-cache"
@@ -50,3 +50,16 @@ properties:
     default: "deprecated"
   rlp.override_address:
     description: "Override of bosh links for reverse-log-proxy url"
+
+  metrics.port:
+    description: "The port for the nozzle to bind a health endpoint"
+    default: 6061
+  metrics.ca_cert:
+    description: "TLS CA cert to verify requests to metrics endpoint."
+  metrics.cert:
+    description: "TLS certificate for metrics server signed by the metrics CA"
+  metrics.key:
+    description: "TLS private key for metrics server signed by the metrics CA"
+  metrics.server_name:
+    description: "The server name used in the scrape configuration for the metrics endpoint"
+    default: "log_cache_nozzle_metrics"

@@ -1,6 +1,8 @@
 ---
-port: <%= p('health_port') %>
+port: <%= p('metrics.port') %>
 source_id: log-cache-nozzle
 instance_id: <%= spec.id || spec.index.to_s %>
+scheme: https
+server_name: <%= p('metrics.server_name') %>
 labels:
   job: log_cache_nozzle

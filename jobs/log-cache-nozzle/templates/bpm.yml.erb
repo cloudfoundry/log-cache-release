@@ -15,8 +15,6 @@ processes:
 - name: log-cache-nozzle
   executable: /var/vcap/packages/log-cache-nozzle/log-cache-nozzle
   env:
-    HEALTH_PORT: "<%= p('health_port') %>"
-
     # Logs Provider
     LOGS_PROVIDER_ADDR: "<%= "#{rlp_address}:#{rlp.p('reverse_log_proxy.egress.port')}" %>"
     LOGS_PROVIDER_CA_FILE_PATH:   "<%= "#{certDir}/logs_provider_ca.crt" %>"
@@ -32,6 +30,13 @@ processes:
     SELECTORS:      "<%= p('selectors').join(',') %>"
     GODEBUG: "x509ignoreCN=0"
     USE_RFC339: "<%= p("logging.format.timestamp") == "rfc3339" %>"
+
+    METRICS_PORT: <%= p("metrics.port") %>
+    <% if_p("metrics.ca_cert") do |_| %>
+    METRICS_CA_FILE_PATH: "<%= "#{certDir}/metrics_ca.crt" %>"
+    METRICS_CERT_FILE_PATH: "<%= "#{certDir}/metrics.crt" %>"
+    METRICS_KEY_FILE_PATH: "<%= "#{certDir}/metrics.key" %>"
+    <% end %>
 
   limits:
     open_files: 8192

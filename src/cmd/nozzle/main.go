@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/signal"
+	"syscall"
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
@@ -39,6 +39,27 @@ func main() {
 
 	envstruct.WriteReport(cfg)
 
+	metricServerOption := metrics.WithTLSServer(
+		int(cfg.MetricsServer.Port),
+		cfg.MetricsServer.CertFile,
+		cfg.MetricsServer.KeyFile,
+		cfg.MetricsServer.CAFile,
+	)
+
+	if cfg.MetricsServer.CAFile == "" {
+		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
+	}
+
+	m := metrics.NewRegistry(
+		loggr,
+		metricServerOption,
+	)
+
+	dropped := m.NewCounter(
+		"nozzle_dropped",
+		"Total number of envelopes dropped.",
+	)
+
 	tlsCfg, err := loggregator.NewEgressTLSConfig(
 		cfg.LogsProviderTLS.LogProviderCA,
 		cfg.LogsProviderTLS.LogProviderCert,
@@ -47,13 +68,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("invalid LogsProviderTLS configuration: %s", err)
 	}
-
-	m := metrics.NewRegistry(loggr)
-
-	dropped := m.NewCounter(
-		"nozzle_dropped",
-		"Total number of envelopes dropped.",
-	)
 
 	streamConnector := loggregator.NewEnvelopeStreamConnector(
 		cfg.LogProviderAddr,
@@ -65,11 +79,7 @@ func main() {
 		}),
 	)
 
-	nozzle := NewNozzle(
-		streamConnector,
-		cfg.LogCacheAddr,
-		m,
-		loggr,
+	nozzleOptions := []NozzleOption{
 		WithDialOpts(
 			grpc.WithTransportCredentials(
 				cfg.LogCacheTLS.Credentials("log-cache"),
@@ -77,10 +87,22 @@ func main() {
 		),
 		WithSelectors(cfg.Selectors...),
 		WithShardID(cfg.ShardId),
+	}
+
+	nozzle := NewNozzle(
+		streamConnector,
+		cfg.LogCacheAddr,
+		m,
+		loggr,
+		nozzleOptions...,
 	)
 
 	go nozzle.Start()
+	waitForTermination()
+}
 
-	// health endpoints (pprof and prometheus)
-	log.Printf("Health: %s", http.ListenAndServe(fmt.Sprintf("localhost:%d", cfg.HealthPort), nil))
+func waitForTermination() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
+	<-c
 }
