@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 )
 
 type SpyAgent struct {
@@ -82,6 +82,9 @@ type SpyLogCache struct {
 	MetaResponses      map[string]*rpc.MetaInfo
 	tlsConfig          *tls.Config
 	value              float64
+	rpc.UnimplementedEgressServer
+	rpc.UnimplementedIngressServer
+	rpc.UnimplementedPromQLQuerierServer
 }
 
 func (s *SpyLogCache) SetValue(value float64) {

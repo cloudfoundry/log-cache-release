@@ -6,9 +6,9 @@ code.cloudfoundry.org/go-diodes
 code.cloudfoundry.org/go-envstruct
 # code.cloudfoundry.org/go-loggregator v0.0.0-20190809213911-969cb33bee6a
 code.cloudfoundry.org/go-loggregator
-code.cloudfoundry.org/go-loggregator/metrics
-code.cloudfoundry.org/go-loggregator/metrics/testhelpers
-code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2
+code.cloudfoundry.org/go-loggregator/v8/metrics
+code.cloudfoundry.org/go-loggregator/v8/metrics/testhelpers
+code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2
 # code.cloudfoundry.org/go-metric-registry v0.0.0-20200413202920-40d97c8804ec
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers

@@ -6,8 +6,8 @@ import (
 	"io"
 	"strconv"
 
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 type PromqlMarshaler struct {
@@ -469,6 +469,6 @@ func (m *PromqlMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
 	})
 }
 
-func (m *PromqlMarshaler) ContentType() string {
+func (m *PromqlMarshaler) ContentType(_ interface{}) string {
 	return `application/json`
 }

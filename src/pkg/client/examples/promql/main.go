@@ -12,9 +12,9 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/pkg/client"
-	"github.com/golang/protobuf/jsonpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func main() {
@@ -39,8 +39,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	m := &jsonpb.Marshaler{}
-	str, err := m.MarshalToString(result)
+	str, err := protojson.Marshal(result)
 	if err != nil {
 		log.Fatal(err)
 	}

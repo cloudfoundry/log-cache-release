@@ -3,16 +3,17 @@ package auth_test
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 
 	"code.cloudfoundry.org/log-cache/internal/auth"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"context"
 
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"github.com/Benjamintf1/unmarshalledmatchers"
-	"github.com/golang/protobuf/jsonpb"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -156,7 +157,9 @@ var _ = Describe("CfAuthMiddleware", func() {
 			Expect(tc.recorder.Code).To(Equal(http.StatusOK))
 
 			var m rpc.MetaResponse
-			Expect(jsonpb.Unmarshal(tc.recorder.Body, &m)).To(Succeed())
+			msg, err := ioutil.ReadAll(tc.recorder.Body)
+			Expect(err).To(BeNil())
+			Expect(protojson.Unmarshal(msg, &m)).To(Succeed())
 
 			Expect(m.Meta).To(HaveLen(2))
 			Expect(m.Meta).To(HaveKey("source-0"))
@@ -180,7 +183,9 @@ var _ = Describe("CfAuthMiddleware", func() {
 
 			Expect(tc.recorder.Code).To(Equal(http.StatusOK))
 			var m rpc.MetaResponse
-			Expect(jsonpb.Unmarshal(tc.recorder.Body, &m)).To(Succeed())
+			msg, err := ioutil.ReadAll(tc.recorder.Body)
+			Expect(err).To(BeNil())
+			Expect(protojson.Unmarshal(msg, &m)).To(Succeed())
 			Expect(m.Meta).To(HaveLen(2))
 			Expect(m.Meta).To(HaveKey("source-0"))
 			Expect(m.Meta).To(HaveKey("source-1"))

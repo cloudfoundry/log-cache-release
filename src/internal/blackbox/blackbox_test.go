@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
+	logcache_client "code.cloudfoundry.org/go-log-cache"
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/log-cache/internal/blackbox"
-	logcache_client "code.cloudfoundry.org/log-cache/pkg/client"
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"google.golang.org/grpc"
 
 	"code.cloudfoundry.org/log-cache/internal/testing"
@@ -160,6 +160,8 @@ type mockLogCache struct {
 	port int
 
 	sync.Mutex
+
+	rpc.UnimplementedIngressServer
 }
 
 func (lc *mockLogCache) Start() {

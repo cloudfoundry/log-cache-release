@@ -11,13 +11,13 @@ import (
 	"strconv"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/pkg/marshaler"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"github.com/blang/semver"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // Client reads from LogCache via the RESTful or gRPC API.
@@ -144,7 +144,11 @@ func (c *Client) Read(
 	}
 
 	var r logcache_v1.ReadResponse
-	if err := jsonpb.Unmarshal(resp.Body, &r); err != nil {
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if err := protojson.Unmarshal(b, &r); err != nil {
 		return nil, err
 	}
 
@@ -272,7 +276,11 @@ func (c *Client) Meta(ctx context.Context) (map[string]*logcache_v1.MetaInfo, er
 	}
 
 	var metaResponse logcache_v1.MetaResponse
-	if err := jsonpb.Unmarshal(resp.Body, &metaResponse); err != nil {
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if err := protojson.Unmarshal(b, &metaResponse); err != nil {
 		return nil, err
 	}
 

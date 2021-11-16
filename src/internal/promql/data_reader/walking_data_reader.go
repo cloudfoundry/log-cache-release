@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/pkg/client"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 )
 
 type WalkingDataReader struct {

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/pkg/client"
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 )
 
 // Ensure client.Reader is fulfilled by Client.Read

@@ -11,8 +11,8 @@ import (
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/promql"
 	"github.com/prometheus/prometheus/storage"
@@ -29,6 +29,8 @@ type PromQL struct {
 	failures          int
 
 	result int64
+
+	logcache_v1.UnimplementedPromQLQuerierServer
 }
 
 type DataReader interface {

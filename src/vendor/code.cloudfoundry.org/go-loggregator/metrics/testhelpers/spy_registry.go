@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	"code.cloudfoundry.org/go-loggregator/metrics"
+	"code.cloudfoundry.org/go-loggregator/v8/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

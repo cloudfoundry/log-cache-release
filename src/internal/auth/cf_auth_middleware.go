@@ -9,10 +9,11 @@ import (
 
 	"context"
 
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
-	"github.com/golang/protobuf/jsonpb"
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"github.com/gorilla/mux"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	//TODO: why is this calling log-cache. use go-log-cache?
 	"code.cloudfoundry.org/log-cache/internal/promql"
 )
 
@@ -20,7 +21,6 @@ type CFAuthMiddlewareProvider struct {
 	oauth2Reader            Oauth2ClientReader
 	logAuthorizer           LogAuthorizer
 	metaFetcher             MetaFetcher
-	marshaller              jsonpb.Marshaler
 	promQLSourceIdExtractor PromQLSourceIdExtractor
 	appNameTranslator       AppNameTranslator
 }
@@ -203,9 +203,10 @@ func (m CFAuthMiddlewareProvider) Middleware(h http.Handler) http.Handler {
 		}
 
 		// We don't care if writing to the client fails. They can come back and ask again.
-		_ = m.marshaller.Marshal(w, &rpc.MetaResponse{
+		msg, _ := protojson.Marshal(&rpc.MetaResponse{
 			Meta: m.onlyAuthorized(authToken, meta, c),
 		})
+		w.Write(msg)
 		w.Write([]byte("\n"))
 	})
 
