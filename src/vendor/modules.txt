@@ -4,7 +4,7 @@ code.cloudfoundry.org/go-batching
 code.cloudfoundry.org/go-diodes
 # code.cloudfoundry.org/go-envstruct v1.5.0
 code.cloudfoundry.org/go-envstruct
-# code.cloudfoundry.org/go-log-cache v1.0.1-0.20211115214340-c0129a94db50
+# code.cloudfoundry.org/go-log-cache v1.0.1-0.20211123204853-93b7f0836b81
 code.cloudfoundry.org/go-log-cache
 code.cloudfoundry.org/go-log-cache/internal
 code.cloudfoundry.org/go-log-cache/rpc/logcache_v1
@@ -118,8 +118,6 @@ github.com/onsi/ginkgo/types
 # github.com/onsi/gomega v1.10.1
 github.com/onsi/gomega
 github.com/onsi/gomega/format
-github.com/onsi/gomega/gstruct
-github.com/onsi/gomega/gstruct/errors
 github.com/onsi/gomega/internal/assertion
 github.com/onsi/gomega/internal/asyncassertion
 github.com/onsi/gomega/internal/oraclematcher

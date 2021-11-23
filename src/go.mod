@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20171020220229-924d2a9b48ac
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee
 	code.cloudfoundry.org/go-envstruct v1.5.0
-	code.cloudfoundry.org/go-log-cache v1.0.1-0.20211115214340-c0129a94db50
+	code.cloudfoundry.org/go-log-cache v1.0.1-0.20211123204853-93b7f0836b81
 	code.cloudfoundry.org/go-loggregator/v8 v8.0.2-0.20200722201844-b5130958b65d
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20200413202920-40d97c8804ec
 	code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3
@@ -16,7 +16,6 @@ require (
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea // indirect
-	github.com/blang/semver v3.5.1+incompatible
 	github.com/cespare/xxhash v1.1.0
 	github.com/cloudfoundry/gosigar v1.2.0
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
