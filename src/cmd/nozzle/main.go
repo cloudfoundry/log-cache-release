@@ -14,7 +14,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 
-	loggregator "code.cloudfoundry.org/go-loggregator"
+	loggregator "code.cloudfoundry.org/go-loggregator/v8"
 )
 
 func main() {

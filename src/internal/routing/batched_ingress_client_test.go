@@ -1,15 +1,16 @@
 package routing_test
 
 import (
-	"code.cloudfoundry.org/go-loggregator/metrics"
-	"code.cloudfoundry.org/go-loggregator/metrics/testhelpers"
 	"io/ioutil"
 	"log"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-metric-registry/testhelpers"
+
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/log-cache/internal/routing"
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"golang.org/x/net/context"
 
 	. "github.com/onsi/ginkgo"
@@ -26,9 +27,9 @@ var _ = Describe("BatchedIngressClient", func() {
 
 	BeforeEach(func() {
 		m = testhelpers.NewMetricsRegistry()
-		spyDropped = m.NewCounter("nodeX_dropped")
+		spyDropped = m.NewCounter("nodeX_dropped", "some help text")
 		ingressClient = newSpyIngressClient()
-		c = routing.NewBatchedIngressClient(5, time.Hour, ingressClient, spyDropped, m.NewCounter("send_failure"), log.New(ioutil.Discard, "", 0))
+		c = routing.NewBatchedIngressClient(5, time.Hour, ingressClient, spyDropped, m.NewCounter("send_failure", "some help text"), log.New(ioutil.Discard, "", 0))
 	})
 
 	It("sends envelopes by batches because of size", func() {
@@ -48,7 +49,7 @@ var _ = Describe("BatchedIngressClient", func() {
 	})
 
 	It("sends envelopes by batches because of interval", func() {
-		c = routing.NewBatchedIngressClient(5, time.Microsecond, ingressClient, spyDropped, m.NewCounter("send_failure"), log.New(ioutil.Discard, "", 0))
+		c = routing.NewBatchedIngressClient(5, time.Microsecond, ingressClient, spyDropped, m.NewCounter("send_failure", "some help text"), log.New(ioutil.Discard, "", 0))
 		_, err := c.Send(context.Background(), &rpc.SendRequest{
 			Envelopes: &loggregator_v2.EnvelopeBatch{
 				Batch: []*loggregator_v2.Envelope{
@@ -118,7 +119,7 @@ var _ = Describe("BatchedIngressClient", func() {
 			time.Hour,
 			ingressClient,
 			spyDropped,
-			m.NewCounter("send_failure"),
+			m.NewCounter("send_failure", "fake help text"),
 			log.New(ioutil.Discard, "", 0),
 			routing.WithLocalOnlyDisabled,
 		)

@@ -12,12 +12,12 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	client "code.cloudfoundry.org/go-log-cache"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/log-cache/internal/cache/store"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 	"code.cloudfoundry.org/log-cache/internal/promql/data_reader"
 	"code.cloudfoundry.org/log-cache/internal/routing"
-	"code.cloudfoundry.org/log-cache/pkg/client"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 )
 
 type Metrics interface {

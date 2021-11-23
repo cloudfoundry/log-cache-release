@@ -6,10 +6,10 @@ import (
 	"io"
 	"strings"
 
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/log-cache/pkg/marshaler"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -816,7 +816,7 @@ var _ = Describe("PromqlMarshaler", func() {
 		It("returns application/json", func() {
 			marshaler := marshaler.NewPromqlMarshaler(&mockMarshaler{})
 
-			Expect(marshaler.ContentType()).To(Equal("application/json"))
+			Expect(marshaler.ContentType(nil)).To(Equal("application/json"))
 		})
 	})
 })
@@ -854,6 +854,6 @@ func (m *mockMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
 	})
 }
 
-func (m *mockMarshaler) ContentType() string {
+func (m *mockMarshaler) ContentType(interface{}) string {
 	panic("not implemented")
 }

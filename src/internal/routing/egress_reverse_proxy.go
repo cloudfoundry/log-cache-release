@@ -1,17 +1,18 @@
 package routing
 
 import (
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"context"
 	"errors"
-	"google.golang.org/grpc/status"
 	"log"
 	"math/rand"
 	"sync/atomic"
 	"time"
 	"unsafe"
 
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	"google.golang.org/grpc/status"
+
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"google.golang.org/grpc/codes"
 )
 
@@ -25,6 +26,8 @@ type EgressReverseProxy struct {
 	remoteMetaCache   unsafe.Pointer
 	localMetaCache    unsafe.Pointer
 	metaCacheDuration time.Duration
+
+	rpc.UnimplementedEgressServer
 }
 
 // NewEgressReverseProxy returns a new EgressReverseProxy. LocalIdx is

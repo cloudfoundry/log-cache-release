@@ -8,7 +8,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/blackbox"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/naming"
+	//	"google.golang.org/grpc/naming"
 )
 
 func main() {
@@ -31,25 +31,25 @@ func main() {
 		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	}
 
-	resolver, _ := naming.NewDNSResolverWithFreq(1 * time.Minute)
+	//	resolver, _ := naming.NewDNSResolverWithFreq(1 * time.Minute)
 
 	ingressClient := blackbox.NewIngressClient(
 		cfg.DataSourceGrpcAddr,
-		grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
-		grpc.WithBalancer(
-			grpc.RoundRobin(resolver),
-		),
-	)
+		grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")))
+	//		grpc.WithBalancer(
+	//			grpc.RoundRobin(resolver),
+	//		),
+	//	)
 
 	go blackbox.StartEmittingTestMetrics(cfg.SourceId, cfg.EmissionInterval, ingressClient)
 
 	grpcEgressClient := blackbox.NewGrpcEgressClient(
 		cfg.DataSourceGrpcAddr,
-		grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
-		grpc.WithBalancer(
-			grpc.RoundRobin(resolver),
-		),
-	)
+		grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")))
+	//		grpc.WithBalancer(
+	//			grpc.RoundRobin(resolver),
+	//		),
+	//	)
 
 	var httpEgressClient blackbox.QueryableClient
 

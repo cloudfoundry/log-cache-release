@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/go-metric-registry/testhelpers"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"code.cloudfoundry.org/log-cache/internal/testing"
@@ -554,7 +554,7 @@ func buildClientTLSConfig(maxVersion, cipherSuite uint16) *tls.Config {
 	).Client()
 	Expect(err).ToNot(HaveOccurred())
 
-	tlsConf.MaxVersion = uint16(maxVersion)
+	tlsConf.MaxVersion = maxVersion
 	tlsConf.CipherSuites = []uint16{cipherSuite}
 	tlsConf.InsecureSkipVerify = true
 

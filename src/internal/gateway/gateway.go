@@ -8,13 +8,14 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/shirou/gopsutil/host"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/protojson"
 
-	"code.cloudfoundry.org/log-cache/pkg/marshaler"
-	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	logcacheMarshaler "code.cloudfoundry.org/log-cache/pkg/marshaler"
 )
 
 // Gateway provides a RESTful API into LogCache's gRPC API.
@@ -129,11 +130,10 @@ func (g *Gateway) Addr() string {
 func (g *Gateway) listenAndServe() {
 	mux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(
-			runtime.MIMEWildcard, marshaler.NewPromqlMarshaler(&runtime.JSONPb{OrigName: true, EmitDefaults: true}),
+			runtime.MIMEWildcard, logcacheMarshaler.NewPromqlMarshaler(&runtime.JSONPb{MarshalOptions: protojson.MarshalOptions{UseProtoNames: true, EmitUnpopulated: true}}),
 		),
+		runtime.WithErrorHandler(g.httpErrorHandler),
 	)
-
-	runtime.HTTPError = g.httpErrorHandler
 
 	conn, err := grpc.Dial(g.logCacheAddr, g.logCacheDialOpts...)
 	if err != nil {
@@ -198,14 +198,14 @@ func (g *Gateway) httpErrorHandler(
 	err error,
 ) {
 	if r.URL.Path != "/api/v1/query" && r.URL.Path != "/api/v1/query_range" {
-		runtime.DefaultHTTPError(ctx, mux, marshaler, w, r, err)
+		runtime.DefaultHTTPErrorHandler(ctx, mux, marshaler, w, r, err)
 		return
 	}
 
 	const fallback = `{"error": "failed to marshal error message"}`
 
 	w.Header().Del("Trailer")
-	w.Header().Set("Content-Type", marshaler.ContentType())
+	w.Header().Set("Content-Type", marshaler.ContentType(nil))
 
 	body := &errorBody{
 		Status:    "error",

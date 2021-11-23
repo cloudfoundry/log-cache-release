@@ -20,7 +20,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
-	"code.cloudfoundry.org/log-cache/pkg/client"
+	"code.cloudfoundry.org/go-log-cache"
 )
 
 func main() {

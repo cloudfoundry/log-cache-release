@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
-	rpc "code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
