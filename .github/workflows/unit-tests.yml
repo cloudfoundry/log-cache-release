@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ruby/setup-ruby@v2
+      - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           ruby-version: 2.5
