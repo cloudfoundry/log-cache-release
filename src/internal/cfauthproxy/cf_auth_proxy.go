@@ -1,7 +1,6 @@
 package cfauthproxy
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -142,15 +141,6 @@ func (p *CFAuthProxy) Start(readyChecker func() error) {
 	} else {
 		log.Fatal(server.ServeTLS(ln, p.certPath, p.keyPath))
 	}
-}
-
-func (p *CFAuthProxy) Stop() {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	p.server.Shutdown(ctx)
 }
 
 // Addr returns the listener address. This must be called after calling Start.

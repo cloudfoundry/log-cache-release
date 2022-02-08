@@ -25,7 +25,6 @@ var _ = Describe("CFAuthProxy", func() {
 		defer gateway.Close()
 
 		proxy := newSecureCFAuthProxy(gateway.URL)
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
@@ -51,7 +50,6 @@ var _ = Describe("CFAuthProxy", func() {
 		}
 
 		proxy := newSecureCFAuthProxy(gateway.URL)
-		defer proxy.Stop()
 		go proxy.Start(almostReadyChecker)
 
 		Consistently(proxy.Addr, time.Second).Should(BeEmpty())
@@ -72,7 +70,6 @@ var _ = Describe("CFAuthProxy", func() {
 		defer gateway.Close()
 
 		proxy := newInsecureCFAuthProxy(gateway.URL)
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeReq(proxy.Addr())
@@ -97,7 +94,6 @@ var _ = Describe("CFAuthProxy", func() {
 		testGatewayURL.Scheme = "https"
 
 		proxy := newSecureCFAuthProxy(testGatewayURL.String())
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
@@ -119,7 +115,6 @@ var _ = Describe("CFAuthProxy", func() {
 				return middleware
 			}),
 		)
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
@@ -142,7 +137,6 @@ var _ = Describe("CFAuthProxy", func() {
 				return auth.NewAccessHandler(middleware, auth.NewNullAccessLogger(), "0.0.0.0", "1234")
 			}),
 		)
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
@@ -165,7 +159,6 @@ var _ = Describe("CFAuthProxy", func() {
 				return middleware
 			}),
 		)
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeTLSReq(proxy.Addr())
@@ -180,7 +173,6 @@ var _ = Describe("CFAuthProxy", func() {
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}),
 		)
 		proxy := newSecureCFAuthProxy(testServer.URL)
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeReq(proxy.Addr())
@@ -194,7 +186,6 @@ var _ = Describe("CFAuthProxy", func() {
 		defer gateway.Close()
 
 		proxy := newSecureCFAuthProxy(gateway.URL, WithCFAuthProxyTLSDisabled())
-		defer proxy.Stop()
 		startProxy(proxy, alwaysReadyChecker)
 
 		resp, err := makeReq(proxy.Addr())
