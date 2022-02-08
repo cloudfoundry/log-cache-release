@@ -215,8 +215,8 @@ var _ = Describe("Store", func() {
 		s.Put(e3, e3.GetSourceId())
 		s.Put(e4, e4.GetSourceId())
 
-		m := s.Meta()["a"]
-		Expect(m.Count).To(Equal(int64(4)))
+		m := s.Meta()["a"].Count
+		Expect(m).To(Equal(int64(4)))
 	})
 
 	DescribeTable("fetches data based on envelope type",

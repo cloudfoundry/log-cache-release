@@ -101,11 +101,13 @@ func (r *LocalStoreReader) Meta(ctx context.Context, req *logcache_v1.MetaReques
 	sourceIds := r.s.Meta()
 
 	metaInfo := make(map[string]*logcache_v1.MetaInfo)
-	for sourceId, m := range sourceIds {
-		// Shadow m so that the range function does not mess with the
-		// instance.
-		m := m
-		metaInfo[sourceId] = &m
+	for sourceId, _ := range sourceIds {
+		metaInfo[sourceId] = &logcache_v1.MetaInfo{
+			Count:           sourceIds[sourceId].Count,
+			Expired:         sourceIds[sourceId].Expired,
+			OldestTimestamp: sourceIds[sourceId].OldestTimestamp,
+			NewestTimestamp: sourceIds[sourceId].NewestTimestamp,
+		}
 	}
 
 	return &logcache_v1.MetaResponse{

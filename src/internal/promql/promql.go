@@ -349,7 +349,8 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 	builder := newSeriesBuilder()
 
 	for sourceID := range sourceIDs {
-		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		envelopeBatch, err := l.dataReader.Read(ctx, &logcache_v1.ReadRequest{
 			SourceId:  sourceID,
 			StartTime: l.start.Add(-time.Second).UnixNano(),

@@ -20,7 +20,7 @@ import (
 type CFAuthProxy struct {
 	tlsDisabled bool
 	ln          net.Listener
-	server      http.Server
+	server      *http.Server
 	mu          sync.Mutex
 
 	gatewayURL        *url.URL
@@ -127,7 +127,7 @@ func (p *CFAuthProxy) Start(readyChecker func() error) {
 		log.Fatalf("failed to start listener: %s", err)
 	}
 
-	server := http.Server{
+	server := &http.Server{
 		Handler:   p.accessMiddleware(p.promMiddleware(p.authMiddleware(p.reverseProxy()))),
 		TLSConfig: sharedtls.NewBaseTLSConfig(),
 	}
@@ -148,7 +148,8 @@ func (p *CFAuthProxy) Stop() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	p.server.Shutdown(ctx)
 }
 

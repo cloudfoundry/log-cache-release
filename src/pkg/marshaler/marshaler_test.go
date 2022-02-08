@@ -525,14 +525,8 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(result).To(Equal(logcache_v1.PromQL_InstantQueryResult{
-				Result: &logcache_v1.PromQL_InstantQueryResult_Scalar{
-					Scalar: &logcache_v1.PromQL_Scalar{
-						Time:  "1.777",
-						Value: 2.5,
-					},
-				},
-			}))
+			Expect(result.GetScalar().GetTime()).To(Equal("1.777"))
+			Expect(result.GetScalar().GetValue()).To(Equal(2.5))
 		})
 
 		It("handles a vector instant query result", func() {
@@ -563,34 +557,19 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(result).To(Equal(logcache_v1.PromQL_InstantQueryResult{
-				Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
-					Vector: &logcache_v1.PromQL_Vector{
-						Samples: []*logcache_v1.PromQL_Sample{
-							{
-								Metric: map[string]string{
-									"deployment": "cf",
-									"tag-name":   "tag-value",
-								},
-								Point: &logcache_v1.PromQL_Point{
-									Time:  "1.456",
-									Value: 2.5,
-								},
-							},
-							{
-								Metric: map[string]string{
-									"deployment": "cf",
-									"tag-name2":  "tag-value2",
-								},
-								Point: &logcache_v1.PromQL_Point{
-									Time:  "2.000",
-									Value: 3.5,
-								},
-							},
-						},
-					},
-				},
+			Expect(len(result.GetVector().GetSamples())).To(Equal(2))
+			Expect(result.GetVector().GetSamples()[0].GetMetric()).To(Equal(map[string]string{
+				"deployment": "cf",
+				"tag-name":   "tag-value",
 			}))
+			Expect(result.GetVector().GetSamples()[1].GetMetric()).To(Equal(map[string]string{
+				"deployment": "cf",
+				"tag-name2":  "tag-value2",
+			}))
+			Expect(result.GetVector().GetSamples()[0].GetPoint().GetTime()).To(Equal("1.456"))
+			Expect(result.GetVector().GetSamples()[1].GetPoint().GetTime()).To(Equal("2.000"))
+			Expect(result.GetVector().GetSamples()[0].GetPoint().GetValue()).To(Equal(2.5))
+			Expect(result.GetVector().GetSamples()[1].GetPoint().GetValue()).To(Equal(3.5))
 		})
 
 		It("handles a matrix instant query result", func() {
@@ -627,46 +606,25 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(result).To(Equal(logcache_v1.PromQL_InstantQueryResult{
-				Result: &logcache_v1.PromQL_InstantQueryResult_Matrix{
-					Matrix: &logcache_v1.PromQL_Matrix{
-						Series: []*logcache_v1.PromQL_Series{
-							{
-								Metric: map[string]string{
-									"deployment": "cf",
-									"tag-name":   "tag-value",
-								},
-								Points: []*logcache_v1.PromQL_Point{
-									{
-										Time:  "1.987",
-										Value: 2.5,
-									},
-									{
-										Time:  "2.000",
-										Value: 3.5,
-									},
-								},
-							},
-							{
-								Metric: map[string]string{
-									"deployment": "cf",
-									"tag-name2":  "tag-value2",
-								},
-								Points: []*logcache_v1.PromQL_Point{
-									{
-										Time:  "1.000",
-										Value: 4.5,
-									},
-									{
-										Time:  "2.000",
-										Value: 6.5,
-									},
-								},
-							},
-						},
-					},
-				},
+			Expect(len(result.GetMatrix().GetSeries())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[0].GetMetric()).To(Equal(map[string]string{
+				"deployment": "cf",
+				"tag-name":   "tag-value",
 			}))
+			Expect(result.GetMatrix().GetSeries()[1].GetMetric()).To(Equal(map[string]string{
+				"deployment": "cf",
+				"tag-name2":  "tag-value2",
+			}))
+			Expect(len(result.GetMatrix().GetSeries()[0].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetTime()).To(Equal("1.987"))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetValue()).To(Equal(2.5))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetTime()).To(Equal("2.000"))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetValue()).To(Equal(3.5))
+			Expect(len(result.GetMatrix().GetSeries()[1].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetTime()).To(Equal("1.000"))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetValue()).To(Equal(4.5))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[1].GetTime()).To(Equal("2.000"))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[1].GetValue()).To(Equal(6.5))
 		})
 
 		It("handles a matrix range query result", func() {
@@ -703,46 +661,16 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(result).To(Equal(logcache_v1.PromQL_RangeQueryResult{
-				Result: &logcache_v1.PromQL_RangeQueryResult_Matrix{
-					Matrix: &logcache_v1.PromQL_Matrix{
-						Series: []*logcache_v1.PromQL_Series{
-							{
-								Metric: map[string]string{
-									"deployment": "cf",
-									"tag-name":   "tag-value",
-								},
-								Points: []*logcache_v1.PromQL_Point{
-									{
-										Time:  "1.987",
-										Value: 2.5,
-									},
-									{
-										Time:  "2.000",
-										Value: 3.5,
-									},
-								},
-							},
-							{
-								Metric: map[string]string{
-									"deployment": "cf",
-									"tag-name2":  "tag-value2",
-								},
-								Points: []*logcache_v1.PromQL_Point{
-									{
-										Time:  "1.000",
-										Value: 4.5,
-									},
-									{
-										Time:  "2.000",
-										Value: 6.5,
-									},
-								},
-							},
-						},
-					},
-				},
-			}))
+			Expect(len(result.GetMatrix().GetSeries()[0].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetTime()).To(Equal("1.987"))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetValue()).To(Equal(2.5))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetTime()).To(Equal("2.000"))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetValue()).To(Equal(3.5))
+			Expect(len(result.GetMatrix().GetSeries()[1].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetTime()).To(Equal("1.000"))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetValue()).To(Equal(4.5))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[1].GetTime()).To(Equal("2.000"))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[1].GetValue()).To(Equal(6.5))
 		})
 
 		It("falls back to the fallback marshaler", func() {
@@ -780,14 +708,8 @@ var _ = Describe("PromqlMarshaler", func() {
 			err := marshaler.NewDecoder(marshaled).Decode(&result)
 
 			Expect(err).ToNot(HaveOccurred())
-			Expect(result).To(Equal(logcache_v1.PromQL_InstantQueryResult{
-				Result: &logcache_v1.PromQL_InstantQueryResult_Scalar{
-					Scalar: &logcache_v1.PromQL_Scalar{
-						Time:  "1.123",
-						Value: 2.5,
-					},
-				},
-			}))
+			Expect(result.GetScalar().GetTime()).To(Equal("1.123"))
+			Expect(result.GetScalar().GetValue()).To(Equal(2.5))
 		})
 
 		It("falls back to the fallback marshaler", func() {

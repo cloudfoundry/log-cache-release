@@ -121,7 +121,8 @@ func emitTestMetrics(sourceId string, client logcache_v1.IngressClient, timestam
 		})
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	var err error
 	for retries := 5; retries > 0; retries-- {
@@ -180,7 +181,8 @@ func EmitMeasuredMetrics(sourceId string, ingressClient logcache_v1.IngressClien
 		},
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	_, err = ingressClient.Send(ctx, &logcache_v1.SendRequest{
 		Envelopes: &loggregator_v2.EnvelopeBatch{
 			Batch: batch,
@@ -265,7 +267,8 @@ func (rc ReliabilityCalculator) CountMetricPoints(metricName string, client Quer
 	queryString := fmt.Sprintf(`%s{source_id="%s"}[%.0fs]`, metricName, rc.SourceId, rc.WindowInterval.Seconds())
 	rc.InfoLogger.Println("Issuing query:", queryString)
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	queryTimestamp := time.Now().Add(-rc.WindowLag).Truncate(rc.SampleInterval)
 	queryResult, err := client.PromQL(ctx, queryString, logcache_client.WithPromQLTime(queryTimestamp))
 	if err != nil {

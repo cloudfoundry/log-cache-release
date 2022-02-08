@@ -534,7 +534,12 @@ func (store *Store) Meta() map[string]logcache_v1.MetaInfo {
 
 	store.storageIndex.Range(func(sourceId interface{}, tree interface{}) bool {
 		tree.(*storage).RLock()
-		metaReport[sourceId.(string)] = tree.(*storage).meta
+		metaReport[sourceId.(string)] = logcache_v1.MetaInfo{
+			Count:           int64(tree.(*storage).meta.GetCount()),
+			Expired:         tree.(*storage).meta.GetExpired(),
+			OldestTimestamp: tree.(*storage).meta.GetOldestTimestamp(),
+			NewestTimestamp: tree.(*storage).meta.GetNewestTimestamp(),
+		}
 		tree.(*storage).RUnlock()
 
 		return true
@@ -542,13 +547,17 @@ func (store *Store) Meta() map[string]logcache_v1.MetaInfo {
 
 	// Range over our local copy of metaReport
 	// TODO - shouldn't we just maintain Count on metaReport..?!
-	for sourceId, meta := range metaReport {
+	for sourceId, _ := range metaReport {
 		tree, _ := store.storageIndex.Load(sourceId)
 
 		tree.(*storage).RLock()
-		meta.Count = int64(tree.(*storage).Size())
+		metaReport[sourceId] = logcache_v1.MetaInfo{
+			Count:           int64(tree.(*storage).Size()),
+			Expired:         tree.(*storage).meta.GetExpired(),
+			OldestTimestamp: tree.(*storage).meta.GetOldestTimestamp(),
+			NewestTimestamp: tree.(*storage).meta.GetNewestTimestamp(),
+		}
 		tree.(*storage).RUnlock()
-		metaReport[sourceId] = meta
 	}
 	return metaReport
 }

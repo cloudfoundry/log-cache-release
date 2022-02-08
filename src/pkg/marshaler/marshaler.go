@@ -248,22 +248,20 @@ func (m *PromqlMarshaler) Unmarshal(data []byte, v interface{}) error {
 			return err
 		}
 
-		r, err := m.disassembleInstantQueryResult(result)
+		*q, err = m.disassembleInstantQueryResult(result)
 		if err != nil {
 			return err
 		}
-		*q = *r
 	case *logcache_v1.PromQL_RangeQueryResult:
 		err := json.Unmarshal(data, &result)
 		if err != nil {
 			return err
 		}
 
-		r, err := m.disassembleRangeQueryResult(result)
+		*q, err = m.disassembleRangeQueryResult(result)
 		if err != nil {
 			return err
 		}
-		*q = *r
 	default:
 		return m.fallback.Unmarshal(data, v)
 	}
@@ -271,15 +269,15 @@ func (m *PromqlMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return nil
 }
 
-func (m *PromqlMarshaler) disassembleInstantQueryResult(q queryResult) (*logcache_v1.PromQL_InstantQueryResult, error) {
+func (m *PromqlMarshaler) disassembleInstantQueryResult(q queryResult) (logcache_v1.PromQL_InstantQueryResult, error) {
 	switch q.Data.ResultType {
 	case "scalar":
 		r, err := unmarshalScalarResultData(q.Data.Result)
 		if err != nil {
-			return nil, err
+			return logcache_v1.PromQL_InstantQueryResult{}, err
 		}
 
-		return &logcache_v1.PromQL_InstantQueryResult{
+		return logcache_v1.PromQL_InstantQueryResult{
 			Result: &logcache_v1.PromQL_InstantQueryResult_Scalar{
 				Scalar: r,
 			},
@@ -287,10 +285,10 @@ func (m *PromqlMarshaler) disassembleInstantQueryResult(q queryResult) (*logcach
 	case "vector":
 		r, err := unmarshalVectorResultData(q.Data.Result)
 		if err != nil {
-			return nil, err
+			return logcache_v1.PromQL_InstantQueryResult{}, err
 		}
 
-		return &logcache_v1.PromQL_InstantQueryResult{
+		return logcache_v1.PromQL_InstantQueryResult{
 			Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
 				Vector: r,
 			},
@@ -298,34 +296,34 @@ func (m *PromqlMarshaler) disassembleInstantQueryResult(q queryResult) (*logcach
 	case "matrix":
 		r, err := unmarshalMatrixResultData(q.Data.Result)
 		if err != nil {
-			return nil, err
+			return logcache_v1.PromQL_InstantQueryResult{}, err
 		}
 
-		return &logcache_v1.PromQL_InstantQueryResult{
+		return logcache_v1.PromQL_InstantQueryResult{
 			Result: &logcache_v1.PromQL_InstantQueryResult_Matrix{
 				Matrix: r,
 			},
 		}, nil
 	default:
-		return nil, fmt.Errorf("unknown instant query resultType '%s'", q.Data.ResultType)
+		return logcache_v1.PromQL_InstantQueryResult{}, fmt.Errorf("unknown instant query resultType '%s'", q.Data.ResultType)
 	}
 }
 
-func (m *PromqlMarshaler) disassembleRangeQueryResult(q queryResult) (*logcache_v1.PromQL_RangeQueryResult, error) {
+func (m *PromqlMarshaler) disassembleRangeQueryResult(q queryResult) (logcache_v1.PromQL_RangeQueryResult, error) {
 	switch q.Data.ResultType {
 	case "matrix":
 		r, err := unmarshalMatrixResultData(q.Data.Result)
 		if err != nil {
-			return nil, err
+			return logcache_v1.PromQL_RangeQueryResult{}, err
 		}
 
-		return &logcache_v1.PromQL_RangeQueryResult{
+		return logcache_v1.PromQL_RangeQueryResult{
 			Result: &logcache_v1.PromQL_RangeQueryResult_Matrix{
 				Matrix: r,
 			},
 		}, nil
 	default:
-		return nil, fmt.Errorf("unknown range query resultType '%s'", q.Data.ResultType)
+		return logcache_v1.PromQL_RangeQueryResult{}, fmt.Errorf("unknown range query resultType '%s'", q.Data.ResultType)
 	}
 }
 
@@ -443,11 +441,10 @@ func (m *PromqlMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
 				return err
 			}
 
-			r, err := m.disassembleInstantQueryResult(result)
+			*q, err = m.disassembleInstantQueryResult(result)
 			if err != nil {
 				return err
 			}
-			*q = *r
 
 			return nil
 		case *logcache_v1.PromQL_RangeQueryResult:
@@ -456,11 +453,10 @@ func (m *PromqlMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
 				return err
 			}
 
-			r, err := m.disassembleRangeQueryResult(result)
+			*q, err = m.disassembleRangeQueryResult(result)
 			if err != nil {
 				return err
 			}
-			*q = *r
 
 			return nil
 		}
