@@ -81,6 +81,31 @@ describe 'log-cache-nozzle job' do
     end
   end
 
+  describe 'prom_scraper_config.yml' do
+    let(:template) { job.template('config/prom_scraper_config.yml') }
+
+    it 'is a empty file when not enabled' do
+      properties = {
+        'enabled' => false
+      }
+
+      actual = template.render(properties)
+      expect(actual).to eq("\n")
+    end
+    it 'renders correctly when enabled' do
+      properties = {
+        'enabled' => true,
+        'metrics' => {
+          'port' => 55,
+          'server_name' => 'server-name'
+        }
+      }
+      actual = YAML.safe_load(template.render(properties))
+      expect(actual['port']).to equal(55)
+      expect(actual['server_name']).to eq("server-name")
+    end
+  end
+
   describe 'bpm.yml' do
     let(:template) { job.template('config/bpm.yml') }
     let(:links) do
