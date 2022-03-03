@@ -131,6 +131,8 @@ builds:
     version: 2.6.3
   fa98573d-05ab-4e04-6406-f26c5033faf7:
     version: 2.2.1
+  faf0e56d-6586-47bf-65b8-1285a05b95e0:
+    version: 2.11.6
   fbd5de9d-1c55-4eec-4013-9a11fb43407e:
     version: 2.6.9
 format-version: "2"
