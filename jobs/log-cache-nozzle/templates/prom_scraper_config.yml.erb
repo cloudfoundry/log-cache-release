@@ -1,6 +1,8 @@
+<% if p('enabled') %>
 ---
 port: <%= p('health_port') %>
 source_id: log-cache-nozzle
 instance_id: <%= spec.id || spec.index.to_s %>
 labels:
   job: log_cache_nozzle
+<% end %>
