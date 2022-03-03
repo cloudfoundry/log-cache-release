@@ -1,3 +1,4 @@
+<% if p('enabled') %>
 ---
 port: <%= p('metrics.port') %>
 source_id: log-cache-nozzle
@@ -6,3 +7,4 @@ scheme: https
 server_name: <%= p('metrics.server_name') %>
 labels:
   job: log_cache_nozzle
+<% end %>
