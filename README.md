@@ -19,7 +19,7 @@ is caching the data for the requested source ID.
 Log Cache is included by default in 
 [Cloud Foundry's cf-deployment](https://github.com/cloudfoundry/cf-deployment).
 
-By default Log Cache receives data from syslog agents which is an add on which runs on all jobs by default. Log Cache can also be configured
+By default Log Cache receives data from syslog agents which is an add on which runs on all instance groups by default. Log Cache can also be configured
 to read from the Reverse Log Proxy instead, though this option is not recommended because of firehose scalability limits.
 
 Log Cache is queried by Cloud Controller for app instance metrics such as CPU usage and memory when retrieving details for applications and 
@@ -30,16 +30,20 @@ by the cf cli directly to retrieve recent logs. It can also be queried using the
 
 ### Scaling
 
-We recomend aiming for retaining 15 minutes of logs and metrics in log-cache per source. This can be monitored with the `cf log-meta` command
-provided by the Log Cache cli plugin or from the log_cache_cache_period metric reported by Log Cache.
+Numerous variables affect the retention of Log Cache:
+Number of instances - Increasing adds more storage space, allows higher throughput and reduces contention between sources
+Max Per Source ID - Increasing allows a higher max storage allowance, but may decrease the storage of less noisy apps on the same node
+Memory per instance - Increasing allows more storage in general, but any given instance may not be able to take advantage of that increase due to max per source id
+Memory limit - Increasing memory limit allows for more storage, but may cause out of memory errors and crashing if set too high for the total throughput of the system
+Larger CPUs - Increasing the CPU budget per instance should allow higher throughput
 
-Log Cache nodes use CPU to process incoming envelopes and evict old envelopes from the cache. If your Log Cache runs out of
-CPU resources but has an adequate retention interval you can move Log Cache to an instance type with more CPU.
+Log Cache is known to exceed memory limits under high throughput/stress. If you see your log-cache reaching higher memory
+then you have set, you might want to scale your log-cache up. Either solely in terms of CPU per instance, or more instances.
 
-Log Cache nodes use memory to cache envelopes. If your Log Cache retention interval is shorter than you would like but you 
-have not exhausted your CPU you can move Log Cache to an instance type with more memory.
-
-In either case you can add more Log Cache nodes to increase both CPU and memory at the same time.
+You can monitor the performance of log cache per source id (app or platform component) using the Log Cache CLI. The command `cf log-meta` allows viewing
+the amount of logs and metrics as well as the period of time for those logs and metrics for each source on the system. This can be used in conjuction with scaling
+to target your use cases. For simple pushes, a low retention period may be adequate. For running analysis on metrics for debugging and scaling, higher retention
+periods may be desired; although one should remember all logs and metrics will always be lost upon crashes or re-deploys of log-cache.
 
 ### Reliability
 
