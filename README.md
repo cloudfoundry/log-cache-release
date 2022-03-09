@@ -31,10 +31,15 @@ by the cf cli directly to retrieve recent logs. It can also be queried using the
 ### Scaling
 
 Numerous variables affect the retention of Log Cache:
+
 Number of instances - Increasing adds more storage space, allows higher throughput and reduces contention between sources
+
 Max Per Source ID - Increasing allows a higher max storage allowance, but may decrease the storage of less noisy apps on the same node
+
 Memory per instance - Increasing allows more storage in general, but any given instance may not be able to take advantage of that increase due to max per source id
+
 Memory limit - Increasing memory limit allows for more storage, but may cause out of memory errors and crashing if set too high for the total throughput of the system
+
 Larger CPUs - Increasing the CPU budget per instance should allow higher throughput
 
 Log Cache is known to exceed memory limits under high throughput/stress. If you see your log-cache reaching higher memory
