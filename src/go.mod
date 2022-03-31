@@ -22,6 +22,7 @@ require (
 	github.com/emirpasic/gods v1.12.0
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20201006113939-efe45e3cff92
