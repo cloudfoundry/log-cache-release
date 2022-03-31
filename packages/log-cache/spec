@@ -2,7 +2,7 @@
 name: log-cache
 
 dependencies:
-- golang-1-linux
+- golang-1.17-linux
 
 files:
 - cmd/log-cache/**/*.go
