@@ -77,6 +77,7 @@ func main() {
 			loggr.Printf("dropped %d envelope batches", missed)
 			dropped.Add(float64(missed))
 		}),
+		loggregator.WithEnvelopeStreamConnectorDialOptions(grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024))),
 	)
 
 	nozzleOptions := []NozzleOption{

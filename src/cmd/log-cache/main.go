@@ -83,7 +83,7 @@ func main() {
 		transport = grpc.WithTransportCredentials(
 			cfg.TLS.Credentials("log-cache"),
 		)
-		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(cfg.TLS.Credentials("log-cache"))))
+		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(cfg.TLS.Credentials("log-cache")), grpc.MaxRecvMsgSize(50*1024*1024)))
 	} else {
 		transport = grpc.WithInsecure()
 	}
@@ -91,6 +91,7 @@ func main() {
 		cfg.NodeIndex,
 		cfg.NodeAddrs,
 		transport,
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024)),
 	))
 
 	cache := New(
