@@ -36,6 +36,8 @@ processes:
     METRICS_CERT_FILE_PATH: "<%= "#{certDir}/metrics.crt" %>"
     METRICS_KEY_FILE_PATH: "<%= "#{certDir}/metrics.key" %>"
     <% end %>
+    DEBUG_METRICS: "<%= p("metrics.debug") %>"
+    PPROF_PORT: "<%= p("metrics.pprof_port") %>"
 
   limits:
     open_files: 8192
