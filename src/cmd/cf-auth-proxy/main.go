@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -15,12 +16,12 @@ import (
 	"crypto/x509"
 
 	"code.cloudfoundry.org/go-envstruct"
+	client "code.cloudfoundry.org/go-log-cache"
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
-	"code.cloudfoundry.org/go-log-cache"
 )
 
 func main() {
@@ -58,6 +59,11 @@ func main() {
 		loggr,
 		metricServerOption,
 	)
+	if cfg.MetricsServer.DebugMetrics {
+		metrics.RegisterDebugMetrics()
+		pprofServer := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort), Handler: http.DefaultServeMux}
+		go loggr.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error())
+	}
 
 	var options []auth.UAAOption
 	if cfg.UAA.ClientID != "" && cfg.UAA.ClientSecret != "" {
