@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -54,6 +56,11 @@ func main() {
 		loggr,
 		metricServerOption,
 	)
+	if cfg.MetricsServer.DebugMetrics {
+		m.RegisterDebugMetrics()
+		pprofServer := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort), Handler: http.DefaultServeMux}
+		go loggr.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error())
+	}
 
 	dropped := m.NewCounter(
 		"nozzle_dropped",

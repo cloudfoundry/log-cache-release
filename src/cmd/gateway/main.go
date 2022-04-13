@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
+	"net/http"
 	_ "net/http/pprof"
 
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
@@ -45,10 +47,15 @@ func main() {
 	if cfg.MetricsServer.CAFile == "" {
 		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
-	metrics.NewRegistry(
+	m := metrics.NewRegistry(
 		metricsLoggr,
 		metricServerOption,
 	)
+	if cfg.MetricsServer.DebugMetrics {
+		m.RegisterDebugMetrics()
+		pprofServer := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort), Handler: http.DefaultServeMux}
+		go log.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error())
+	}
 
 	gatewayOptions := []GatewayOption{
 		WithGatewayLogger(gatewayLoggr),

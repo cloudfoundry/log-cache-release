@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 
@@ -44,10 +46,16 @@ func main() {
 	if cfg.MetricsServer.CAFile == "" {
 		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
+
 	m := metrics.NewRegistry(
 		loggr,
 		metricServerOption,
 	)
+	if cfg.MetricsServer.DebugMetrics {
+		m.RegisterDebugMetrics()
+		pprofServer := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort), Handler: http.DefaultServeMux}
+		go loggr.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error())
+	}
 
 	serverOptions := []syslog.ServerOption{
 		syslog.WithServerPort(cfg.SyslogPort),
