@@ -2,7 +2,7 @@
 name: log-cache-blackbox
 
 dependencies:
-- golang-1.17-linux
+- golang-1-linux
 
 files:
 - cmd/blackbox/**/*.go
