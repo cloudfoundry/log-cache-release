@@ -62,7 +62,7 @@ func main() {
 	if cfg.MetricsServer.DebugMetrics {
 		metrics.RegisterDebugMetrics()
 		pprofServer := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort), Handler: http.DefaultServeMux}
-		go loggr.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error())
+		go func() { loggr.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error()) }()
 	}
 
 	var options []auth.UAAOption
