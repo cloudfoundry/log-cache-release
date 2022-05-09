@@ -122,7 +122,7 @@ func (n *Nozzle) Start() {
 
 	ch := make(chan []*loggregator_v2.Envelope, BATCH_CHANNEL_SIZE)
 
-	log.Printf("Starting %d nozzle workers...", 2*runtime.NumCPU())
+	log.Printf("Starting %d workers...", 2*runtime.NumCPU())
 	for i := 0; i < 2*runtime.NumCPU(); i++ {
 		go n.envelopeWriter(ch, client)
 	}
