@@ -1,6 +1,8 @@
 Log Cache Release
 =================
 
+If you have any questions, or want to get attention for a PR or issue please reach out on the [#logging-and-metrics channel in the cloudfoundry slack](https://cloudfoundry.slack.com/archives/CUW93AF3M)
+
 ## What is Log Cache?
 
 Log Cache provides an in memory caching layer for logs and metrics which are emitted by
