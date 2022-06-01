@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"code.cloudfoundry.org/go-metric-registry"
+	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	batching "code.cloudfoundry.org/go-batching"
 	diodes "code.cloudfoundry.org/go-diodes"

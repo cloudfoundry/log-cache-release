@@ -119,4 +119,3 @@ func (tc *TestCerts) generateCertKeyPair(commonName string) certKeyPair {
 		keyFile:  keyFile,
 	}
 }
-
