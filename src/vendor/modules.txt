@@ -35,7 +35,7 @@ github.com/blang/semver
 github.com/cespare/xxhash
 # github.com/cespare/xxhash/v2 v2.1.2
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry/gosigar v1.2.0
+# github.com/cloudfoundry/gosigar v1.3.4
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows
 # github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
@@ -203,7 +203,7 @@ golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20220408201424-a24fb2fb8a0f
+# golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
