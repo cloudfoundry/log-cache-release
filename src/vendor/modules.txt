@@ -49,7 +49,7 @@ github.com/dvsekhvalnov/jose2go/keys/ecc
 github.com/dvsekhvalnov/jose2go/padding
 # github.com/edsrzf/mmap-go v1.0.0
 github.com/edsrzf/mmap-go
-# github.com/emirpasic/gods v1.12.0
+# github.com/emirpasic/gods v1.18.1
 github.com/emirpasic/gods/containers
 github.com/emirpasic/gods/trees
 github.com/emirpasic/gods/trees/avltree
