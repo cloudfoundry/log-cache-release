@@ -12,7 +12,11 @@ import (
 	"syscall"
 )
 
-const MaxUint64 = ^uint64(0)
+const (
+	MaxUint64 = ^uint64(0)
+	// UnlimitedMemorySize defines the bytes size when memory limit is not set (2 ^ 63 - 4096)
+	UnlimitedMemorySize = "9223372036854771712"
+)
 
 var system struct {
 	ticks uint64
@@ -100,6 +104,14 @@ func (self *Uptime) Get() error {
 }
 
 func (self *Mem) Get() error {
+	return self.get(false)
+}
+
+func (self *Mem) GetIgnoringCGroups() error {
+	return self.get(true)
+}
+
+func (self *Mem) get(ignoreCGroups bool) error {
 	var available uint64 = MaxUint64
 	var buffers, cached uint64
 	table := map[string]*uint64{
@@ -122,6 +134,10 @@ func (self *Mem) Get() error {
 
 	self.Used = self.Total - self.Free
 	self.ActualUsed = self.Total - self.ActualFree
+
+	if ignoreCGroups {
+		return nil
+	}
 
 	// Instead of detecting if this code is run within a container
 	// or not (*), we simply attempt to retrieve the cgroup
@@ -477,8 +493,22 @@ func determineMemoryLimit(cgroup string) (uint64, error) {
 	}
 
 	limitAsString, err = ioutil.ReadFile(Sysd1 + cgroup + "/memory.limit_in_bytes")
-	if err == nil {
+	if string(limitAsString) != UnlimitedMemorySize && err == nil {
 		return strtoull(strings.Split(string(limitAsString), "\n")[0])
+	}
+
+	var limit uint64
+	table := map[string]*uint64{
+		"hierarchical_memory_limit": &limit,
+	}
+
+	err, found := parseCgroupMeminfo(Sysd1+cgroup, table)
+	if err == nil {
+		if !found {
+			// If no data was found, simply claim `zero limit set`.
+			return 0, errors.New("no hierarchical memory limit found")
+		}
+		return limit, nil
 	}
 
 	return 0, err
@@ -651,7 +681,7 @@ func determineControllerMounts(sysd1, sysd2 *string) {
 
 		if mtype == "cgroup2" {
 			if *sysd2 != "" {
-				panic("Multiple cgroup v2 mount points")
+				return true
 			}
 			*sysd2 = mpath
 			return true
@@ -660,7 +690,7 @@ func determineControllerMounts(sysd1, sysd2 *string) {
 			options := strings.Split(moptions, ",")
 			if stringSliceContains(options, "memory") {
 				if *sysd1 != "" {
-					panic("Multiple cgroup v1 mount points")
+					return true
 				}
 				*sysd1 = mpath
 				return true

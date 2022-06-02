@@ -16,7 +16,7 @@ require (
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea // indirect
 	github.com/cespare/xxhash v1.1.0
-	github.com/cloudfoundry/gosigar v1.2.0
+	github.com/cloudfoundry/gosigar v1.3.4
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/emirpasic/gods v1.18.1
 	github.com/go-ole/go-ole v1.2.4 // indirect
@@ -24,7 +24,6 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20201006113939-efe45e3cff92
-	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
@@ -34,7 +33,6 @@ require (
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil v2.20.5+incompatible
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
-	golang.org/x/sys v0.0.0-20220408201424-a24fb2fb8a0f // indirect
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.28.0
 )
