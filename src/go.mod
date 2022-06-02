@@ -18,7 +18,7 @@ require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/cloudfoundry/gosigar v1.2.0
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
-	github.com/emirpasic/gods v1.12.0
+	github.com/emirpasic/gods v1.18.1
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.7.4
