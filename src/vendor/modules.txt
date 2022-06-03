@@ -21,8 +21,6 @@ code.cloudfoundry.org/tlsconfig
 code.cloudfoundry.org/tlsconfig/certtest
 # github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 github.com/Benjamintf1/unmarshalledmatchers
-# github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
-github.com/StackExchange/wmi
 # github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d
 github.com/alecthomas/units
 # github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
@@ -61,7 +59,7 @@ github.com/go-kit/kit/log
 github.com/go-kit/kit/log/level
 # github.com/go-logfmt/logfmt v0.5.1
 github.com/go-logfmt/logfmt
-# github.com/go-ole/go-ole v1.2.4
+# github.com/go-ole/go-ole v1.2.6
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
 # github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0
@@ -181,7 +179,7 @@ github.com/prometheus/prometheus/util/stats
 github.com/prometheus/prometheus/util/strutil
 github.com/prometheus/prometheus/util/teststorage
 github.com/prometheus/prometheus/util/testutil
-# github.com/shirou/gopsutil v2.20.5+incompatible
+# github.com/shirou/gopsutil v3.21.11+incompatible
 github.com/shirou/gopsutil/cpu
 github.com/shirou/gopsutil/host
 github.com/shirou/gopsutil/internal/common
@@ -190,6 +188,12 @@ github.com/shirou/gopsutil/net
 github.com/shirou/gopsutil/process
 # github.com/square/certstrap v1.2.0
 github.com/square/certstrap/pkix
+# github.com/tklauser/go-sysconf v0.3.10
+github.com/tklauser/go-sysconf
+# github.com/tklauser/numcpus v0.4.0
+github.com/tklauser/numcpus
+# github.com/yusufpapurcu/wmi v1.2.2
+github.com/yusufpapurcu/wmi
 # golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 golang.org/x/net/context
 golang.org/x/net/html
