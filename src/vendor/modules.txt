@@ -75,7 +75,7 @@ github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
-# github.com/gorilla/mux v1.7.4
+# github.com/gorilla/mux v1.8.0
 github.com/gorilla/mux
 # github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
