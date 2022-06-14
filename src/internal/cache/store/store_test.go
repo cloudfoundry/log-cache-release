@@ -28,10 +28,10 @@ var _ = Describe("Store", func() {
 	BeforeEach(func() {
 		sp = newSpyPruner()
 		sm = testhelpers.NewMetricsRegistry()
-		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 	})
 
 	It("fetches data based on time and source ID", func() {
+		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 		e1 := buildEnvelope(1, "a")
 		e2 := buildEnvelope(2, "b")
 		e3 := buildEnvelope(3, "a")
@@ -57,6 +57,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("returns a maximum number of envelopes in ascending order", func() {
+		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 		e1 := buildEnvelope(1, "a")
 		e2 := buildEnvelope(2, "a")
 		e3 := buildEnvelope(3, "a")
@@ -185,6 +186,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("returns a maximum number of envelopes in descending order", func() {
+		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 		e1 := buildEnvelope(1, "a")
 		e2 := buildEnvelope(2, "a")
 		e3 := buildEnvelope(3, "a")
@@ -205,6 +207,7 @@ var _ = Describe("Store", func() {
 	})
 
 	It("increments the timestamp as necessary to prevent overwrites", func() {
+		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 		e1 := buildEnvelope(1, "a")
 		e2 := buildEnvelope(1, "a")
 		e3 := buildEnvelope(3, "a")
@@ -221,6 +224,7 @@ var _ = Describe("Store", func() {
 
 	DescribeTable("fetches data based on envelope type",
 		func(envelopeType logcache_v1.EnvelopeType, envelopeWrapper interface{}) {
+			s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 			e1 := buildTypedEnvelope(1, "a", &loggregator_v2.Log{})
 			e2 := buildTypedEnvelope(2, "a", &loggregator_v2.Counter{})
 			e3 := buildTypedEnvelope(3, "a", &loggregator_v2.Gauge{})
@@ -253,6 +257,7 @@ var _ = Describe("Store", func() {
 
 	DescribeTable("fetches data based on metric name",
 		func(nameFilter, expectedName string) {
+			s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 			filter := regexp.MustCompile(nameFilter)
 
 			e1 := buildTypedEnvelopeWithName(1, "counter-metric-name", &loggregator_v2.Counter{})
@@ -291,6 +296,7 @@ var _ = Describe("Store", func() {
 	)
 
 	It("is thread safe", func() {
+		s = store.NewStore(5, TruncationInterval, PrunesPerGC, sp, sm)
 		var wg sync.WaitGroup
 		wg.Add(2)
 		defer wg.Wait()
