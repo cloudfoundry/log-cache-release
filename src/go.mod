@@ -31,6 +31,6 @@ require (
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil/v3 v3.22.6
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
-	google.golang.org/grpc v1.47.0
+	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.0
 )
