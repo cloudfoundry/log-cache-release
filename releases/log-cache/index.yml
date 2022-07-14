@@ -121,6 +121,8 @@ builds:
     version: 2.11.11
   cacb65b1-ab27-450e-623e-8aac75124667:
     version: 1.4.9
+  d596ff02-2514-4c58-50af-3ce846a8d4ff:
+    version: 2.11.12
   d5ca2392-f909-4099-6d0d-3d6b4147c8ef:
     version: 2.10.0
   d5e3dbea-cced-44bf-773f-4911f52687a0:
