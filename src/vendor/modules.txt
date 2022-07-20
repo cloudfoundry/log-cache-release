@@ -71,7 +71,7 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/golang/snappy v0.0.1
+# github.com/golang/snappy v0.0.3
 github.com/golang/snappy
 # github.com/google/go-cmp v0.5.8
 github.com/google/go-cmp/cmp
@@ -81,7 +81,7 @@ github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
 # github.com/gorilla/mux v1.8.0
 github.com/gorilla/mux
-# github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.3
+# github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.0
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
 github.com/grpc-ecosystem/grpc-gateway/v2/runtime
 github.com/grpc-ecosystem/grpc-gateway/v2/utilities
@@ -204,7 +204,7 @@ github.com/tklauser/go-sysconf
 github.com/tklauser/numcpus
 # github.com/yusufpapurcu/wmi v1.2.2
 github.com/yusufpapurcu/wmi
-# golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
+# golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
 golang.org/x/net/context
 golang.org/x/net/html
 golang.org/x/net/html/atom
@@ -215,9 +215,9 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+# golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
+# golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -245,7 +245,7 @@ golang.org/x/text/unicode/norm
 # golang.org/x/tools v0.1.10
 golang.org/x/tools/go/ast/inspector
 golang.org/x/tools/internal/typeparams
-# google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
+# google.golang.org/genproto v0.0.0-20220719170305-83ca9fad585f
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
 google.golang.org/genproto/googleapis/rpc/status
