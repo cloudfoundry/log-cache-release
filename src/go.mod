@@ -20,7 +20,7 @@ require (
 	github.com/emirpasic/gods v1.18.1
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.8.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.3
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20201006113939-efe45e3cff92
 	github.com/kr/text v0.2.0 // indirect
 	github.com/onsi/ginkgo v1.16.5
@@ -30,7 +30,7 @@ require (
 	github.com/prometheus/common v0.37.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil/v3 v3.22.6
-	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
+	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.0
 )
