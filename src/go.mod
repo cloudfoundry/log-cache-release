@@ -32,5 +32,5 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.6
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
 	google.golang.org/grpc v1.48.0
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/protobuf v1.28.1
 )
