@@ -57,7 +57,11 @@ func main() {
 	)
 	if cfg.MetricsServer.DebugMetrics {
 		m.RegisterDebugMetrics()
-		pprofServer := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort), Handler: http.DefaultServeMux}
+		pprofServer := &http.Server{
+			Addr:              fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort),
+			Handler:           http.DefaultServeMux,
+			ReadHeaderTimeout: 2 * time.Second,
+		}
 		go func() { logger.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error()) }()
 	}
 

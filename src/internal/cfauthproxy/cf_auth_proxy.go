@@ -127,8 +127,9 @@ func (p *CFAuthProxy) Start(readyChecker func() error) {
 	}
 
 	server := &http.Server{
-		Handler:   p.accessMiddleware(p.promMiddleware(p.authMiddleware(p.reverseProxy()))),
-		TLSConfig: sharedtls.NewBaseTLSConfig(),
+		Handler:           p.accessMiddleware(p.promMiddleware(p.authMiddleware(p.reverseProxy()))),
+		TLSConfig:         sharedtls.NewBaseTLSConfig(),
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 
 	p.mu.Lock()
