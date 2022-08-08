@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/shirou/gopsutil/v3/host"
@@ -162,7 +163,10 @@ func (g *Gateway) listenAndServe() {
 	topLevelMux.HandleFunc("/api/v1/info", g.handleInfoEndpoint)
 	topLevelMux.Handle("/", mux)
 
-	server := &http.Server{Handler: topLevelMux}
+	server := &http.Server{
+		Handler:           topLevelMux,
+		ReadHeaderTimeout: 2 * time.Second,
+	}
 	if g.certPath != "" || g.keyPath != "" {
 		if err := server.ServeTLS(g.lis, g.certPath, g.keyPath); err != nil {
 			g.log.Fatalf("failed to serve HTTPS endpoint: %s", err)
