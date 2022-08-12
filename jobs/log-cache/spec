@@ -43,6 +43,10 @@ properties:
     description: "Percentage of system memory to use for the cache. Must be an integer."
     default: 50
 
+  bpm_memory_limit:
+    description: "Bpm memory hard limit for process log-cache"
+    default: 100G
+
   max_per_source:
     description: "The maximum number of items stored in LogCache per source."
     default: 100000
