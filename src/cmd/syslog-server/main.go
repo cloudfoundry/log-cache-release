@@ -70,6 +70,9 @@ func main() {
 	if cfg.SyslogTLSCertPath != "" || cfg.SyslogTLSKeyPath != "" {
 		serverOptions = append(serverOptions, syslog.WithServerTLS(cfg.SyslogTLSCertPath, cfg.SyslogTLSKeyPath))
 	}
+	if cfg.SyslogClientTrustedCAFile != "" {
+		serverOptions = append(serverOptions, syslog.WithSyslogClientCA(cfg.SyslogClientTrustedCAFile))
+	}
 
 	server := syslog.NewServer(
 		loggr,

@@ -48,9 +48,13 @@ Log Cache is known to exceed memory limits under high throughput/stress. If you 
 then you have set, you might want to scale your log-cache up. Either solely in terms of CPU per instance, or more instances.
 
 You can monitor the performance of log cache per source id (app or platform component) using the Log Cache CLI. The command `cf log-meta` allows viewing
-the amount of logs and metrics as well as the period of time for those logs and metrics for each source on the system. This can be used in conjuction with scaling
+the amount of logs and metrics as well as the period of time for those logs and metrics for each source on the system. This can be used in conjunction with scaling
 to target your use cases. For simple pushes, a low retention period may be adequate. For running analysis on metrics for debugging and scaling, higher retention
 periods may be desired; although one should remember all logs and metrics will always be lost upon crashes or re-deploys of log-cache.
+
+### Log Cache Syslog Server TLS and mutual TLS configuration
+
+If someone runs Cloud Foundry with a hardened setup in terms of security, they might want to activate TLS or even mutual TLS(mTLS) for the incoming connections to the Log Cache Syslog Server. The activation of TLS and mTLS is optional and is configured by the presence of the needed certificates. For TLS a syslog certificate or syslog key should be present in the BPM configuration and for mTLS a syslog client CA certificate should be present in the BPM configuration. Check the BOSH [BPM template](jobs/log-cache-syslog-server/templates/bpm.yml.erb) and the [spec](jobs/log-cache-syslog-server/spec) for details.
 
 ### Reliability
 

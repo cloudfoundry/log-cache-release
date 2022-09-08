@@ -2,6 +2,11 @@
   jobDir = "/var/vcap/jobs/log-cache-syslog-server"
   certDir = "#{jobDir}/config/certs"
 
+  syslog_client_ca=""
+  if_p("syslog_client_ca_cert") {
+    syslog_client_ca="#{certDir}/syslog_client_ca.crt"
+  }
+
   lc = link("log-cache")
 %>
 ---
@@ -14,6 +19,8 @@ processes:
 
     SYSLOG_TLS_CERT_PATH: "<%= "#{certDir}/syslog.crt" %>"
     SYSLOG_TLS_KEY_PATH: "<%= "#{certDir}/syslog.key" %>"
+
+    SYSLOG_CLIENT_TRUSTED_CA_FILE: "<%= "#{syslog_client_ca}" %>"
 
     LOG_CACHE_ADDR: "<%= "localhost:#{lc.p('port')}" %>"
     CA_PATH:        "<%= "#{certDir}/log_cache_ca.crt" %>"

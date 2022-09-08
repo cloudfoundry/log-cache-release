@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"reflect"
 	"sync/atomic"
 	"time"
 
@@ -28,6 +29,7 @@ func newTlsServerTestSetup(opts ...syslog.ServerOption) (*syslog.Server, *testhe
 
 	options := []syslog.ServerOption{
 		syslog.WithServerTLS(testing.LogCacheTestCerts.Cert("log-cache"), testing.LogCacheTestCerts.Key("log-cache")),
+		syslog.WithSyslogClientCA(testing.LogCacheTestCerts.CA()),
 		syslog.WithServerPort(0),
 		syslog.WithIdleTimeout(100 * time.Millisecond),
 	}
@@ -524,6 +526,34 @@ var _ = Describe("Syslog", func() {
 
 			Entry("supported cipher ECDHE_RSA_WITH_AES_128_GCM_SHA256", tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, true),
 			Entry("supported cipher ECDHE_RSA_WITH_AES_256_GCM_SHA384", tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, true),
+		)
+
+		DescribeTable("checks the mTLS configuration", func(expectedValue string, withMTLS bool) {
+			spyMetrics := testhelpers.NewMetricsRegistry()
+			loggr := log.New(GinkgoWriter, "", log.LstdFlags)
+
+			options := []syslog.ServerOption{
+				syslog.WithServerTLS(testing.LogCacheTestCerts.Cert("log-cache"), testing.LogCacheTestCerts.Key("log-cache")),
+				syslog.WithServerPort(0),
+				syslog.WithIdleTimeout(100 * time.Millisecond),
+			}
+
+			if withMTLS {
+				options = append(options, syslog.WithSyslogClientCA(testing.LogCacheTestCerts.CA()))
+			}
+
+			server := syslog.NewServer(
+				loggr,
+				spyMetrics,
+				options...,
+			)
+
+			r := reflect.ValueOf(server)
+			f := reflect.Indirect(r).FieldByName("syslogClientCA")
+			Expect(string(f.String())).To(Equal(expectedValue))
+		},
+			Entry("creates a server without mTLS", "", false),
+			Entry("creates a server with mTLS", testing.LogCacheTestCerts.CA(), true),
 		)
 	})
 })

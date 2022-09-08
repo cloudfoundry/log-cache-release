@@ -28,6 +28,7 @@ type Server struct {
 	port             int
 	l                net.Listener
 	envelopes        chan *loggregator_v2.Envelope
+	syslogClientCA   string
 	syslogCert       string
 	syslogKey        string
 	idleTimeout      time.Duration
@@ -89,6 +90,12 @@ func WithServerTLS(cert, key string) ServerOption {
 	return func(s *Server) {
 		s.syslogCert = cert
 		s.syslogKey = key
+	}
+}
+
+func WithSyslogClientCA(syslogClientCA string) ServerOption {
+	return func(s *Server) {
+		s.syslogClientCA = syslogClientCA
 	}
 }
 
@@ -380,13 +387,27 @@ func (s *Server) Stop() {
 }
 
 func (s *Server) buildTLSConfig() *tls.Config {
-	tlsConfig, err := tlsconfig.Build(
-		tlsconfig.WithInternalServiceDefaults(),
-		tlsconfig.WithIdentityFromFile(s.syslogCert, s.syslogKey),
-	).Server()
-
-	if err != nil {
-		log.Fatal(err)
+	var tlsConfig *tls.Config
+	var err error
+	if s.syslogClientCA != "" {
+		tlsConfig, err = tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(s.syslogCert, s.syslogKey),
+		).Server(
+			tlsconfig.WithClientAuthenticationFromFile(s.syslogClientCA),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		tlsConfig, err = tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(s.syslogCert, s.syslogKey),
+		).Server()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	return tlsConfig
 }
