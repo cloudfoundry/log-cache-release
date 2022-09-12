@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	//nolint:gosec
 	_ "net/http/pprof"
+
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,6 +19,7 @@ import (
 	. "code.cloudfoundry.org/log-cache/internal/cache"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -38,7 +42,10 @@ func main() {
 	log.Print("Starting Log Cache...")
 	defer log.Print("Closing Log Cache.")
 
-	envstruct.WriteReport(cfg)
+	err = envstruct.WriteReport(cfg)
+	if err != nil {
+		log.Printf("Failed to write a report of the from environment: %s\n", err)
+	}
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),
@@ -96,7 +103,7 @@ func main() {
 		)
 		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(cfg.TLS.Credentials("log-cache")), grpc.MaxRecvMsgSize(50*1024*1024)))
 	} else {
-		transport = grpc.WithInsecure()
+		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 	logCacheOptions = append(logCacheOptions, WithClustered(
 		cfg.NodeIndex,

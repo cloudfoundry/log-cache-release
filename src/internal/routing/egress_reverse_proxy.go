@@ -2,9 +2,10 @@ package routing
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"log"
-	"math/rand"
+	"math/big"
 	"sync/atomic"
 	"time"
 	"unsafe"
@@ -70,7 +71,11 @@ func (e *EgressReverseProxy) Read(ctx context.Context, in *rpc.ReadRequest) (*rp
 }
 
 func (e *EgressReverseProxy) remoteRead(idx []int, ctx context.Context, in *rpc.ReadRequest) (*rpc.ReadResponse, error) {
-	response, err := e.clients[idx[rand.Intn(len(idx))]].Read(ctx, in)
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(idx))))
+	if err != nil {
+		return nil, err
+	}
+	response, err := e.clients[idx[int(nBig.Int64())]].Read(ctx, in)
 	if status.Code(err) == codes.Unavailable {
 		return &rpc.ReadResponse{
 			Envelopes: &loggregator_v2.EnvelopeBatch{

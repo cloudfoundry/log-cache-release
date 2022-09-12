@@ -180,7 +180,8 @@ func NewTransportWithRootCA(rootCACertPool *x509.CertPool) *http.Transport {
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 		TLSClientConfig: &tls.Config{
-			RootCAs: rootCACertPool,
+			MinVersion: tls.VersionTLS12, //nolint:gosec
+			RootCAs:    rootCACertPool,
 		},
 	}
 }

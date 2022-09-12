@@ -397,8 +397,6 @@ var _ = Describe("CfAuthMiddleware", func() {
 type spyOauth2ClientReader struct {
 	token         string
 	isAdminResult bool
-	client        string
-	user          string
 	err           error
 }
 

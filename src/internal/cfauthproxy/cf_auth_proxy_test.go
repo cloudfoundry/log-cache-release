@@ -86,7 +86,8 @@ var _ = Describe("CFAuthProxy", func() {
 
 		testServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				w.Write([]byte("Insecure Gateway not allowed"))
+				_, err := w.Write([]byte("Insecure Gateway not allowed"))
+				Expect(err).ToNot(HaveOccurred())
 			}))
 		defer testServer.Close()
 
@@ -243,7 +244,8 @@ func newInsecureCFAuthProxy(gatewayURL string, opts ...CFAuthProxyOption) *CFAut
 func startSecureGateway(responseBody string) *httptest.Server {
 	testGateway := httptest.NewUnstartedServer(
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			w.Write([]byte(responseBody))
+			_, err := w.Write([]byte(responseBody))
+			Expect(err).ToNot(HaveOccurred())
 		}),
 	)
 
@@ -253,6 +255,7 @@ func startSecureGateway(responseBody string) *httptest.Server {
 	}
 
 	testGateway.TLS = &tls.Config{
+		MinVersion:   tls.VersionTLS12,
 		RootCAs:      localhostCerts.Pool(),
 		Certificates: []tls.Certificate{cert},
 	}
@@ -265,7 +268,8 @@ func startSecureGateway(responseBody string) *httptest.Server {
 func startGateway(responseBody string) *httptest.Server {
 	testGateway := httptest.NewUnstartedServer(
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			w.Write([]byte(responseBody))
+			_, err := w.Write([]byte(responseBody))
+			Expect(err).ToNot(HaveOccurred())
 		}),
 	)
 
@@ -279,7 +283,7 @@ func makeTLSReq(addr string) (*http.Response, error) {
 	Expect(err).ToNot(HaveOccurred())
 
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
 	}
 	client := &http.Client{Transport: tr}
 

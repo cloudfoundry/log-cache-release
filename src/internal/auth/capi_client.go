@@ -312,6 +312,7 @@ func cleanup(resp *http.Response) {
 		return
 	}
 
+	//nolint:errcheck
 	io.Copy(ioutil.Discard, resp.Body)
 	resp.Body.Close()
 }

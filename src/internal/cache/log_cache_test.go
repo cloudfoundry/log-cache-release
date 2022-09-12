@@ -12,6 +12,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
@@ -67,7 +68,7 @@ func logCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMetri
 		log.New(ioutil.Discard, "", 0),
 		WithAddr("127.0.0.1:0"),
 		WithClustered(0, []string{"my-addr", peerAddr},
-			grpc.WithInsecure(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		),
 	)
 	cache.Start()
@@ -102,7 +103,7 @@ var _ = Describe("LogCache", func() {
 			}
 		},
 
-			Entry("unsupported SSL 3.0", tls.VersionSSL30, false),
+			Entry("unsupported SSL 3.0", tls.VersionSSL30, false), //nolint:staticcheck
 			Entry("unsupported TLS 1.0", tls.VersionTLS10, false),
 			Entry("unsupported TLS 1.1", tls.VersionTLS11, false),
 			Entry("supported TLS 1.2", tls.VersionTLS12, true),
@@ -418,7 +419,7 @@ var _ = Describe("LogCache", func() {
 			log.New(ioutil.Discard, "", 0),
 			WithAddr("127.0.0.1:0"),
 			WithClustered(0, []string{"my-addr", peerAddr},
-				grpc.WithInsecure(),
+				grpc.WithTransportCredentials(insecure.NewCredentials()),
 			),
 			WithMemoryLimit(1),
 		)
@@ -427,7 +428,7 @@ var _ = Describe("LogCache", func() {
 		peer.MetaResponses = map[string]*rpc.MetaInfo{}
 
 		conn, err := grpc.Dial(cache.Addr(),
-			grpc.WithInsecure(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		Expect(err).ToNot(HaveOccurred())
 		defer conn.Close()
@@ -449,7 +450,9 @@ var _ = Describe("LogCache", func() {
 			},
 		}
 
-		ingressClient.Send(context.Background(), sendRequest)
+		_, err = ingressClient.Send(context.Background(), sendRequest)
+		Expect(err).ToNot(HaveOccurred())
+
 		Eventually(func() map[string]*rpc.MetaInfo {
 			resp, err := egressClient.Meta(context.Background(), &rpc.MetaRequest{})
 			if err != nil {
@@ -494,7 +497,9 @@ var _ = Describe("LogCache", func() {
 			},
 		}
 
-		ingressClient.Send(context.Background(), sendRequest)
+		_, err = ingressClient.Send(context.Background(), sendRequest)
+		Expect(err).ToNot(HaveOccurred())
+
 		Eventually(func() map[string]*rpc.MetaInfo {
 			resp, err := egressClient.Meta(context.Background(), &rpc.MetaRequest{})
 			if err != nil {
@@ -555,7 +560,7 @@ func writeEnvelopes(addr string, es []*loggregator_v2.Envelope) {
 
 func writeEnvelopesNoTLS(addr string, es []*loggregator_v2.Envelope) {
 	conn, err := grpc.Dial(addr,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		panic(err)

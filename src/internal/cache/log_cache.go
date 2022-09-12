@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	client "code.cloudfoundry.org/go-log-cache"
 	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
@@ -68,7 +69,7 @@ func New(m Metrics, logger *log.Logger, opts ...LogCacheOption) *LogCache {
 		prunesPerGC:        int64(3),
 
 		addr:     ":8080",
-		dialOpts: []grpc.DialOption{grpc.WithInsecure()},
+		dialOpts: []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
 	}
 
 	for _, o := range opts {

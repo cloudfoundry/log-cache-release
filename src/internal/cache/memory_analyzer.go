@@ -51,6 +51,8 @@ func (a *MemoryAnalyzer) Memory() (heapInUse, total uint64) {
 	defer a.Unlock()
 
 	var m sigar.Mem
+
+	//nolint:errcheck
 	m.Get()
 
 	a.avail = m.ActualFree

@@ -14,6 +14,7 @@ func NewTLSConfig(caPath, certPath, keyPath, cn string) (*tls.Config, error) {
 	}
 
 	tlsConfig := &tls.Config{
+		MinVersion:         tls.VersionTLS12,
 		ServerName:         cn,
 		Certificates:       []tls.Certificate{cert},
 		InsecureSkipVerify: false,

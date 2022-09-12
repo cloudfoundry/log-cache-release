@@ -27,7 +27,7 @@ func NewSpyAgent(tlsConfig *tls.Config) *SpyAgent {
 }
 
 func (s *SpyAgent) Start() string {
-	lis, err := net.Listen("tcp", ":0")
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -39,6 +39,8 @@ func (s *SpyAgent) Start() string {
 		srv = grpc.NewServer(grpc.Creds(credentials.NewTLS(s.tlsConfig)))
 	}
 	loggregator_v2.RegisterIngressServer(srv, s)
+
+	//nolint:errcheck
 	go srv.Serve(lis)
 
 	return lis.Addr().String()
@@ -102,7 +104,7 @@ func NewSpyLogCache(tlsConfig *tls.Config) *SpyLogCache {
 }
 
 func (s *SpyLogCache) Start() string {
-	lis, err := net.Listen("tcp", ":0")
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -116,6 +118,8 @@ func (s *SpyLogCache) Start() string {
 	rpc.RegisterIngressServer(srv, s)
 	rpc.RegisterEgressServer(srv, s)
 	rpc.RegisterPromQLQuerierServer(srv, s)
+
+	//nolint:errcheck
 	go srv.Serve(lis)
 
 	return lis.Addr().String()
@@ -151,9 +155,7 @@ func (s *SpyLogCache) Send(ctx context.Context, r *rpc.SendRequest) (*rpc.SendRe
 
 	s.localOnlyValues = append(s.localOnlyValues, r.LocalOnly)
 
-	for _, e := range r.Envelopes.Batch {
-		s.envelopes = append(s.envelopes, e)
-	}
+	s.envelopes = append(s.envelopes, r.Envelopes.Batch...)
 
 	return &rpc.SendResponse{}, nil
 }

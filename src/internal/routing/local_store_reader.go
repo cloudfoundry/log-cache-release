@@ -101,7 +101,7 @@ func (r *LocalStoreReader) Meta(ctx context.Context, req *logcache_v1.MetaReques
 	sourceIds := r.s.Meta()
 
 	metaInfo := make(map[string]*logcache_v1.MetaInfo)
-	for sourceId, _ := range sourceIds {
+	for sourceId := range sourceIds {
 		metaInfo[sourceId] = &logcache_v1.MetaInfo{
 			Count:           sourceIds[sourceId].Count,
 			Expired:         sourceIds[sourceId].Expired,

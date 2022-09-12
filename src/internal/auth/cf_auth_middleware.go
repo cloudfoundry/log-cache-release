@@ -117,11 +117,14 @@ func (m CFAuthMiddlewareProvider) Middleware(h http.Handler) http.Handler {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 
-			json.NewEncoder(w).Encode(&promqlErrorBody{
+			err = json.NewEncoder(w).Encode(&promqlErrorBody{
 				Status:    "error",
 				ErrorType: "bad_data",
 				Error:     err.Error(),
 			})
+			if err != nil {
+				log.Printf("bad data: %v\n", err)
+			}
 
 			return
 		}
@@ -130,11 +133,14 @@ func (m CFAuthMiddlewareProvider) Middleware(h http.Handler) http.Handler {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 
-			json.NewEncoder(w).Encode(&promqlErrorBody{
+			err = json.NewEncoder(w).Encode(&promqlErrorBody{
 				Status:    "error",
 				ErrorType: "bad_data",
 				Error:     "query does not request any source_ids",
 			})
+			if err != nil {
+				log.Println("bad_data: query does not request any source_ids")
+			}
 
 			return
 		}
@@ -206,7 +212,9 @@ func (m CFAuthMiddlewareProvider) Middleware(h http.Handler) http.Handler {
 		msg, _ := protojson.Marshal(&rpc.MetaResponse{
 			Meta: m.onlyAuthorized(authToken, meta, c),
 		})
+		//nolint:errcheck
 		w.Write(msg)
+		//nolint:errcheck
 		w.Write([]byte("\n"))
 	})
 

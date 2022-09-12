@@ -16,8 +16,6 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/auth"
 
 	"bytes"
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"encoding/pem"
 	"io/ioutil"
@@ -107,8 +105,11 @@ var _ = Describe("UAAClient", func() {
 			payload := tc.BuildValidPayload("logs.admin")
 			token := tc.CreateSignedToken(payload)
 
-			tc.uaaClient.Read(withBearer(token))
-			tc.uaaClient.Read(withBearer(token))
+			_, err := tc.uaaClient.Read(withBearer(token))
+			Expect(err).ToNot(HaveOccurred())
+
+			_, err = tc.uaaClient.Read(withBearer(token))
+			Expect(err).ToNot(HaveOccurred())
 
 			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount))
 		})
@@ -116,12 +117,13 @@ var _ = Describe("UAAClient", func() {
 		It("does not allow use of an expired token", func() {
 			tc.GenerateSingleTokenKeyResponse(true)
 
-			tc.uaaClient.RefreshTokenKeys()
+			err := tc.uaaClient.RefreshTokenKeys()
+			Expect(err).ToNot(HaveOccurred())
 
 			expiredPayload := tc.BuildExpiredPayload("logs.Admin")
 			expiredToken := tc.CreateSignedToken(expiredPayload)
 
-			_, err := tc.uaaClient.Read(withBearer(expiredToken))
+			_, err = tc.uaaClient.Read(withBearer(expiredToken))
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("token is expired"))
 		})
@@ -248,7 +250,9 @@ var _ = Describe("UAAClient", func() {
 		It("handles concurrent refreshes", func() {
 			tc := uaaSetup(true)
 			tc.GenerateSingleTokenKeyResponse(true)
-			tc.uaaClient.RefreshTokenKeys()
+
+			err := tc.uaaClient.RefreshTokenKeys()
+			Expect(err).ToNot(HaveOccurred())
 
 			payload := tc.BuildValidPayload("logs.admin")
 			token := tc.CreateSignedToken(payload)
@@ -259,6 +263,7 @@ var _ = Describe("UAAClient", func() {
 
 			for n := 0; n < 4; n++ {
 				wg.Add(1)
+				//nolint:errcheck
 				go func(wg *sync.WaitGroup) {
 					tc.uaaClient.Read(withBearer(token))
 					tc.uaaClient.RefreshTokenKeys()
@@ -275,7 +280,8 @@ var _ = Describe("UAAClient", func() {
 		It("calls UAA correctly", func() {
 			tc := uaaSetup(true)
 			tc.GenerateSingleTokenKeyResponse(true)
-			tc.uaaClient.RefreshTokenKeys()
+			err := tc.uaaClient.RefreshTokenKeys()
+			Expect(err).ToNot(HaveOccurred())
 
 			r := tc.httpClient.requests[0]
 
@@ -293,7 +299,8 @@ var _ = Describe("UAAClient", func() {
 		It("calls UAA with basic auth", func() {
 			tc := uaaSetup(true, auth.WithBasicAuth("User", "Password"))
 			tc.GenerateSingleTokenKeyResponse(true)
-			tc.uaaClient.RefreshTokenKeys()
+			err := tc.uaaClient.RefreshTokenKeys()
+			Expect(err).ToNot(HaveOccurred())
 
 			r := tc.httpClient.requests[0]
 
@@ -378,7 +385,8 @@ var _ = Describe("UAAClient", func() {
 
 			tokenKey := generateLegitTokenKey("testKey1")
 			tc.GenerateTokenKeyResponse(true, []mockTokenKey{tokenKey})
-			tc.uaaClient.RefreshTokenKeys()
+			err = tc.uaaClient.RefreshTokenKeys()
+			Expect(err).ToNot(HaveOccurred())
 
 			_, err = tc.uaaClient.Read(withBearer(token))
 			Expect(err).To(HaveOccurred())
@@ -418,16 +426,18 @@ var _ = Describe("UAAClient", func() {
 
 			initialRequestCount := len(tc.httpClient.requests)
 
-			tc.uaaClient.RefreshTokenKeys()
+			err := tc.uaaClient.RefreshTokenKeys()
+			Expect(err).ToNot(HaveOccurred())
 			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
 
 			time.Sleep(100 * time.Millisecond)
-			err := tc.uaaClient.RefreshTokenKeys()
+			err = tc.uaaClient.RefreshTokenKeys()
 			Expect(err).To(HaveOccurred())
 			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
 
 			time.Sleep(101 * time.Millisecond)
-			tc.uaaClient.RefreshTokenKeys()
+			err = tc.uaaClient.RefreshTokenKeys()
+			Expect(err).To(HaveOccurred())
 			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 2))
 		})
 	})
@@ -450,15 +460,15 @@ func generateLegitTokenKey(keyId string) mockTokenKey {
 	}
 }
 
-func generateHSTokenKey(keyId string) mockTokenKey {
-	privateKey := keyId
+// func generateHSTokenKey(keyId string) mockTokenKey {
+// 	privateKey := keyId
 
-	return mockTokenKey{
-		privateKey: privateKey,
-		publicKey:  privateKey,
-		keyId:      keyId,
-	}
-}
+// 	return mockTokenKey{
+// 		privateKey: privateKey,
+// 		publicKey:  privateKey,
+// 		keyId:      keyId,
+// 	}
+// }
 
 func uaaSetup(rsa bool, opts ...auth.UAAOption) *UAATestContext {
 	httpClient := newSpyHTTPClient()
@@ -691,31 +701,6 @@ func (s *spyHTTPClient) Do(r *http.Request) (*http.Response, error) {
 	return &resp, nil
 }
 
-type spyMetrics struct {
-	mu sync.Mutex
-	m  map[string]float64
-}
-
-func newSpyMetrics() *spyMetrics {
-	return &spyMetrics{
-		m: make(map[string]float64),
-	}
-}
-
-func (s *spyMetrics) NewGauge(name, unit string) func(float64) {
-	return func(v float64) {
-		s.mu.Lock()
-		defer s.mu.Unlock()
-		s.m[name] = v
-	}
-}
-
-func publicKeyExponentToString(privateKey *rsa.PrivateKey) string {
-	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, uint64(privateKey.PublicKey.E))
-	return base64.StdEncoding.EncodeToString(b[0:3])
-}
-
 func keyPEMToString(privateKey *rsa.PrivateKey) (string, string) {
 	encodedKey, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
 	Expect(err).ToNot(HaveOccurred())
@@ -734,10 +719,6 @@ func keyPEMToString(privateKey *rsa.PrivateKey) (string, string) {
 	}
 	privateKeyString := string(pem.EncodeToMemory(pemKey))
 	return publicKey, privateKeyString
-}
-
-func publicKeyModulusToString(privateKey *rsa.PrivateKey) string {
-	return base64.StdEncoding.EncodeToString(privateKey.PublicKey.N.Bytes())
 }
 
 func withBearer(token string) string {

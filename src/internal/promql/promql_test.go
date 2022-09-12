@@ -1370,10 +1370,10 @@ func (s *spyDataReader) ReadEnvelopeTypes() [][]logcache_v1.EnvelopeType {
 	return result
 }
 
-func (s *spyDataReader) setRead(es [][]*loggregator_v2.Envelope, errs []error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// func (s *spyDataReader) setRead(es [][]*loggregator_v2.Envelope, errs []error) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
 
-	s.readResults = es
-	s.readErrs = errs
-}
+// 	s.readResults = es
+// 	s.readErrs = errs
+// }

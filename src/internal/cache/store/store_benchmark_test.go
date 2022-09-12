@@ -1,9 +1,9 @@
 package store_test
 
 import (
-	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"testing"
 	"time"
 
@@ -151,15 +151,6 @@ func BenchmarkMetaWhileReading(b *testing.B) {
 	}
 }
 
-func contextIsDone(ctx context.Context) bool {
-	select {
-	case <-ctx.Done():
-		return true
-	default:
-		return false
-	}
-}
-
 func randEnvGen() func() *loggregator_v2.Envelope {
 	var s []*loggregator_v2.Envelope
 	fiveMinAgo := time.Now().Add(-5 * time.Minute)
@@ -178,10 +169,15 @@ func randEnvGen() func() *loggregator_v2.Envelope {
 }
 
 func benchBuildLog(appID string, ts int64) *loggregator_v2.Envelope {
+
+	nBig, err := rand.Int(rand.Reader, big.NewInt(50))
+	if err != nil {
+		return nil
+	}
 	return &loggregator_v2.Envelope{
 		SourceId: appID,
 		// Timestamp: ts,
-		Timestamp: time.Now().Add(time.Duration(rand.Int63n(50)-100) * time.Microsecond).UnixNano(),
+		Timestamp: time.Now().Add(time.Duration(int(nBig.Int64())-100) * time.Microsecond).UnixNano(),
 		Message: &loggregator_v2.Envelope_Log{
 			Log: &loggregator_v2.Log{},
 		},
