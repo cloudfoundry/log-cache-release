@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	//nolint:gosec
 	_ "net/http/pprof"
+
 	"os"
 	"time"
 
@@ -14,6 +17,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -36,7 +40,10 @@ func main() {
 	log.Print("Starting Syslog Server...")
 	defer log.Print("Closing Syslog Server.")
 
-	envstruct.WriteReport(cfg)
+	err = envstruct.WriteReport(cfg)
+	if err != nil {
+		log.Printf("Failed to print a report of the from environment: %s\n", err)
+	}
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),
@@ -83,7 +90,7 @@ func main() {
 	if cfg.LogCacheTLS.HasAnyCredential() {
 		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(cfg.LogCacheTLS.Credentials("log-cache"))))
 	} else {
-		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithInsecure()))
+		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(insecure.NewCredentials())))
 	}
 
 	nozzle := NewNozzle(

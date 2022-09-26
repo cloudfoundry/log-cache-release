@@ -26,7 +26,6 @@ type PromQL struct {
 	failureCounter    metrics.Counter
 	instantQueryTimer metrics.Gauge
 	rangeQueryTimer   metrics.Gauge
-	failures          int
 
 	result int64
 
@@ -622,11 +621,14 @@ func ExtractSourceIds(query string) ([]string, error) {
 
 	visitor := newSourceIDVisitor()
 
-	promql.Walk(
+	err = promql.Walk(
 		visitor,
 		expr,
 		nil,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	var sourceIDs []string
 
@@ -690,11 +692,14 @@ func ReplaceSourceIdSets(query string, sourceIDExpansions map[string][]string) (
 
 	visitor := newSourceIdReplacementVisitor(sourceIDExpansions)
 
-	promql.Walk(
+	err = promql.Walk(
 		visitor,
 		expr,
 		nil,
 	)
+	if err != nil {
+		return "", err
+	}
 
 	return expr.String(), nil
 }

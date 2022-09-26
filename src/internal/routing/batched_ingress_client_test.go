@@ -74,13 +74,14 @@ var _ = Describe("BatchedIngressClient", func() {
 		}(ingressClient)
 
 		for i := 0; i < 25000; i++ {
-			c.Send(context.Background(), &rpc.SendRequest{
+			_, err := c.Send(context.Background(), &rpc.SendRequest{
 				Envelopes: &loggregator_v2.EnvelopeBatch{
 					Batch: []*loggregator_v2.Envelope{
 						{Timestamp: 1},
 					},
 				},
 			})
+			Expect(err).ToNot(HaveOccurred())
 		}
 
 		Eventually(func() float64 {

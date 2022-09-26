@@ -37,7 +37,10 @@ func LoadConfig() (*Config, error) {
 
 	c.Version = buildVersion
 
-	envstruct.WriteReport(&c)
+	err := envstruct.WriteReport(&c)
+	if err != nil {
+		return nil, err
+	}
 
 	return &c, nil
 }

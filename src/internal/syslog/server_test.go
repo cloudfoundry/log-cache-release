@@ -483,7 +483,7 @@ var _ = Describe("Syslog", func() {
 				Expect(err).To(HaveOccurred())
 			}
 		},
-			Entry("unsupported SSL 3.0", tls.VersionSSL30, false),
+			Entry("unsupported SSL 3.0", tls.VersionSSL30, false), // nolint:staticcheck
 			Entry("unsupported TLS 1.0", tls.VersionTLS10, false),
 			Entry("unsupported TLS 1.1", tls.VersionTLS11, false),
 			Entry("supported TLS 1.2", tls.VersionTLS12, true),

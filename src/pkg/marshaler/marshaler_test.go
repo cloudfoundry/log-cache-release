@@ -762,7 +762,10 @@ func (m *mockMarshaler) Unmarshal(data []byte, v interface{}) error {
 
 func (m *mockMarshaler) NewEncoder(w io.Writer) runtime.Encoder {
 	return runtime.EncoderFunc(func(interface{}) error {
-		w.Write([]byte("mock encoded result"))
+		_, err := w.Write([]byte("mock encoded result"))
+		if err != nil {
+			return err
+		}
 
 		return m.encodeError
 	})

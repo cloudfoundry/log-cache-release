@@ -13,6 +13,7 @@ import (
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Metrics interface {
@@ -54,7 +55,7 @@ func NewNozzle(c StreamConnector, logCacheAddr string, m Metrics, logger *log.Lo
 	n := &Nozzle{
 		s:         c,
 		addr:      logCacheAddr,
-		opts:      []grpc.DialOption{grpc.WithInsecure()},
+		opts:      []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
 		log:       logger,
 		metrics:   m,
 		selectors: []string{},

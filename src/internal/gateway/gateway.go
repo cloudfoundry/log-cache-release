@@ -13,6 +13,7 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
@@ -179,7 +180,10 @@ func (g *Gateway) listenAndServe() {
 }
 
 func (g *Gateway) handleInfoEndpoint(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(fmt.Sprintf(`{"version":"%s","vm_uptime":"%d"}`+"\n", g.logCacheVersion, g.uptimeFn())))
+	_, err := w.Write([]byte(fmt.Sprintf(`{"version":"%s","vm_uptime":"%d"}`+"\n", g.logCacheVersion, g.uptimeFn())))
+	if err != nil {
+		g.log.Println("Cannot send result for the info endpoint")
+	}
 }
 
 func uptimeInSeconds() int64 {
@@ -214,7 +218,7 @@ func (g *Gateway) httpErrorHandler(
 	body := &errorBody{
 		Status:    "error",
 		ErrorType: "internal",
-		Error:     grpc.ErrorDesc(err),
+		Error:     status.Convert(err).Message(),
 	}
 
 	buf, merr := marshaler.Marshal(body)
@@ -227,7 +231,7 @@ func (g *Gateway) httpErrorHandler(
 		return
 	}
 
-	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
+	w.WriteHeader(runtime.HTTPStatusFromCode(status.Code(err)))
 	if _, err := w.Write(buf); err != nil {
 		g.log.Printf("Failed to write response: %v", err)
 	}

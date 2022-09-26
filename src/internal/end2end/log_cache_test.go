@@ -14,6 +14,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/cache"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -45,20 +46,20 @@ var _ = Describe("LogCache", func() {
 			m,
 			logger,
 			cache.WithAddr(lc_addrs[0]),
-			cache.WithClustered(0, lc_addrs, grpc.WithInsecure()),
+			cache.WithClustered(0, lc_addrs, grpc.WithTransportCredentials(insecure.NewCredentials())),
 		)
 
 		node2 = cache.New(
 			m,
 			logger,
 			cache.WithAddr(lc_addrs[1]),
-			cache.WithClustered(1, lc_addrs, grpc.WithInsecure()),
+			cache.WithClustered(1, lc_addrs, grpc.WithTransportCredentials(insecure.NewCredentials())),
 		)
 
 		node1.Start()
 		node2.Start()
 
-		lc_client = client.NewClient(lc_addrs[0], client.WithViaGRPC(grpc.WithInsecure()))
+		lc_client = client.NewClient(lc_addrs[0], client.WithViaGRPC(grpc.WithTransportCredentials(insecure.NewCredentials())))
 	})
 
 	AfterEach(func() {
@@ -122,7 +123,7 @@ var _ = Describe("LogCache", func() {
 })
 
 func ingressClient(addr string) (client rpc.IngressClient, cleanup func()) {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}

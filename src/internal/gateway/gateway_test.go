@@ -12,6 +12,7 @@ import (
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"code.cloudfoundry.org/log-cache/internal/testing"
 	. "github.com/onsi/ginkgo"
@@ -29,7 +30,7 @@ func gatewayTestSetup() (*Gateway, *testing.SpyLogCache) {
 		WithGatewayVersion("1.2.3"),
 		WithGatewayVMUptimeFn(testing.StubUptimeFn),
 		WithGatewayLogCacheDialOpts(
-			grpc.WithInsecure(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		),
 	)
 	gw.Start()
@@ -96,6 +97,7 @@ var _ = Describe("Gateway", func() {
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
 		respBytes, err := ioutil.ReadAll(resp.Body)
+		Expect(err).ToNot(HaveOccurred())
 		Expect(string(respBytes)).To(MatchRegexp(`\n$`))
 	})
 
@@ -219,6 +221,7 @@ func makeTLSReq(addr string) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s", addr), nil)
 	Expect(err).ToNot(HaveOccurred())
 
+	//nolint:gosec
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	//nolint:gosec
 	_ "net/http/pprof"
+
 	"os"
 	"os/signal"
 	"syscall"
@@ -40,7 +43,10 @@ func main() {
 	log.Print("Starting LogCache Nozzle...")
 	defer log.Print("Closing LogCache Nozzle.")
 
-	envstruct.WriteReport(cfg)
+	err = envstruct.WriteReport(cfg)
+	if err != nil {
+		log.Printf("Failed to print a report of the from environment: %s\n", err)
+	}
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),

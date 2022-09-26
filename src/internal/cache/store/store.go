@@ -547,7 +547,7 @@ func (store *Store) Meta() map[string]logcache_v1.MetaInfo {
 
 	// Range over our local copy of metaReport
 	// TODO - shouldn't we just maintain Count on metaReport..?!
-	for sourceId, _ := range metaReport {
+	for sourceId := range metaReport {
 		tree, _ := store.storageIndex.Load(sourceId)
 
 		tree.(*storage).RLock()

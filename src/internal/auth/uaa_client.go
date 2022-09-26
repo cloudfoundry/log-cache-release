@@ -217,7 +217,7 @@ func (c *UAAClient) Read(token string) (Oauth2ClientContext, error) {
 			// which generally means we've tried to decode a token with the
 			// wrong private key. just in case UAA has rolled the key, but
 			// kept the same keyId, let's renew our keys.
-			go c.RefreshTokenKeys()
+			go c.RefreshTokenKeys() //nolint:errcheck
 		}
 
 		return Oauth2ClientContext{}, fmt.Errorf("failed to decode token: %s", err.Error())
@@ -252,7 +252,7 @@ func (c *UAAClient) loadOrFetchPublicKey(keyId string) (interface{}, error) {
 		return publicKey, nil
 	}
 
-	c.RefreshTokenKeys()
+	c.RefreshTokenKeys() //nolint:errcheck
 
 	publicKey, ok = c.publicKeys.Load(keyId)
 	if ok {

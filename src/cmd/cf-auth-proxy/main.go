@@ -6,7 +6,10 @@ import (
 	"log"
 	"net"
 	"net/http"
+
+	//nolint:gosec
 	_ "net/http/pprof"
+
 	"net/url"
 	"os"
 	"time"
@@ -44,7 +47,10 @@ func main() {
 	loggr.Print("Starting Log Cache CF Auth Reverse Proxy...")
 	defer loggr.Print("Closing Log Cache CF Auth Reverse Proxy.")
 
-	envstruct.WriteReport(cfg)
+	err = envstruct.WriteReport(cfg)
+	if err != nil {
+		log.Printf("Failed to print a report of the from environment: %s\n", err)
+	}
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),
 		cfg.MetricsServer.CertFile,
@@ -149,6 +155,8 @@ func main() {
 		if err != nil {
 			loggr.Panicf("Unable to open access log: %s", err)
 		}
+
+		//nolint:errcheck
 		defer func() {
 			accessLog.Sync()
 			accessLog.Close()

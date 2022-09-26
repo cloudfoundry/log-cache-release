@@ -12,6 +12,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"code.cloudfoundry.org/log-cache/internal/testing"
 	. "github.com/onsi/ginkgo"
@@ -35,7 +36,7 @@ var _ = Describe("Nozzle", func() {
 			addr := logCache.Start()
 
 			n = NewNozzle(streamConnector, addr, spyMetrics, logger,
-				WithDialOpts(grpc.WithInsecure()),
+				WithDialOpts(grpc.WithTransportCredentials(insecure.NewCredentials())),
 				WithSelectors("gauge", "timer", "event"),
 				WithShardID("log-cache"),
 			)

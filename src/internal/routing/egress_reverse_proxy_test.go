@@ -300,10 +300,10 @@ var _ = Describe("EgressReverseProxy", func() {
 	It("uses the given context for meta", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
-		p.Meta(ctx, &rpc.MetaRequest{
+		_, err := p.Meta(ctx, &rpc.MetaRequest{
 			LocalOnly: true,
 		})
-
+		Expect(err).ToNot(HaveOccurred())
 		Expect(spyEgressLocalClient.ctxs[0].Done()).To(BeClosed())
 	})
 

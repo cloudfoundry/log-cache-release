@@ -1,8 +1,11 @@
 package auth_test
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"log"
+	"math"
+	"math/big"
 	"net/http"
 	"strconv"
 	"time"
@@ -39,16 +42,25 @@ var _ = Describe("AccessLog", func() {
 		timestamp = time.Now()
 
 		method = "GET"
-		path = fmt.Sprintf("/some/path?with_query=params-%d", rand.Int())
-		url = "http://example.com" + path
-		sourceHost = fmt.Sprintf("10.0.1.%d", rand.Int()%256)
-		sourcePort = strconv.Itoa(rand.Int()%65535 + 1)
-		remoteAddr = sourceHost + ":" + sourcePort
-		dstHost = fmt.Sprintf("10.1.2.%d", rand.Int()%256)
-		dstPort = strconv.Itoa(rand.Int()%65535 + 1)
 
-		forwardedFor = fmt.Sprintf("10.0.0.%d", rand.Int()%256)
-		requestId = fmt.Sprintf("test-vcap-request-id-%d", rand.Int())
+		getRandomNumber := func() int {
+			nBig, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt32))
+			if err != nil {
+				log.Fatalf("Cannot generate random number %v", err)
+			}
+			return int(nBig.Int64())
+		}
+
+		path = fmt.Sprintf("/some/path?with_query=params-%d", getRandomNumber())
+		url = "http://example.com" + path
+		sourceHost = fmt.Sprintf("10.0.1.%d", getRandomNumber()%256)
+		sourcePort = strconv.Itoa(getRandomNumber()%65535 + 1)
+		remoteAddr = sourceHost + ":" + sourcePort
+		dstHost = fmt.Sprintf("10.1.2.%d", getRandomNumber()%256)
+		dstPort = strconv.Itoa(getRandomNumber()%65535 + 1)
+
+		forwardedFor = fmt.Sprintf("10.0.0.%d", getRandomNumber()%256)
+		requestId = fmt.Sprintf("test-vcap-request-id-%d", getRandomNumber())
 	})
 
 	JustBeforeEach(func() {

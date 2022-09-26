@@ -9,11 +9,14 @@ import (
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	"net/http"
+
+	//nolint: gosec
 	_ "net/http/pprof"
 
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -79,7 +82,7 @@ func main() {
 		)
 	} else {
 		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
-			grpc.WithInsecure(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024)),
 		),
 		)
