@@ -1,6 +1,11 @@
+run:
+  # Timeout for analysis.
+  # Default: 1m.
+  timeout: 5m
+
 linters:
   enable:
-    # Checks for non-ASCII identifiers
+    # Checks for non-ASCII identifiers.
     - asciicheck
     # Computes and checks the cyclomatic complexity of functions.
     - gocyclo
