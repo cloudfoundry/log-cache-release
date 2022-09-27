@@ -2,7 +2,7 @@
 name: log-cache-nozzle
 
 dependencies:
-- golang-1.18-linux
+- golang-1.19-linux
 
 files:
 - cmd/nozzle/**/*.go
