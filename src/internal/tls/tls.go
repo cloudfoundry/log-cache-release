@@ -4,8 +4,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"google.golang.org/grpc/credentials"
 )
@@ -53,7 +53,7 @@ func NewMutualTLSConfig(caPath, certPath, keyPath, cn string) (*tls.Config, erro
 	tlsConfig.ServerName = cn
 	tlsConfig.Certificates = []tls.Certificate{cert}
 
-	caCertBytes, err := ioutil.ReadFile(caPath)
+	caCertBytes, err := os.ReadFile(caPath)
 	if err != nil {
 		return nil, err
 	}

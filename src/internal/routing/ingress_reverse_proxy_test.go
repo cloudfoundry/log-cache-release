@@ -3,7 +3,7 @@ package routing_test
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"sync"
 
@@ -33,7 +33,7 @@ var _ = Describe("IngressReverseProxy", func() {
 			spyIngressLocalClient,
 		},
 			1, // Point local at spyIngressLocalClient
-			log.New(ioutil.Discard, "", 0))
+			log.New(io.Discard, "", 0))
 	})
 
 	It("uses the correct clients", func() {

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +31,7 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		Expect(body).To(Equal([]byte("Hello World!")))
 	})
 
@@ -61,7 +61,7 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		Expect(body).To(Equal([]byte("Hello World!")))
 	})
 
@@ -76,13 +76,13 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		Expect(body).To(Equal([]byte("Hello World!")))
 	})
 
 	It("returns an error when proxying requests to an insecure log cache gateway", func() {
 		// suppress tls error in test
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 
 		testServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -193,7 +193,7 @@ var _ = Describe("CFAuthProxy", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		Expect(body).To(Equal([]byte("Hello World!")))
 	})
 })

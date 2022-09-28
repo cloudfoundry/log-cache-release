@@ -3,7 +3,7 @@ package auth_test
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 
@@ -157,7 +157,7 @@ var _ = Describe("CfAuthMiddleware", func() {
 			Expect(tc.recorder.Code).To(Equal(http.StatusOK))
 
 			var m rpc.MetaResponse
-			msg, err := ioutil.ReadAll(tc.recorder.Body)
+			msg, err := io.ReadAll(tc.recorder.Body)
 			Expect(err).To(BeNil())
 			Expect(protojson.Unmarshal(msg, &m)).To(Succeed())
 
@@ -183,7 +183,7 @@ var _ = Describe("CfAuthMiddleware", func() {
 
 			Expect(tc.recorder.Code).To(Equal(http.StatusOK))
 			var m rpc.MetaResponse
-			msg, err := ioutil.ReadAll(tc.recorder.Body)
+			msg, err := io.ReadAll(tc.recorder.Body)
 			Expect(err).To(BeNil())
 			Expect(protojson.Unmarshal(msg, &m)).To(Succeed())
 			Expect(m.Meta).To(HaveLen(2))

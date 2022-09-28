@@ -1,7 +1,7 @@
 package routing_test
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"time"
 
@@ -29,7 +29,7 @@ var _ = Describe("BatchedIngressClient", func() {
 		m = testhelpers.NewMetricsRegistry()
 		spyDropped = m.NewCounter("nodeX_dropped", "some help text")
 		ingressClient = newSpyIngressClient()
-		c = routing.NewBatchedIngressClient(5, time.Hour, ingressClient, spyDropped, m.NewCounter("send_failure", "some help text"), log.New(ioutil.Discard, "", 0))
+		c = routing.NewBatchedIngressClient(5, time.Hour, ingressClient, spyDropped, m.NewCounter("send_failure", "some help text"), log.New(io.Discard, "", 0))
 	})
 
 	It("sends envelopes by batches because of size", func() {
@@ -49,7 +49,7 @@ var _ = Describe("BatchedIngressClient", func() {
 	})
 
 	It("sends envelopes by batches because of interval", func() {
-		c = routing.NewBatchedIngressClient(5, time.Microsecond, ingressClient, spyDropped, m.NewCounter("send_failure", "some help text"), log.New(ioutil.Discard, "", 0))
+		c = routing.NewBatchedIngressClient(5, time.Microsecond, ingressClient, spyDropped, m.NewCounter("send_failure", "some help text"), log.New(io.Discard, "", 0))
 		_, err := c.Send(context.Background(), &rpc.SendRequest{
 			Envelopes: &loggregator_v2.EnvelopeBatch{
 				Batch: []*loggregator_v2.Envelope{
@@ -121,7 +121,7 @@ var _ = Describe("BatchedIngressClient", func() {
 			ingressClient,
 			spyDropped,
 			m.NewCounter("send_failure", "fake help text"),
-			log.New(ioutil.Discard, "", 0),
+			log.New(io.Discard, "", 0),
 			routing.WithLocalOnlyDisabled,
 		)
 

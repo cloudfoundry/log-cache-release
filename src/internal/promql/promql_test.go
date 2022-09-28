@@ -3,7 +3,7 @@ package promql_test
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"sync"
 	"time"
@@ -33,7 +33,7 @@ var _ = Describe("PromQL", func() {
 		q = promql.New(
 			spyDataReader,
 			spyMetrics,
-			log.New(ioutil.Discard, "", 0),
+			log.New(io.Discard, "", 0),
 			5*time.Second,
 		)
 	})

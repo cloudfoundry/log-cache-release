@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"io/ioutil"
+	"os"
 )
 
 func NewTLSConfig(caPath, certPath, keyPath, cn string) (*tls.Config, error) {
@@ -20,7 +20,7 @@ func NewTLSConfig(caPath, certPath, keyPath, cn string) (*tls.Config, error) {
 		InsecureSkipVerify: false,
 	}
 
-	caCertBytes, err := ioutil.ReadFile(caPath)
+	caCertBytes, err := os.ReadFile(caPath)
 	if err != nil {
 		return nil, err
 	}
