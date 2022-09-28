@@ -3,7 +3,6 @@ package gateway
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -41,7 +40,7 @@ type Gateway struct {
 // invoked before using the Gateway.
 func NewGateway(logCacheAddr, gatewayAddr string, opts ...GatewayOption) *Gateway {
 	g := &Gateway{
-		log:          log.New(ioutil.Discard, "", 0),
+		log:          log.New(io.Discard, "", 0),
 		logCacheAddr: logCacheAddr,
 		gatewayAddr:  gatewayAddr,
 		uptimeFn:     uptimeInSeconds,

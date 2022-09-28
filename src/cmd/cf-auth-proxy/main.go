@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -222,7 +221,7 @@ func buildCAPIClient(cfg *Config, loggr *log.Logger) *http.Client {
 }
 
 func loadCA(caCertPath string, loggr *log.Logger) *x509.CertPool {
-	caCert, err := ioutil.ReadFile(caCertPath)
+	caCert, err := os.ReadFile(caCertPath)
 	if err != nil {
 		loggr.Fatalf("failed to read CA certificate: %s", err)
 	}

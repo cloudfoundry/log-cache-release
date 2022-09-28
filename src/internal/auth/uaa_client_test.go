@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 	"sync"
@@ -18,7 +19,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/pem"
-	"io/ioutil"
 	"net/http"
 
 	jose "github.com/dvsekhvalnov/jose2go"
@@ -491,7 +491,7 @@ func uaaSetup(rsa bool, opts ...auth.UAAOption) *UAATestContext {
 		"https://uaa.com",
 		httpClient,
 		metrics,
-		log.New(ioutil.Discard, "", 0),
+		log.New(io.Discard, "", 0),
 		opts...,
 	)
 
@@ -682,7 +682,7 @@ func (s *spyHTTPClient) Do(r *http.Request) (*http.Response, error) {
 	if len(s.resps) == 0 {
 		return &http.Response{
 			StatusCode: http.StatusNotFound,
-			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+			Body:       io.NopCloser(bytes.NewReader(nil)),
 		}, nil
 	}
 
@@ -691,7 +691,7 @@ func (s *spyHTTPClient) Do(r *http.Request) (*http.Response, error) {
 
 	resp := http.Response{
 		StatusCode: result.status,
-		Body:       ioutil.NopCloser(bytes.NewReader(result.body)),
+		Body:       io.NopCloser(bytes.NewReader(result.body)),
 	}
 
 	if result.err != nil {

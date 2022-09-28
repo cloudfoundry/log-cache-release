@@ -3,7 +3,7 @@ package routing_test
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"time"
 
@@ -37,7 +37,7 @@ var _ = Describe("EgressReverseProxy", func() {
 			spyEgressLocalClient,
 			spyEgressRemoteClient1,
 			spyEgressRemoteClient2,
-		}, 0, log.New(ioutil.Discard, "", 0),
+		}, 0, log.New(io.Discard, "", 0),
 			routing.WithMetaCacheDuration(50*time.Millisecond),
 		)
 	})

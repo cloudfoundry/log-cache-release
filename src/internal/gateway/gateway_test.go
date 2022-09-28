@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -96,7 +96,7 @@ var _ = Describe("Gateway", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-		respBytes, err := ioutil.ReadAll(resp.Body)
+		respBytes, err := io.ReadAll(resp.Body)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(string(respBytes)).To(MatchRegexp(`\n$`))
 	})
@@ -154,7 +154,7 @@ var _ = Describe("Gateway", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		Expect(body).To(MatchJSON(`{"status":"success","data":{"resultType":"scalar","result":[99,"0"]}}`))
 	})
 
@@ -166,7 +166,7 @@ var _ = Describe("Gateway", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-		respBytes, err := ioutil.ReadAll(resp.Body)
+		respBytes, err := io.ReadAll(resp.Body)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(respBytes).To(MatchJSON(
 			`{
@@ -206,7 +206,7 @@ var _ = Describe("Gateway", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
 
-			body, _ := ioutil.ReadAll(resp.Body)
+			body, _ := io.ReadAll(resp.Body)
 			Expect(body).To(MatchJSON(`{
 				"status": "error",
 

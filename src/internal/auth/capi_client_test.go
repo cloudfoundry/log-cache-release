@@ -1,7 +1,7 @@
 package auth_test
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"sync"
 	"time"
@@ -35,7 +35,7 @@ var _ = Describe("CAPIClient", func() {
 			"http://internal.capi.com",
 			capiClient,
 			metrics,
-			log.New(ioutil.Discard, "", 0),
+			log.New(io.Discard, "", 0),
 			capiOpts...,
 		)
 

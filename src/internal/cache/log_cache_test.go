@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"time"
 
@@ -41,7 +41,7 @@ func tlsLogCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMe
 
 	cache := New(
 		spyMetrics,
-		log.New(ioutil.Discard, "", 0),
+		log.New(io.Discard, "", 0),
 		WithAddr("127.0.0.1:0"),
 		WithClustered(0, []string{"my-addr", peerAddr},
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
@@ -65,7 +65,7 @@ func logCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMetri
 
 	cache := New(
 		spyMetrics,
-		log.New(ioutil.Discard, "", 0),
+		log.New(io.Discard, "", 0),
 		WithAddr("127.0.0.1:0"),
 		WithClustered(0, []string{"my-addr", peerAddr},
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -416,7 +416,7 @@ var _ = Describe("LogCache", func() {
 
 		cache := New(
 			spyMetrics,
-			log.New(ioutil.Discard, "", 0),
+			log.New(io.Discard, "", 0),
 			WithAddr("127.0.0.1:0"),
 			WithClustered(0, []string{"my-addr", peerAddr},
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
