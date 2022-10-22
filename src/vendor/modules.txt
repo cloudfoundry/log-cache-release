@@ -1,14 +1,14 @@
-# code.cloudfoundry.org/go-batching v0.0.0-20171020220229-924d2a9b48ac
-## explicit
+# code.cloudfoundry.org/go-batching v0.0.0-20220601181205-303abfc14b83
+## explicit; go 1.18
 code.cloudfoundry.org/go-batching
-# code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee
-## explicit
+# code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655
+## explicit; go 1.18
 code.cloudfoundry.org/go-diodes
 # code.cloudfoundry.org/go-envstruct v1.5.0
 ## explicit; go 1.12
 code.cloudfoundry.org/go-envstruct
-# code.cloudfoundry.org/go-log-cache v1.0.1-0.20211123204853-93b7f0836b81
-## explicit; go 1.14
+# code.cloudfoundry.org/go-log-cache v1.0.1-0.20221018060643-5866ce9a4570
+## explicit; go 1.18
 code.cloudfoundry.org/go-log-cache
 code.cloudfoundry.org/go-log-cache/internal
 code.cloudfoundry.org/go-log-cache/rpc/logcache_v1
@@ -16,6 +16,9 @@ code.cloudfoundry.org/go-log-cache/rpc/logcache_v1
 ## explicit; go 1.12
 code.cloudfoundry.org/go-loggregator/v8
 code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2
+# code.cloudfoundry.org/go-loggregator/v9 v9.0.3
+## explicit; go 1.18
+code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2
 # code.cloudfoundry.org/go-metric-registry v0.0.0-20220408214155-d9c3faa1e9e3
 ## explicit; go 1.18
 code.cloudfoundry.org/go-metric-registry
@@ -23,8 +26,8 @@ code.cloudfoundry.org/go-metric-registry/testhelpers
 # code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a
 ## explicit
 code.cloudfoundry.org/rfc5424
-# code.cloudfoundry.org/tlsconfig v0.0.0-20211123175040-23cc9f05b6b3
-## explicit; go 1.16
+# code.cloudfoundry.org/tlsconfig v0.0.0-20220621140725-0e6fbd869921
+## explicit; go 1.17
 code.cloudfoundry.org/tlsconfig
 code.cloudfoundry.org/tlsconfig/certtest
 # github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
@@ -56,8 +59,8 @@ github.com/cespare/xxhash/v2
 ## explicit; go 1.18
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows
-# github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
-## explicit
+# github.com/dvsekhvalnov/jose2go v1.5.1-0.20211102184025-feb89cf56911
+## explicit; go 1.15
 github.com/dvsekhvalnov/jose2go
 github.com/dvsekhvalnov/jose2go/aes
 github.com/dvsekhvalnov/jose2go/arrays
@@ -75,8 +78,8 @@ github.com/emirpasic/gods/containers
 github.com/emirpasic/gods/trees
 github.com/emirpasic/gods/trees/avltree
 github.com/emirpasic/gods/utils
-# github.com/fsnotify/fsnotify v1.4.9
-## explicit; go 1.13
+# github.com/fsnotify/fsnotify v1.6.0
+## explicit; go 1.16
 github.com/fsnotify/fsnotify
 # github.com/go-kit/kit v0.9.0
 ## explicit
@@ -120,7 +123,7 @@ github.com/gorilla/mux
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
 github.com/grpc-ecosystem/grpc-gateway/v2/runtime
 github.com/grpc-ecosystem/grpc-gateway/v2/utilities
-# github.com/influxdata/go-syslog/v3 v3.0.1-0.20201006113939-efe45e3cff92
+# github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
 ## explicit; go 1.13
 github.com/influxdata/go-syslog/v3
 github.com/influxdata/go-syslog/v3/common
@@ -261,7 +264,7 @@ github.com/tklauser/numcpus
 # github.com/yusufpapurcu/wmi v1.2.2
 ## explicit; go 1.16
 github.com/yusufpapurcu/wmi
-# golang.org/x/net v0.0.0-20220909164309-bea034e7d591
+# golang.org/x/net v0.1.0
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/html
@@ -276,12 +279,12 @@ golang.org/x/net/trace
 # golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 ## explicit
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10
+# golang.org/x/sys v0.1.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.3.8
+# golang.org/x/text v0.4.0
 ## explicit; go 1.17
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
@@ -303,11 +306,11 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.1.12
+# golang.org/x/tools v0.2.0
 ## explicit; go 1.18
 golang.org/x/tools/go/ast/inspector
 golang.org/x/tools/internal/typeparams
-# google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a
+# google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody

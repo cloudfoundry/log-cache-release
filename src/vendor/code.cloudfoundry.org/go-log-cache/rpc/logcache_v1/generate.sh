@@ -21,7 +21,7 @@ trap "rm -rf $tmp_dir" EXIT
 git clone --depth 1 https://github.com/googleapis/googleapis.git $tmp_dir/googleapis
 git clone --depth 1 https://github.com/cloudfoundry/loggregator-api $tmp_dir/loggregator-api
 
-OUT_PATH=Mapi/v1/ingress.proto=/logcache_v1,Mapi/v1/egress.proto=/logcache_v1,Mapi/v1/orchestration.proto=/logcache_v1,Mapi/v1/promql.proto=/logcache_v1,Mv2/envelope.proto=code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2:..
+OUT_PATH=Mapi/v1/ingress.proto=/logcache_v1,Mapi/v1/egress.proto=/logcache_v1,Mapi/v1/orchestration.proto=/logcache_v1,Mapi/v1/promql.proto=/logcache_v1,Mv2/envelope.proto=code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2:..
 
 protoc \
   api/v1/ingress.proto \
