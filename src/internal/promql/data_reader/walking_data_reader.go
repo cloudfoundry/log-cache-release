@@ -6,7 +6,7 @@ import (
 
 	client "code.cloudfoundry.org/go-log-cache"
 	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
-	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 )
 
 type WalkingDataReader struct {
