@@ -15,6 +15,8 @@ import (
 )
 
 type SpyAgent struct {
+	loggregator_v2.UnimplementedIngressServer
+
 	mu        sync.Mutex
 	envelopes []*loggregator_v2.Envelope
 	tlsConfig *tls.Config
