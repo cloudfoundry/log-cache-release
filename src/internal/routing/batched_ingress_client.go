@@ -9,7 +9,7 @@ import (
 	batching "code.cloudfoundry.org/go-batching"
 	diodes "code.cloudfoundry.org/go-diodes"
 	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
-	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
