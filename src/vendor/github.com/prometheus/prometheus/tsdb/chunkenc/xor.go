@@ -14,7 +14,7 @@
 // The code in this file was largely written by Damian Gryski as part of
 // https://github.com/dgryski/go-tsz and published under the license below.
 // It was modified to accommodate reading from byte slices without modifying
-// the underlying bytes, which would panic when reading from mmaped
+// the underlying bytes, which would panic when reading from mmap'd
 // read-only byte slices.
 
 // Copyright (c) 2015,2016 Damian Gryski <damian@gryski.com>
@@ -49,6 +49,10 @@ import (
 	"math/bits"
 )
 
+const (
+	chunkCompactCapacityThreshold = 32
+)
+
 // XORChunk holds XOR encoded sample data.
 type XORChunk struct {
 	b bstream
@@ -73,6 +77,14 @@ func (c *XORChunk) Bytes() []byte {
 // NumSamples returns the number of samples in the chunk.
 func (c *XORChunk) NumSamples() int {
 	return int(binary.BigEndian.Uint16(c.Bytes()))
+}
+
+func (c *XORChunk) Compact() {
+	if l := len(c.b.stream); cap(c.b.stream) > l+chunkCompactCapacityThreshold {
+		buf := make([]byte, l)
+		copy(buf, c.b.stream)
+		c.b.stream = buf
+	}
 }
 
 // Appender implements the Chunk interface.
@@ -115,6 +127,7 @@ func (c *XORChunk) iterator(it Iterator) *xorIterator {
 		// We skip that for actual samples.
 		br:       newBReader(c.b.bytes()[2:]),
 		numTotal: binary.BigEndian.Uint16(c.b.bytes()),
+		t:        math.MinInt64,
 	}
 }
 
@@ -165,16 +178,16 @@ func (a *xorAppender) Append(t int64, v float64) {
 		case dod == 0:
 			a.b.writeBit(zero)
 		case bitRange(dod, 14):
-			a.b.writeBits(0x02, 2) // '10'
+			a.b.writeBits(0b10, 2)
 			a.b.writeBits(uint64(dod), 14)
 		case bitRange(dod, 17):
-			a.b.writeBits(0x06, 3) // '110'
+			a.b.writeBits(0b110, 3)
 			a.b.writeBits(uint64(dod), 17)
 		case bitRange(dod, 20):
-			a.b.writeBits(0x0e, 4) // '1110'
+			a.b.writeBits(0b1110, 4)
 			a.b.writeBits(uint64(dod), 20)
 		default:
-			a.b.writeBits(0x0f, 4) // '1111'
+			a.b.writeBits(0b1111, 4)
 			a.b.writeBits(uint64(dod), 64)
 		}
 
@@ -187,6 +200,8 @@ func (a *xorAppender) Append(t int64, v float64) {
 	a.tDelta = tDelta
 }
 
+// bitRange returns whether the given integer can be represented by nbits.
+// See docs/bstream.md.
 func bitRange(x int64, nbits uint8) bool {
 	return -((1<<(nbits-1))-1) <= x && x <= 1<<(nbits-1)
 }
@@ -227,7 +242,7 @@ func (a *xorAppender) writeVDelta(v float64) {
 }
 
 type xorIterator struct {
-	br       bstream
+	br       bstreamReader
 	numTotal uint16
 	numRead  uint16
 
@@ -239,6 +254,19 @@ type xorIterator struct {
 
 	tDelta uint64
 	err    error
+}
+
+func (it *xorIterator) Seek(t int64) bool {
+	if it.err != nil {
+		return false
+	}
+
+	for t > it.t || it.numRead == 0 {
+		if !it.Next() {
+			return false
+		}
+	}
+	return true
 }
 
 func (it *xorIterator) At() (int64, float64) {
@@ -302,7 +330,10 @@ func (it *xorIterator) Next() bool {
 	// read delta-of-delta
 	for i := 0; i < 4; i++ {
 		d <<= 1
-		bit, err := it.br.readBit()
+		bit, err := it.br.readBitFast()
+		if err != nil {
+			bit, err = it.br.readBit()
+		}
 		if err != nil {
 			it.err = err
 			return false
@@ -315,15 +346,16 @@ func (it *xorIterator) Next() bool {
 	var sz uint8
 	var dod int64
 	switch d {
-	case 0x00:
+	case 0b0:
 		// dod == 0
-	case 0x02:
+	case 0b10:
 		sz = 14
-	case 0x06:
+	case 0b110:
 		sz = 17
-	case 0x0e:
+	case 0b1110:
 		sz = 20
-	case 0x0f:
+	case 0b1111:
+		// Do not use fast because it's very unlikely it will succeed.
 		bits, err := it.br.readBits(64)
 		if err != nil {
 			it.err = err
@@ -334,14 +366,19 @@ func (it *xorIterator) Next() bool {
 	}
 
 	if sz != 0 {
-		bits, err := it.br.readBits(int(sz))
+		bits, err := it.br.readBitsFast(sz)
+		if err != nil {
+			bits, err = it.br.readBits(sz)
+		}
 		if err != nil {
 			it.err = err
 			return false
 		}
+
+		// Account for negative numbers, which come back as high unsigned numbers.
+		// See docs/bstream.md.
 		if bits > (1 << (sz - 1)) {
-			// or something
-			bits = bits - (1 << sz)
+			bits -= 1 << sz
 		}
 		dod = int64(bits)
 	}
@@ -353,7 +390,10 @@ func (it *xorIterator) Next() bool {
 }
 
 func (it *xorIterator) readValue() bool {
-	bit, err := it.br.readBit()
+	bit, err := it.br.readBitFast()
+	if err != nil {
+		bit, err = it.br.readBit()
+	}
 	if err != nil {
 		it.err = err
 		return false
@@ -362,7 +402,10 @@ func (it *xorIterator) readValue() bool {
 	if bit == zero {
 		// it.val = it.val
 	} else {
-		bit, err := it.br.readBit()
+		bit, err := it.br.readBitFast()
+		if err != nil {
+			bit, err = it.br.readBit()
+		}
 		if err != nil {
 			it.err = err
 			return false
@@ -371,14 +414,20 @@ func (it *xorIterator) readValue() bool {
 			// reuse leading/trailing zero bits
 			// it.leading, it.trailing = it.leading, it.trailing
 		} else {
-			bits, err := it.br.readBits(5)
+			bits, err := it.br.readBitsFast(5)
+			if err != nil {
+				bits, err = it.br.readBits(5)
+			}
 			if err != nil {
 				it.err = err
 				return false
 			}
 			it.leading = uint8(bits)
 
-			bits, err = it.br.readBits(6)
+			bits, err = it.br.readBitsFast(6)
+			if err != nil {
+				bits, err = it.br.readBits(6)
+			}
 			if err != nil {
 				it.err = err
 				return false
@@ -391,14 +440,17 @@ func (it *xorIterator) readValue() bool {
 			it.trailing = 64 - it.leading - mbits
 		}
 
-		mbits := int(64 - it.leading - it.trailing)
-		bits, err := it.br.readBits(mbits)
+		mbits := 64 - it.leading - it.trailing
+		bits, err := it.br.readBitsFast(mbits)
+		if err != nil {
+			bits, err = it.br.readBits(mbits)
+		}
 		if err != nil {
 			it.err = err
 			return false
 		}
 		vbits := math.Float64bits(it.val)
-		vbits ^= (bits << it.trailing)
+		vbits ^= bits << it.trailing
 		it.val = math.Float64frombits(vbits)
 	}
 

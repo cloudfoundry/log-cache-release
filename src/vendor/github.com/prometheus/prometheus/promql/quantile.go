@@ -17,7 +17,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/prometheus/prometheus/model/labels"
 )
 
 // Helpers to calculate quantiles.
@@ -61,14 +61,21 @@ type metricWithBuckets struct {
 // happening during evaluations of AST functions, we should report those
 // explicitly):
 //
+// If 'buckets' has 0 observations, NaN is returned.
+//
 // If 'buckets' has fewer than 2 elements, NaN is returned.
 //
 // If the highest bucket is not +Inf, NaN is returned.
+//
+// If q==NaN, NaN is returned.
 //
 // If q<0, -Inf is returned.
 //
 // If q>1, +Inf is returned.
 func bucketQuantile(q float64, buckets buckets) float64 {
+	if math.IsNaN(q) {
+		return math.NaN()
+	}
 	if q < 0 {
 		return math.Inf(-1)
 	}
@@ -86,8 +93,11 @@ func bucketQuantile(q float64, buckets buckets) float64 {
 	if len(buckets) < 2 {
 		return math.NaN()
 	}
-
-	rank := q * buckets[len(buckets)-1].count
+	observations := buckets[len(buckets)-1].count
+	if observations == 0 {
+		return math.NaN()
+	}
+	rank := q * observations
 	b := sort.Search(len(buckets)-1, func(i int) bool { return buckets[i].count >= rank })
 
 	if b == len(buckets)-1 {
@@ -163,7 +173,7 @@ func coalesceBuckets(buckets buckets) buckets {
 
 func ensureMonotonic(buckets buckets) {
 	max := buckets[0].count
-	for i := range buckets[1:] {
+	for i := 1; i < len(buckets); i++ {
 		switch {
 		case buckets[i].count > max:
 			max = buckets[i].count
@@ -177,10 +187,11 @@ func ensureMonotonic(buckets buckets) {
 //
 // The Vector will be sorted.
 // If 'values' has zero elements, NaN is returned.
+// If q==NaN, NaN is returned.
 // If q<0, -Inf is returned.
 // If q>1, +Inf is returned.
 func quantile(q float64, values vectorByValueHeap) float64 {
-	if len(values) == 0 {
+	if len(values) == 0 || math.IsNaN(q) {
 		return math.NaN()
 	}
 	if q < 0 {

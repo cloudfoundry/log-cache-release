@@ -15,292 +15,737 @@ package tsdb
 
 import (
 	"fmt"
+	"io"
 	"math"
-	"runtime"
-	"sort"
-	"strings"
+	"path/filepath"
 	"sync"
-	"sync/atomic"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/oklog/ulid"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/atomic"
+
+	"github.com/prometheus/prometheus/config"
+	"github.com/prometheus/prometheus/model/exemplar"
+	"github.com/prometheus/prometheus/model/labels"
+	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/tsdb/chunkenc"
 	"github.com/prometheus/prometheus/tsdb/chunks"
-	"github.com/prometheus/prometheus/tsdb/encoding"
+	tsdb_errors "github.com/prometheus/prometheus/tsdb/errors"
 	"github.com/prometheus/prometheus/tsdb/index"
-	"github.com/prometheus/prometheus/tsdb/labels"
 	"github.com/prometheus/prometheus/tsdb/record"
 	"github.com/prometheus/prometheus/tsdb/tombstones"
+	"github.com/prometheus/prometheus/tsdb/tsdbutil"
 	"github.com/prometheus/prometheus/tsdb/wal"
 )
 
 var (
-	// ErrNotFound is returned if a looked up resource was not found.
-	ErrNotFound = errors.Errorf("not found")
+	// ErrInvalidSample is returned if an appended sample is not valid and can't
+	// be ingested.
+	ErrInvalidSample = errors.New("invalid sample")
+	// ErrInvalidExemplar is returned if an appended exemplar is not valid and can't
+	// be ingested.
+	ErrInvalidExemplar = errors.New("invalid exemplar")
+	// ErrAppenderClosed is returned if an appender has already be successfully
+	// rolled back or committed.
+	ErrAppenderClosed = errors.New("appender closed")
 
-	// ErrOutOfOrderSample is returned if an appended sample has a
-	// timestamp smaller than the most recent sample.
-	ErrOutOfOrderSample = errors.New("out of order sample")
-
-	// ErrAmendSample is returned if an appended sample has the same timestamp
-	// as the most recent sample but a different value.
-	ErrAmendSample = errors.New("amending sample")
-
-	// ErrOutOfBounds is returned if an appended sample is out of the
-	// writable time range.
-	ErrOutOfBounds = errors.New("out of bounds")
-
-	// emptyTombstoneReader is a no-op Tombstone Reader.
-	// This is used by head to satisfy the Tombstones() function call.
-	emptyTombstoneReader = tombstones.NewMemTombstones()
+	// defaultIsolationDisabled is true if isolation is disabled by default.
+	defaultIsolationDisabled = false
 )
 
 // Head handles reads and writes of time series data within a time window.
 type Head struct {
-	// Keep all 64bit atomically accessed variables at the top of this struct.
-	// See https://golang.org/pkg/sync/atomic/#pkg-note-BUG for more info.
-	chunkRange       int64
-	numSeries        uint64
-	minTime, maxTime int64 // Current min and max of the samples included in the head.
-	minValidTime     int64 // Mint allowed to be added to the head. It shouldn't be lower than the maxt of the last persisted block.
-	lastSeriesID     uint64
+	chunkRange               atomic.Int64
+	numSeries                atomic.Uint64
+	minTime, maxTime         atomic.Int64 // Current min and max of the samples included in the head.
+	minValidTime             atomic.Int64 // Mint allowed to be added to the head. It shouldn't be lower than the maxt of the last persisted block.
+	lastWALTruncationTime    atomic.Int64
+	lastMemoryTruncationTime atomic.Int64
+	lastSeriesID             atomic.Uint64
 
-	metrics    *headMetrics
-	wal        *wal.WAL
-	logger     log.Logger
-	appendPool sync.Pool
-	seriesPool sync.Pool
-	bytesPool  sync.Pool
+	metrics         *headMetrics
+	opts            *HeadOptions
+	wal             *wal.WAL
+	exemplarMetrics *ExemplarMetrics
+	exemplars       ExemplarStorage
+	logger          log.Logger
+	appendPool      sync.Pool
+	exemplarsPool   sync.Pool
+	seriesPool      sync.Pool
+	bytesPool       sync.Pool
+	memChunkPool    sync.Pool
 
 	// All series addressable by their ID or hash.
 	series *stripeSeries
 
-	symMtx  sync.RWMutex
-	symbols map[string]struct{}
-	values  map[string]stringset // label names to possible values
-
 	deletedMtx sync.Mutex
-	deleted    map[uint64]int // Deleted series, and what WAL segment they must be kept until.
+	deleted    map[chunks.HeadSeriesRef]int // Deleted series, and what WAL segment they must be kept until.
 
-	postings *index.MemPostings // postings lists for terms
+	postings *index.MemPostings // Postings lists for terms.
+
+	tombstones *tombstones.MemTombstones
+
+	iso *isolation
+
+	cardinalityMutex      sync.Mutex
+	cardinalityCache      *index.PostingsStats // Posting stats cache which will expire after 30sec.
+	lastPostingsStatsCall time.Duration        // Last posting stats call (PostingsCardinalityStats()) time for caching.
+
+	// chunkDiskMapper is used to write and read Head chunks to/from disk.
+	chunkDiskMapper *chunks.ChunkDiskMapper
+
+	chunkSnapshotMtx sync.Mutex
+
+	closedMtx sync.Mutex
+	closed    bool
+
+	stats *HeadStats
+	reg   prometheus.Registerer
+
+	memTruncationInProcess atomic.Bool
+}
+
+type ExemplarStorage interface {
+	storage.ExemplarQueryable
+	AddExemplar(labels.Labels, exemplar.Exemplar) error
+	ValidateExemplar(labels.Labels, exemplar.Exemplar) error
+	IterateExemplars(f func(seriesLabels labels.Labels, e exemplar.Exemplar) error) error
+}
+
+// HeadOptions are parameters for the Head block.
+type HeadOptions struct {
+	// Runtime reloadable option. At the top of the struct for 32 bit OS:
+	// https://pkg.go.dev/sync/atomic#pkg-note-BUG
+	MaxExemplars atomic.Int64
+
+	ChunkRange int64
+	// ChunkDirRoot is the parent directory of the chunks directory.
+	ChunkDirRoot         string
+	ChunkPool            chunkenc.Pool
+	ChunkWriteBufferSize int
+	ChunkWriteQueueSize  int
+
+	// StripeSize sets the number of entries in the hash map, it must be a power of 2.
+	// A larger StripeSize will allocate more memory up-front, but will increase performance when handling a large number of series.
+	// A smaller StripeSize reduces the memory allocated, but can decrease performance with large number of series.
+	StripeSize                     int
+	SeriesCallback                 SeriesLifecycleCallback
+	EnableExemplarStorage          bool
+	EnableMemorySnapshotOnShutdown bool
+
+	IsolationDisabled bool
+}
+
+func DefaultHeadOptions() *HeadOptions {
+	return &HeadOptions{
+		ChunkRange:           DefaultBlockDuration,
+		ChunkDirRoot:         "",
+		ChunkPool:            chunkenc.NewPool(),
+		ChunkWriteBufferSize: chunks.DefaultWriteBufferSize,
+		ChunkWriteQueueSize:  chunks.DefaultWriteQueueSize,
+		StripeSize:           DefaultStripeSize,
+		SeriesCallback:       &noopSeriesLifecycleCallback{},
+		IsolationDisabled:    defaultIsolationDisabled,
+	}
+}
+
+// SeriesLifecycleCallback specifies a list of callbacks that will be called during a lifecycle of a series.
+// It is always a no-op in Prometheus and mainly meant for external users who import TSDB.
+// All the callbacks should be safe to be called concurrently.
+// It is up to the user to implement soft or hard consistency by making the callbacks
+// atomic or non-atomic. Atomic callbacks can cause degradation performance.
+type SeriesLifecycleCallback interface {
+	// PreCreation is called before creating a series to indicate if the series can be created.
+	// A non nil error means the series should not be created.
+	PreCreation(labels.Labels) error
+	// PostCreation is called after creating a series to indicate a creation of series.
+	PostCreation(labels.Labels)
+	// PostDeletion is called after deletion of series.
+	PostDeletion(...labels.Labels)
+}
+
+// NewHead opens the head block in dir.
+func NewHead(r prometheus.Registerer, l log.Logger, wal *wal.WAL, opts *HeadOptions, stats *HeadStats) (*Head, error) {
+	var err error
+	if l == nil {
+		l = log.NewNopLogger()
+	}
+	if opts.ChunkRange < 1 {
+		return nil, errors.Errorf("invalid chunk range %d", opts.ChunkRange)
+	}
+	if opts.SeriesCallback == nil {
+		opts.SeriesCallback = &noopSeriesLifecycleCallback{}
+	}
+
+	if stats == nil {
+		stats = NewHeadStats()
+	}
+
+	if !opts.EnableExemplarStorage {
+		opts.MaxExemplars.Store(0)
+	}
+
+	h := &Head{
+		wal:    wal,
+		logger: l,
+		opts:   opts,
+		memChunkPool: sync.Pool{
+			New: func() interface{} {
+				return &memChunk{}
+			},
+		},
+		stats: stats,
+		reg:   r,
+	}
+	if err := h.resetInMemoryState(); err != nil {
+		return nil, err
+	}
+	h.metrics = newHeadMetrics(h, r)
+
+	if opts.ChunkPool == nil {
+		opts.ChunkPool = chunkenc.NewPool()
+	}
+
+	h.chunkDiskMapper, err = chunks.NewChunkDiskMapper(
+		r,
+		mmappedChunksDir(opts.ChunkDirRoot),
+		opts.ChunkPool,
+		opts.ChunkWriteBufferSize,
+		opts.ChunkWriteQueueSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return h, nil
+}
+
+func (h *Head) resetInMemoryState() error {
+	var err error
+	var em *ExemplarMetrics
+	if h.exemplars != nil {
+		ce, ok := h.exemplars.(*CircularExemplarStorage)
+		if ok {
+			em = ce.metrics
+		}
+	}
+	if em == nil {
+		em = NewExemplarMetrics(h.reg)
+	}
+	es, err := NewCircularExemplarStorage(h.opts.MaxExemplars.Load(), em)
+	if err != nil {
+		return err
+	}
+
+	h.iso = newIsolation(h.opts.IsolationDisabled)
+
+	h.exemplarMetrics = em
+	h.exemplars = es
+	h.series = newStripeSeries(h.opts.StripeSize, h.opts.SeriesCallback)
+	h.postings = index.NewUnorderedMemPostings()
+	h.tombstones = tombstones.NewMemTombstones()
+	h.deleted = map[chunks.HeadSeriesRef]int{}
+	h.chunkRange.Store(h.opts.ChunkRange)
+	h.minTime.Store(math.MaxInt64)
+	h.maxTime.Store(math.MinInt64)
+	h.lastWALTruncationTime.Store(math.MinInt64)
+	h.lastMemoryTruncationTime.Store(math.MinInt64)
+	return nil
 }
 
 type headMetrics struct {
-	activeAppenders         prometheus.Gauge
-	series                  prometheus.GaugeFunc
-	seriesCreated           prometheus.Counter
-	seriesRemoved           prometheus.Counter
-	seriesNotFound          prometheus.Counter
-	chunks                  prometheus.Gauge
-	chunksCreated           prometheus.Counter
-	chunksRemoved           prometheus.Counter
-	gcDuration              prometheus.Summary
-	minTime                 prometheus.GaugeFunc
-	maxTime                 prometheus.GaugeFunc
-	samplesAppended         prometheus.Counter
-	walTruncateDuration     prometheus.Summary
-	walCorruptionsTotal     prometheus.Counter
-	headTruncateFail        prometheus.Counter
-	headTruncateTotal       prometheus.Counter
-	checkpointDeleteFail    prometheus.Counter
-	checkpointDeleteTotal   prometheus.Counter
-	checkpointCreationFail  prometheus.Counter
-	checkpointCreationTotal prometheus.Counter
+	activeAppenders          prometheus.Gauge
+	series                   prometheus.GaugeFunc
+	seriesCreated            prometheus.Counter
+	seriesRemoved            prometheus.Counter
+	seriesNotFound           prometheus.Counter
+	chunks                   prometheus.Gauge
+	chunksCreated            prometheus.Counter
+	chunksRemoved            prometheus.Counter
+	gcDuration               prometheus.Summary
+	samplesAppended          prometheus.Counter
+	outOfBoundSamples        prometheus.Counter
+	outOfOrderSamples        prometheus.Counter
+	walTruncateDuration      prometheus.Summary
+	walCorruptionsTotal      prometheus.Counter
+	walTotalReplayDuration   prometheus.Gauge
+	headTruncateFail         prometheus.Counter
+	headTruncateTotal        prometheus.Counter
+	checkpointDeleteFail     prometheus.Counter
+	checkpointDeleteTotal    prometheus.Counter
+	checkpointCreationFail   prometheus.Counter
+	checkpointCreationTotal  prometheus.Counter
+	mmapChunkCorruptionTotal prometheus.Counter
+	snapshotReplayErrorTotal prometheus.Counter // Will be either 0 or 1.
 }
 
 func newHeadMetrics(h *Head, r prometheus.Registerer) *headMetrics {
-	m := &headMetrics{}
-
-	m.activeAppenders = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "prometheus_tsdb_head_active_appenders",
-		Help: "Number of currently active appender transactions",
-	})
-	m.series = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Name: "prometheus_tsdb_head_series",
-		Help: "Total number of series in the head block.",
-	}, func() float64 {
-		return float64(h.NumSeries())
-	})
-	m.seriesCreated = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_series_created_total",
-		Help: "Total number of series created in the head",
-	})
-	m.seriesRemoved = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_series_removed_total",
-		Help: "Total number of series removed in the head",
-	})
-	m.seriesNotFound = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_series_not_found_total",
-		Help: "Total number of requests for series that were not found.",
-	})
-	m.chunks = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "prometheus_tsdb_head_chunks",
-		Help: "Total number of chunks in the head block.",
-	})
-	m.chunksCreated = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_chunks_created_total",
-		Help: "Total number of chunks created in the head",
-	})
-	m.chunksRemoved = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_chunks_removed_total",
-		Help: "Total number of chunks removed in the head",
-	})
-	m.gcDuration = prometheus.NewSummary(prometheus.SummaryOpts{
-		Name:       "prometheus_tsdb_head_gc_duration_seconds",
-		Help:       "Runtime of garbage collection in the head block.",
-		Objectives: map[float64]float64{},
-	})
-	m.maxTime = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Name: "prometheus_tsdb_head_max_time",
-		Help: "Maximum timestamp of the head block. The unit is decided by the library consumer.",
-	}, func() float64 {
-		return float64(h.MaxTime())
-	})
-	m.minTime = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Name: "prometheus_tsdb_head_min_time",
-		Help: "Minimum time bound of the head block. The unit is decided by the library consumer.",
-	}, func() float64 {
-		return float64(h.MinTime())
-	})
-	m.walTruncateDuration = prometheus.NewSummary(prometheus.SummaryOpts{
-		Name:       "prometheus_tsdb_wal_truncate_duration_seconds",
-		Help:       "Duration of WAL truncation.",
-		Objectives: map[float64]float64{},
-	})
-	m.walCorruptionsTotal = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_wal_corruptions_total",
-		Help: "Total number of WAL corruptions.",
-	})
-	m.samplesAppended = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_samples_appended_total",
-		Help: "Total number of appended samples.",
-	})
-	m.headTruncateFail = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_truncations_failed_total",
-		Help: "Total number of head truncations that failed.",
-	})
-	m.headTruncateTotal = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_head_truncations_total",
-		Help: "Total number of head truncations attempted.",
-	})
-	m.checkpointDeleteFail = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_checkpoint_deletions_failed_total",
-		Help: "Total number of checkpoint deletions that failed.",
-	})
-	m.checkpointDeleteTotal = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_checkpoint_deletions_total",
-		Help: "Total number of checkpoint deletions attempted.",
-	})
-	m.checkpointCreationFail = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_checkpoint_creations_failed_total",
-		Help: "Total number of checkpoint creations that failed.",
-	})
-	m.checkpointCreationTotal = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "prometheus_tsdb_checkpoint_creations_total",
-		Help: "Total number of checkpoint creations attempted.",
-	})
+	m := &headMetrics{
+		activeAppenders: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "prometheus_tsdb_head_active_appenders",
+			Help: "Number of currently active appender transactions",
+		}),
+		series: prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+			Name: "prometheus_tsdb_head_series",
+			Help: "Total number of series in the head block.",
+		}, func() float64 {
+			return float64(h.NumSeries())
+		}),
+		seriesCreated: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_series_created_total",
+			Help: "Total number of series created in the head",
+		}),
+		seriesRemoved: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_series_removed_total",
+			Help: "Total number of series removed in the head",
+		}),
+		seriesNotFound: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_series_not_found_total",
+			Help: "Total number of requests for series that were not found.",
+		}),
+		chunks: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "prometheus_tsdb_head_chunks",
+			Help: "Total number of chunks in the head block.",
+		}),
+		chunksCreated: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_chunks_created_total",
+			Help: "Total number of chunks created in the head",
+		}),
+		chunksRemoved: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_chunks_removed_total",
+			Help: "Total number of chunks removed in the head",
+		}),
+		gcDuration: prometheus.NewSummary(prometheus.SummaryOpts{
+			Name: "prometheus_tsdb_head_gc_duration_seconds",
+			Help: "Runtime of garbage collection in the head block.",
+		}),
+		walTruncateDuration: prometheus.NewSummary(prometheus.SummaryOpts{
+			Name: "prometheus_tsdb_wal_truncate_duration_seconds",
+			Help: "Duration of WAL truncation.",
+		}),
+		walCorruptionsTotal: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_wal_corruptions_total",
+			Help: "Total number of WAL corruptions.",
+		}),
+		walTotalReplayDuration: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "prometheus_tsdb_data_replay_duration_seconds",
+			Help: "Time taken to replay the data on disk.",
+		}),
+		samplesAppended: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_samples_appended_total",
+			Help: "Total number of appended samples.",
+		}),
+		outOfBoundSamples: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_out_of_bound_samples_total",
+			Help: "Total number of out of bound samples ingestion failed attempts.",
+		}),
+		outOfOrderSamples: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_out_of_order_samples_total",
+			Help: "Total number of out of order samples ingestion failed attempts.",
+		}),
+		headTruncateFail: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_truncations_failed_total",
+			Help: "Total number of head truncations that failed.",
+		}),
+		headTruncateTotal: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_head_truncations_total",
+			Help: "Total number of head truncations attempted.",
+		}),
+		checkpointDeleteFail: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_checkpoint_deletions_failed_total",
+			Help: "Total number of checkpoint deletions that failed.",
+		}),
+		checkpointDeleteTotal: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_checkpoint_deletions_total",
+			Help: "Total number of checkpoint deletions attempted.",
+		}),
+		checkpointCreationFail: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_checkpoint_creations_failed_total",
+			Help: "Total number of checkpoint creations that failed.",
+		}),
+		checkpointCreationTotal: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_checkpoint_creations_total",
+			Help: "Total number of checkpoint creations attempted.",
+		}),
+		mmapChunkCorruptionTotal: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_mmap_chunk_corruptions_total",
+			Help: "Total number of memory-mapped chunk corruptions.",
+		}),
+		snapshotReplayErrorTotal: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "prometheus_tsdb_snapshot_replay_error_total",
+			Help: "Total number snapshot replays that failed.",
+		}),
+	}
 
 	if r != nil {
 		r.MustRegister(
 			m.activeAppenders,
+			m.series,
 			m.chunks,
 			m.chunksCreated,
 			m.chunksRemoved,
-			m.series,
 			m.seriesCreated,
 			m.seriesRemoved,
 			m.seriesNotFound,
-			m.minTime,
-			m.maxTime,
 			m.gcDuration,
 			m.walTruncateDuration,
 			m.walCorruptionsTotal,
+			m.walTotalReplayDuration,
 			m.samplesAppended,
+			m.outOfBoundSamples,
+			m.outOfOrderSamples,
 			m.headTruncateFail,
 			m.headTruncateTotal,
 			m.checkpointDeleteFail,
 			m.checkpointDeleteTotal,
 			m.checkpointCreationFail,
 			m.checkpointCreationTotal,
+			m.mmapChunkCorruptionTotal,
+			m.snapshotReplayErrorTotal,
+			// Metrics bound to functions and not needed in tests
+			// can be created and registered on the spot.
+			prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name: "prometheus_tsdb_head_max_time",
+				Help: "Maximum timestamp of the head block. The unit is decided by the library consumer.",
+			}, func() float64 {
+				return float64(h.MaxTime())
+			}),
+			prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name: "prometheus_tsdb_head_min_time",
+				Help: "Minimum time bound of the head block. The unit is decided by the library consumer.",
+			}, func() float64 {
+				return float64(h.MinTime())
+			}),
+			prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name: "prometheus_tsdb_isolation_low_watermark",
+				Help: "The lowest TSDB append ID that is still referenced.",
+			}, func() float64 {
+				return float64(h.iso.lowWatermark())
+			}),
+			prometheus.NewGaugeFunc(prometheus.GaugeOpts{
+				Name: "prometheus_tsdb_isolation_high_watermark",
+				Help: "The highest TSDB append ID that has been given out.",
+			}, func() float64 {
+				return float64(h.iso.lastAppendID())
+			}),
 		)
 	}
 	return m
 }
 
-// NewHead opens the head block in dir.
-func NewHead(r prometheus.Registerer, l log.Logger, wal *wal.WAL, chunkRange int64) (*Head, error) {
-	if l == nil {
-		l = log.NewNopLogger()
-	}
-	if chunkRange < 1 {
-		return nil, errors.Errorf("invalid chunk range %d", chunkRange)
-	}
-	h := &Head{
-		wal:        wal,
-		logger:     l,
-		chunkRange: chunkRange,
-		minTime:    math.MaxInt64,
-		maxTime:    math.MinInt64,
-		series:     newStripeSeries(),
-		values:     map[string]stringset{},
-		symbols:    map[string]struct{}{},
-		postings:   index.NewUnorderedMemPostings(),
-		deleted:    map[uint64]int{},
-	}
-	h.metrics = newHeadMetrics(h, r)
+func mmappedChunksDir(dir string) string { return filepath.Join(dir, "chunks_head") }
 
-	return h, nil
+// HeadStats are the statistics for the head component of the DB.
+type HeadStats struct {
+	WALReplayStatus *WALReplayStatus
 }
 
-// processWALSamples adds a partition of samples it receives to the head and passes
-// them on to other workers.
-// Samples before the mint timestamp are discarded.
-func (h *Head) processWALSamples(
-	minValidTime int64,
-	input <-chan []record.RefSample, output chan<- []record.RefSample,
-) (unknownRefs uint64) {
-	defer close(output)
+// NewHeadStats returns a new HeadStats object.
+func NewHeadStats() *HeadStats {
+	return &HeadStats{
+		WALReplayStatus: &WALReplayStatus{},
+	}
+}
 
-	// Mitigate lock contention in getByID.
-	refSeries := map[uint64]*memSeries{}
+// WALReplayStatus contains status information about the WAL replay.
+type WALReplayStatus struct {
+	sync.RWMutex
+	Min     int
+	Max     int
+	Current int
+}
 
-	mint, maxt := int64(math.MaxInt64), int64(math.MinInt64)
+// GetWALReplayStatus returns the WAL replay status information.
+func (s *WALReplayStatus) GetWALReplayStatus() WALReplayStatus {
+	s.RLock()
+	defer s.RUnlock()
 
-	for samples := range input {
-		for _, s := range samples {
-			if s.T < minValidTime {
-				continue
-			}
-			ms := refSeries[s.Ref]
-			if ms == nil {
-				ms = h.series.getByID(s.Ref)
-				if ms == nil {
-					unknownRefs++
-					continue
-				}
-				refSeries[s.Ref] = ms
-			}
-			_, chunkCreated := ms.append(s.T, s.V)
-			if chunkCreated {
-				h.metrics.chunksCreated.Inc()
-				h.metrics.chunks.Inc()
-			}
-			if s.T > maxt {
-				maxt = s.T
-			}
-			if s.T < mint {
-				mint = s.T
+	return WALReplayStatus{
+		Min:     s.Min,
+		Max:     s.Max,
+		Current: s.Current,
+	}
+}
+
+const cardinalityCacheExpirationTime = time.Duration(30) * time.Second
+
+// Init loads data from the write ahead log and prepares the head for writes.
+// It should be called before using an appender so that it
+// limits the ingested samples to the head min valid time.
+func (h *Head) Init(minValidTime int64) error {
+	h.minValidTime.Store(minValidTime)
+	defer func() {
+		h.postings.EnsureOrder()
+	}()
+	defer h.gc() // After loading the wal remove the obsolete data from the head.
+	defer func() {
+		// Loading of m-mapped chunks and snapshot can make the mint of the Head
+		// to go below minValidTime.
+		if h.MinTime() < h.minValidTime.Load() {
+			h.minTime.Store(h.minValidTime.Load())
+		}
+	}()
+
+	level.Info(h.logger).Log("msg", "Replaying on-disk memory mappable chunks if any")
+	start := time.Now()
+
+	snapIdx, snapOffset := -1, 0
+	refSeries := make(map[chunks.HeadSeriesRef]*memSeries)
+
+	if h.opts.EnableMemorySnapshotOnShutdown {
+		level.Info(h.logger).Log("msg", "Chunk snapshot is enabled, replaying from the snapshot")
+		var err error
+		snapIdx, snapOffset, refSeries, err = h.loadChunkSnapshot()
+		if err != nil {
+			snapIdx, snapOffset = -1, 0
+			refSeries = make(map[chunks.HeadSeriesRef]*memSeries)
+
+			h.metrics.snapshotReplayErrorTotal.Inc()
+			level.Error(h.logger).Log("msg", "Failed to load chunk snapshot", "err", err)
+			// We clear the partially loaded data to replay fresh from the WAL.
+			if err := h.resetInMemoryState(); err != nil {
+				return err
 			}
 		}
-		output <- samples
+		level.Info(h.logger).Log("msg", "Chunk snapshot loading time", "duration", time.Since(start).String())
 	}
-	h.updateMinMaxTime(mint, maxt)
 
-	return unknownRefs
+	mmapChunkReplayStart := time.Now()
+	mmappedChunks, err := h.loadMmappedChunks(refSeries)
+	if err != nil {
+		level.Error(h.logger).Log("msg", "Loading on-disk chunks failed", "err", err)
+		if _, ok := errors.Cause(err).(*chunks.CorruptionErr); ok {
+			h.metrics.mmapChunkCorruptionTotal.Inc()
+		}
+
+		// Discard snapshot data since we need to replay the WAL for the missed m-map chunks data.
+		snapIdx, snapOffset = -1, 0
+
+		// If this fails, data will be recovered from WAL.
+		// Hence we wont lose any data (given WAL is not corrupt).
+		mmappedChunks, err = h.removeCorruptedMmappedChunks(err)
+		if err != nil {
+			return err
+		}
+	}
+
+	level.Info(h.logger).Log("msg", "On-disk memory mappable chunks replay completed", "duration", time.Since(mmapChunkReplayStart).String())
+	if h.wal == nil {
+		level.Info(h.logger).Log("msg", "WAL not found")
+		return nil
+	}
+
+	level.Info(h.logger).Log("msg", "Replaying WAL, this may take a while")
+
+	checkpointReplayStart := time.Now()
+	// Backfill the checkpoint first if it exists.
+	dir, startFrom, err := wal.LastCheckpoint(h.wal.Dir())
+	if err != nil && err != record.ErrNotFound {
+		return errors.Wrap(err, "find last checkpoint")
+	}
+
+	// Find the last segment.
+	_, endAt, e := wal.Segments(h.wal.Dir())
+	if e != nil {
+		return errors.Wrap(e, "finding WAL segments")
+	}
+
+	h.startWALReplayStatus(startFrom, endAt)
+
+	multiRef := map[chunks.HeadSeriesRef]chunks.HeadSeriesRef{}
+	if err == nil && startFrom >= snapIdx {
+		sr, err := wal.NewSegmentsReader(dir)
+		if err != nil {
+			return errors.Wrap(err, "open checkpoint")
+		}
+		defer func() {
+			if err := sr.Close(); err != nil {
+				level.Warn(h.logger).Log("msg", "Error while closing the wal segments reader", "err", err)
+			}
+		}()
+
+		// A corrupted checkpoint is a hard error for now and requires user
+		// intervention. There's likely little data that can be recovered anyway.
+		if err := h.loadWAL(wal.NewReader(sr), multiRef, mmappedChunks); err != nil {
+			return errors.Wrap(err, "backfill checkpoint")
+		}
+		h.updateWALReplayStatusRead(startFrom)
+		startFrom++
+		level.Info(h.logger).Log("msg", "WAL checkpoint loaded")
+	}
+	checkpointReplayDuration := time.Since(checkpointReplayStart)
+
+	walReplayStart := time.Now()
+
+	if snapIdx > startFrom {
+		startFrom = snapIdx
+	}
+	// Backfill segments from the most recent checkpoint onwards.
+	for i := startFrom; i <= endAt; i++ {
+		s, err := wal.OpenReadSegment(wal.SegmentName(h.wal.Dir(), i))
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("open WAL segment: %d", i))
+		}
+
+		offset := 0
+		if i == snapIdx {
+			offset = snapOffset
+		}
+		sr, err := wal.NewSegmentBufReaderWithOffset(offset, s)
+		if errors.Cause(err) == io.EOF {
+			// File does not exist.
+			continue
+		}
+		if err != nil {
+			return errors.Wrapf(err, "segment reader (offset=%d)", offset)
+		}
+		err = h.loadWAL(wal.NewReader(sr), multiRef, mmappedChunks)
+		if err := sr.Close(); err != nil {
+			level.Warn(h.logger).Log("msg", "Error while closing the wal segments reader", "err", err)
+		}
+		if err != nil {
+			return err
+		}
+		level.Info(h.logger).Log("msg", "WAL segment loaded", "segment", i, "maxSegment", endAt)
+		h.updateWALReplayStatusRead(i)
+	}
+
+	walReplayDuration := time.Since(start)
+	h.metrics.walTotalReplayDuration.Set(walReplayDuration.Seconds())
+	level.Info(h.logger).Log(
+		"msg", "WAL replay completed",
+		"checkpoint_replay_duration", checkpointReplayDuration.String(),
+		"wal_replay_duration", time.Since(walReplayStart).String(),
+		"total_replay_duration", walReplayDuration.String(),
+	)
+
+	return nil
+}
+
+func (h *Head) loadMmappedChunks(refSeries map[chunks.HeadSeriesRef]*memSeries) (map[chunks.HeadSeriesRef][]*mmappedChunk, error) {
+	mmappedChunks := map[chunks.HeadSeriesRef][]*mmappedChunk{}
+	if err := h.chunkDiskMapper.IterateAllChunks(func(seriesRef chunks.HeadSeriesRef, chunkRef chunks.ChunkDiskMapperRef, mint, maxt int64, numSamples uint16) error {
+		if maxt < h.minValidTime.Load() {
+			return nil
+		}
+		ms, ok := refSeries[seriesRef]
+		if !ok {
+			slice := mmappedChunks[seriesRef]
+			if len(slice) > 0 && slice[len(slice)-1].maxTime >= mint {
+				return errors.Errorf("out of sequence m-mapped chunk for series ref %d, last chunk: [%d, %d], new: [%d, %d]",
+					seriesRef, slice[len(slice)-1].minTime, slice[len(slice)-1].maxTime, mint, maxt)
+			}
+			slice = append(slice, &mmappedChunk{
+				ref:        chunkRef,
+				minTime:    mint,
+				maxTime:    maxt,
+				numSamples: numSamples,
+			})
+			mmappedChunks[seriesRef] = slice
+			return nil
+		}
+
+		if len(ms.mmappedChunks) > 0 && ms.mmappedChunks[len(ms.mmappedChunks)-1].maxTime >= mint {
+			return errors.Errorf("out of sequence m-mapped chunk for series ref %d, last chunk: [%d, %d], new: [%d, %d]",
+				seriesRef, ms.mmappedChunks[len(ms.mmappedChunks)-1].minTime, ms.mmappedChunks[len(ms.mmappedChunks)-1].maxTime,
+				mint, maxt)
+		}
+
+		h.metrics.chunks.Inc()
+		h.metrics.chunksCreated.Inc()
+		ms.mmappedChunks = append(ms.mmappedChunks, &mmappedChunk{
+			ref:        chunkRef,
+			minTime:    mint,
+			maxTime:    maxt,
+			numSamples: numSamples,
+		})
+		h.updateMinMaxTime(mint, maxt)
+		if ms.headChunk != nil && maxt >= ms.headChunk.minTime {
+			// The head chunk was completed and was m-mapped after taking the snapshot.
+			// Hence remove this chunk.
+			ms.nextAt = 0
+			ms.headChunk = nil
+			ms.app = nil
+		}
+		return nil
+	}); err != nil {
+		return nil, errors.Wrap(err, "iterate on on-disk chunks")
+	}
+	return mmappedChunks, nil
+}
+
+// removeCorruptedMmappedChunks attempts to delete the corrupted mmapped chunks and if it fails, it clears all the previously
+// loaded mmapped chunks.
+func (h *Head) removeCorruptedMmappedChunks(err error) (map[chunks.HeadSeriesRef][]*mmappedChunk, error) {
+	// We never want to preserve the in-memory series from snapshots if we are repairing m-map chunks.
+	if err := h.resetInMemoryState(); err != nil {
+		return nil, err
+	}
+
+	level.Info(h.logger).Log("msg", "Deleting mmapped chunk files")
+
+	if err := h.chunkDiskMapper.DeleteCorrupted(err); err != nil {
+		level.Info(h.logger).Log("msg", "Deletion of corrupted mmap chunk files failed, discarding chunk files completely", "err", err)
+		if err := h.chunkDiskMapper.Truncate(math.MaxInt64); err != nil {
+			level.Error(h.logger).Log("msg", "Deletion of all mmap chunk files failed", "err", err)
+		}
+		return map[chunks.HeadSeriesRef][]*mmappedChunk{}, nil
+	}
+
+	level.Info(h.logger).Log("msg", "Deletion of mmap chunk files successful, reattempting m-mapping the on-disk chunks")
+	mmappedChunks, err := h.loadMmappedChunks(make(map[chunks.HeadSeriesRef]*memSeries))
+	if err != nil {
+		level.Error(h.logger).Log("msg", "Loading on-disk chunks failed, discarding chunk files completely", "err", err)
+		if err := h.chunkDiskMapper.Truncate(math.MaxInt64); err != nil {
+			level.Error(h.logger).Log("msg", "Deletion of all mmap chunk files failed after failed loading", "err", err)
+		}
+		mmappedChunks = map[chunks.HeadSeriesRef][]*mmappedChunk{}
+	}
+
+	return mmappedChunks, nil
+}
+
+func (h *Head) ApplyConfig(cfg *config.Config) error {
+	if !h.opts.EnableExemplarStorage {
+		return nil
+	}
+
+	// Head uses opts.MaxExemplars in combination with opts.EnableExemplarStorage
+	// to decide if it should pass exemplars along to its exemplar storage, so we
+	// need to update opts.MaxExemplars here.
+	prevSize := h.opts.MaxExemplars.Load()
+	h.opts.MaxExemplars.Store(cfg.StorageConfig.ExemplarsConfig.MaxExemplars)
+	newSize := h.opts.MaxExemplars.Load()
+
+	if prevSize == newSize {
+		return nil
+	}
+
+	migrated := h.exemplars.(*CircularExemplarStorage).Resize(newSize)
+	level.Info(h.logger).Log("msg", "Exemplar storage resized", "from", prevSize, "to", newSize, "migrated", migrated)
+	return nil
+}
+
+// PostingsCardinalityStats returns top 10 highest cardinality stats By label and value names.
+func (h *Head) PostingsCardinalityStats(statsByLabelName string) *index.PostingsStats {
+	h.cardinalityMutex.Lock()
+	defer h.cardinalityMutex.Unlock()
+	currentTime := time.Duration(time.Now().Unix()) * time.Second
+	seconds := currentTime - h.lastPostingsStatsCall
+	if seconds > cardinalityCacheExpirationTime {
+		h.cardinalityCache = nil
+	}
+	if h.cardinalityCache != nil {
+		return h.cardinalityCache
+	}
+	h.cardinalityCache = h.postings.Stats(statsByLabelName)
+	h.lastPostingsStatsCall = time.Duration(time.Now().Unix()) * time.Second
+
+	return h.cardinalityCache
 }
 
 func (h *Head) updateMinMaxTime(mint, maxt int64) {
@@ -309,7 +754,7 @@ func (h *Head) updateMinMaxTime(mint, maxt int64) {
 		if mint >= lt {
 			break
 		}
-		if atomic.CompareAndSwapInt64(&h.minTime, lt, mint) {
+		if h.minTime.CAS(lt, mint) {
 			break
 		}
 	}
@@ -318,271 +763,68 @@ func (h *Head) updateMinMaxTime(mint, maxt int64) {
 		if maxt <= ht {
 			break
 		}
-		if atomic.CompareAndSwapInt64(&h.maxTime, ht, maxt) {
+		if h.maxTime.CAS(ht, maxt) {
 			break
 		}
 	}
 }
 
-func (h *Head) loadWAL(r *wal.Reader, multiRef map[uint64]uint64) (err error) {
-	// Track number of samples that referenced a series we don't know about
-	// for error reporting.
-	var unknownRefs uint64
-
-	// Start workers that each process samples for a partition of the series ID space.
-	// They are connected through a ring of channels which ensures that all sample batches
-	// read from the WAL are processed in order.
-	var (
-		wg           sync.WaitGroup
-		multiRefLock sync.Mutex
-		n            = runtime.GOMAXPROCS(0)
-		inputs       = make([]chan []record.RefSample, n)
-		outputs      = make([]chan []record.RefSample, n)
-	)
-	wg.Add(n)
-
-	defer func() {
-		// For CorruptionErr ensure to terminate all workers before exiting.
-		if _, ok := err.(*wal.CorruptionErr); ok {
-			for i := 0; i < n; i++ {
-				close(inputs[i])
-				for range outputs[i] {
-				}
-			}
-			wg.Wait()
-		}
-	}()
-
-	for i := 0; i < n; i++ {
-		outputs[i] = make(chan []record.RefSample, 300)
-		inputs[i] = make(chan []record.RefSample, 300)
-
-		go func(input <-chan []record.RefSample, output chan<- []record.RefSample) {
-			unknown := h.processWALSamples(h.minValidTime, input, output)
-			atomic.AddUint64(&unknownRefs, unknown)
-			wg.Done()
-		}(inputs[i], outputs[i])
-	}
-
-	var (
-		dec       record.Decoder
-		series    []record.RefSeries
-		samples   []record.RefSample
-		tstones   []tombstones.Stone
-		allStones = tombstones.NewMemTombstones()
-	)
-	defer func() {
-		if err := allStones.Close(); err != nil {
-			level.Warn(h.logger).Log("msg", "closing  memTombstones during wal read", "err", err)
-		}
-	}()
-	for r.Next() {
-		series, samples, tstones = series[:0], samples[:0], tstones[:0]
-		rec := r.Record()
-
-		switch dec.Type(rec) {
-		case record.Series:
-			series, err = dec.Series(rec, series)
-			if err != nil {
-				return &wal.CorruptionErr{
-					Err:     errors.Wrap(err, "decode series"),
-					Segment: r.Segment(),
-					Offset:  r.Offset(),
-				}
-			}
-			for _, s := range series {
-				series, created := h.getOrCreateWithID(s.Ref, s.Labels.Hash(), s.Labels)
-
-				if !created {
-					// There's already a different ref for this series.
-					multiRefLock.Lock()
-					multiRef[s.Ref] = series.ref
-					multiRefLock.Unlock()
-				}
-
-				if h.lastSeriesID < s.Ref {
-					h.lastSeriesID = s.Ref
-				}
-			}
-		case record.Samples:
-			samples, err = dec.Samples(rec, samples)
-			s := samples
-			if err != nil {
-				return &wal.CorruptionErr{
-					Err:     errors.Wrap(err, "decode samples"),
-					Segment: r.Segment(),
-					Offset:  r.Offset(),
-				}
-			}
-			// We split up the samples into chunks of 5000 samples or less.
-			// With O(300 * #cores) in-flight sample batches, large scrapes could otherwise
-			// cause thousands of very large in flight buffers occupying large amounts
-			// of unused memory.
-			for len(samples) > 0 {
-				m := 5000
-				if len(samples) < m {
-					m = len(samples)
-				}
-				shards := make([][]record.RefSample, n)
-				for i := 0; i < n; i++ {
-					var buf []record.RefSample
-					select {
-					case buf = <-outputs[i]:
-					default:
-					}
-					shards[i] = buf[:0]
-				}
-				for _, sam := range samples[:m] {
-					if r, ok := multiRef[sam.Ref]; ok {
-						sam.Ref = r
-					}
-					mod := sam.Ref % uint64(n)
-					shards[mod] = append(shards[mod], sam)
-				}
-				for i := 0; i < n; i++ {
-					inputs[i] <- shards[i]
-				}
-				samples = samples[m:]
-			}
-			samples = s // Keep whole slice for reuse.
-		case record.Tombstones:
-			tstones, err = dec.Tombstones(rec, tstones)
-			if err != nil {
-				return &wal.CorruptionErr{
-					Err:     errors.Wrap(err, "decode tombstones"),
-					Segment: r.Segment(),
-					Offset:  r.Offset(),
-				}
-			}
-			for _, s := range tstones {
-				for _, itv := range s.Intervals {
-					if itv.Maxt < h.minValidTime {
-						continue
-					}
-					if m := h.series.getByID(s.Ref); m == nil {
-						unknownRefs++
-						continue
-					}
-					allStones.AddInterval(s.Ref, itv)
-				}
-			}
-		default:
-			return &wal.CorruptionErr{
-				Err:     errors.Errorf("invalid record type %v", dec.Type(rec)),
-				Segment: r.Segment(),
-				Offset:  r.Offset(),
-			}
-		}
-	}
-
-	// Signal termination to each worker and wait for it to close its output channel.
-	for i := 0; i < n; i++ {
-		close(inputs[i])
-		for range outputs[i] {
-		}
-	}
-	wg.Wait()
-
-	if r.Err() != nil {
-		return errors.Wrap(r.Err(), "read records")
-	}
-
-	if err := allStones.Iter(func(ref uint64, dranges tombstones.Intervals) error {
-		return h.chunkRewrite(ref, dranges)
-	}); err != nil {
-		return errors.Wrap(r.Err(), "deleting samples from tombstones")
-	}
-
-	if unknownRefs > 0 {
-		level.Warn(h.logger).Log("msg", "unknown series references", "count", unknownRefs)
-	}
-	return nil
+// SetMinValidTime sets the minimum timestamp the head can ingest.
+func (h *Head) SetMinValidTime(minValidTime int64) {
+	h.minValidTime.Store(minValidTime)
 }
 
-// Init loads data from the write ahead log and prepares the head for writes.
-// It should be called before using an appender so that
-// limits the ingested samples to the head min valid time.
-func (h *Head) Init(minValidTime int64) error {
-	h.minValidTime = minValidTime
-	defer h.postings.EnsureOrder()
-	defer h.gc() // After loading the wal remove the obsolete data from the head.
-
-	if h.wal == nil {
+// Truncate removes old data before mint from the head and WAL.
+func (h *Head) Truncate(mint int64) (err error) {
+	initialize := h.MinTime() == math.MaxInt64
+	if err := h.truncateMemory(mint); err != nil {
+		return err
+	}
+	if initialize {
 		return nil
 	}
-
-	level.Info(h.logger).Log("msg", "replaying WAL, this may take awhile")
-	// Backfill the checkpoint first if it exists.
-	dir, startFrom, err := wal.LastCheckpoint(h.wal.Dir())
-	if err != nil && err != record.ErrNotFound {
-		return errors.Wrap(err, "find last checkpoint")
-	}
-	multiRef := map[uint64]uint64{}
-	if err == nil {
-		sr, err := wal.NewSegmentsReader(dir)
-		if err != nil {
-			return errors.Wrap(err, "open checkpoint")
-		}
-		defer func() {
-			if err := sr.Close(); err != nil {
-				level.Warn(h.logger).Log("msg", "error while closing the wal segments reader", "err", err)
-			}
-		}()
-
-		// A corrupted checkpoint is a hard error for now and requires user
-		// intervention. There's likely little data that can be recovered anyway.
-		if err := h.loadWAL(wal.NewReader(sr), multiRef); err != nil {
-			return errors.Wrap(err, "backfill checkpoint")
-		}
-		startFrom++
-		level.Info(h.logger).Log("msg", "WAL checkpoint loaded")
-	}
-
-	// Find the last segment.
-	_, last, err := h.wal.Segments()
-	if err != nil {
-		return errors.Wrap(err, "finding WAL segments")
-	}
-
-	// Backfill segments from the most recent checkpoint onwards.
-	for i := startFrom; i <= last; i++ {
-		s, err := wal.OpenReadSegment(wal.SegmentName(h.wal.Dir(), i))
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("open WAL segment: %d", i))
-		}
-
-		sr := wal.NewSegmentBufReader(s)
-		err = h.loadWAL(wal.NewReader(sr), multiRef)
-		if err := sr.Close(); err != nil {
-			level.Warn(h.logger).Log("msg", "error while closing the wal segments reader", "err", err)
-		}
-		if err != nil {
-			return err
-		}
-		level.Info(h.logger).Log("msg", "WAL segment loaded", "segment", i, "maxSegment", last)
-	}
-
-	return nil
+	return h.truncateWAL(mint)
 }
 
-// Truncate removes old data before mint from the head.
-func (h *Head) Truncate(mint int64) (err error) {
+// OverlapsClosedInterval returns true if the head overlaps [mint, maxt].
+func (h *Head) OverlapsClosedInterval(mint, maxt int64) bool {
+	return h.MinTime() <= maxt && mint <= h.MaxTime()
+}
+
+// truncateMemory removes old data before mint from the head.
+func (h *Head) truncateMemory(mint int64) (err error) {
+	h.chunkSnapshotMtx.Lock()
+	defer h.chunkSnapshotMtx.Unlock()
+
 	defer func() {
 		if err != nil {
 			h.metrics.headTruncateFail.Inc()
 		}
 	}()
+
 	initialize := h.MinTime() == math.MaxInt64
 
 	if h.MinTime() >= mint && !initialize {
 		return nil
 	}
-	atomic.StoreInt64(&h.minTime, mint)
-	atomic.StoreInt64(&h.minValidTime, mint)
+
+	// The order of these two Store() should not be changed,
+	// i.e. truncation time is set before in-process boolean.
+	h.lastMemoryTruncationTime.Store(mint)
+	h.memTruncationInProcess.Store(true)
+	defer h.memTruncationInProcess.Store(false)
+
+	// We wait for pending queries to end that overlap with this truncation.
+	if !initialize {
+		h.WaitForPendingReadersInTimeRange(h.MinTime(), mint)
+	}
+
+	h.minTime.Store(mint)
+	h.minValidTime.Store(mint)
 
 	// Ensure that max time is at least as high as min time.
 	for h.MaxTime() < mint {
-		atomic.CompareAndSwapInt64(&h.maxTime, h.MaxTime(), mint)
+		h.maxTime.CAS(h.MaxTime(), mint)
 	}
 
 	// This was an initial call to Truncate after loading blocks on startup.
@@ -594,37 +836,133 @@ func (h *Head) Truncate(mint int64) (err error) {
 	h.metrics.headTruncateTotal.Inc()
 	start := time.Now()
 
-	h.gc()
-	level.Info(h.logger).Log("msg", "head GC completed", "duration", time.Since(start))
+	actualMint := h.gc()
+	level.Info(h.logger).Log("msg", "Head GC completed", "duration", time.Since(start))
 	h.metrics.gcDuration.Observe(time.Since(start).Seconds())
+	if actualMint > h.minTime.Load() {
+		// The actual mint of the Head is higher than the one asked to truncate.
+		appendableMinValidTime := h.appendableMinValidTime()
+		if actualMint < appendableMinValidTime {
+			h.minTime.Store(actualMint)
+			h.minValidTime.Store(actualMint)
+		} else {
+			// The actual min time is in the appendable window.
+			// So we set the mint to the appendableMinValidTime.
+			h.minTime.Store(appendableMinValidTime)
+			h.minValidTime.Store(appendableMinValidTime)
+		}
+	}
 
-	if h.wal == nil {
+	// Truncate the chunk m-mapper.
+	if err := h.chunkDiskMapper.Truncate(mint); err != nil {
+		return errors.Wrap(err, "truncate chunks.HeadReadWriter")
+	}
+	return nil
+}
+
+// WaitForPendingReadersInTimeRange waits for queries overlapping with given range to finish querying.
+// The query timeout limits the max wait time of this function implicitly.
+// The mint is inclusive and maxt is the truncation time hence exclusive.
+func (h *Head) WaitForPendingReadersInTimeRange(mint, maxt int64) {
+	maxt-- // Making it inclusive before checking overlaps.
+	overlaps := func() bool {
+		o := false
+		h.iso.TraverseOpenReads(func(s *isolationState) bool {
+			if s.mint <= maxt && mint <= s.maxt {
+				// Overlaps with the truncation range.
+				o = true
+				return false
+			}
+			return true
+		})
+		return o
+	}
+	for overlaps() {
+		time.Sleep(500 * time.Millisecond)
+	}
+}
+
+// IsQuerierCollidingWithTruncation returns if the current querier needs to be closed and if a new querier
+// has to be created. In the latter case, the method also returns the new mint to be used for creating the
+// new range head and the new querier. This methods helps preventing races with the truncation of in-memory data.
+//
+// NOTE: The querier should already be taken before calling this.
+func (h *Head) IsQuerierCollidingWithTruncation(querierMint, querierMaxt int64) (shouldClose, getNew bool, newMint int64) {
+	if !h.memTruncationInProcess.Load() {
+		return false, false, 0
+	}
+	// Head truncation is in process. It also means that the block that was
+	// created for this truncation range is also available.
+	// Check if we took a querier that overlaps with this truncation.
+	memTruncTime := h.lastMemoryTruncationTime.Load()
+	if querierMaxt < memTruncTime {
+		// Head compaction has happened and this time range is being truncated.
+		// This query doesn't overlap with the Head any longer.
+		// We should close this querier to avoid races and the data would be
+		// available with the blocks below.
+		// Cases:
+		// 1.     |------truncation------|
+		//   |---query---|
+		// 2.     |------truncation------|
+		//              |---query---|
+		return true, false, 0
+	}
+	if querierMint < memTruncTime {
+		// The truncation time is not same as head mint that we saw above but the
+		// query still overlaps with the Head.
+		// The truncation started after we got the querier. So it is not safe
+		// to use this querier and/or might block truncation. We should get
+		// a new querier for the new Head range while remaining will be available
+		// in the blocks below.
+		// Case:
+		//      |------truncation------|
+		//                        |----query----|
+		// Turns into
+		//      |------truncation------|
+		//                             |---qu---|
+		return true, true, memTruncTime
+	}
+
+	// Other case is this, which is a no-op
+	//      |------truncation------|
+	//                              |---query---|
+	return false, false, 0
+}
+
+// truncateWAL removes old data before mint from the WAL.
+func (h *Head) truncateWAL(mint int64) error {
+	h.chunkSnapshotMtx.Lock()
+	defer h.chunkSnapshotMtx.Unlock()
+
+	if h.wal == nil || mint <= h.lastWALTruncationTime.Load() {
 		return nil
 	}
-	start = time.Now()
+	start := time.Now()
+	h.lastWALTruncationTime.Store(mint)
 
-	first, last, err := h.wal.Segments()
+	first, last, err := wal.Segments(h.wal.Dir())
 	if err != nil {
 		return errors.Wrap(err, "get segment range")
 	}
 	// Start a new segment, so low ingestion volume TSDB don't have more WAL than
 	// needed.
-	err = h.wal.NextSegment()
-	if err != nil {
+	if err := h.wal.NextSegment(); err != nil {
 		return errors.Wrap(err, "next segment")
 	}
 	last-- // Never consider last segment for checkpoint.
 	if last < 0 {
 		return nil // no segments yet.
 	}
-	// The lower third of segments should contain mostly obsolete samples.
-	// If we have less than three segments, it's not worth checkpointing yet.
-	last = first + (last-first)/3
+	// The lower two thirds of segments should contain mostly obsolete samples.
+	// If we have less than two segments, it's not worth checkpointing yet.
+	// With the default 2h blocks, this will keeping up to around 3h worth
+	// of WAL segments.
+	last = first + (last-first)*2/3
 	if last <= first {
 		return nil
 	}
 
-	keep := func(id uint64) bool {
+	keep := func(id chunks.HeadSeriesRef) bool {
 		if h.series.getByID(id) != nil {
 			return true
 		}
@@ -634,8 +972,11 @@ func (h *Head) Truncate(mint int64) (err error) {
 		return ok
 	}
 	h.metrics.checkpointCreationTotal.Inc()
-	if _, err = wal.Checkpoint(h.wal, first, last, keep, mint); err != nil {
+	if _, err = wal.Checkpoint(h.logger, h.wal, first, last, keep, mint); err != nil {
 		h.metrics.checkpointCreationFail.Inc()
+		if _, ok := errors.Cause(err).(*wal.CorruptionErr); ok {
+			h.metrics.walCorruptionsTotal.Inc()
+		}
 		return errors.Wrap(err, "create checkpoint")
 	}
 	if err := h.wal.Truncate(last + 1); err != nil {
@@ -671,50 +1012,74 @@ func (h *Head) Truncate(mint int64) (err error) {
 	return nil
 }
 
-// initTime initializes a head with the first timestamp. This only needs to be called
-// for a completely fresh head with an empty WAL.
-// Returns true if the initialization took an effect.
-func (h *Head) initTime(t int64) (initialized bool) {
-	if !atomic.CompareAndSwapInt64(&h.minTime, math.MaxInt64, t) {
-		return false
-	}
-	// Ensure that max time is initialized to at least the min time we just set.
-	// Concurrent appenders may already have set it to a higher value.
-	atomic.CompareAndSwapInt64(&h.maxTime, math.MinInt64, t)
-
-	return true
+type Stats struct {
+	NumSeries         uint64
+	MinTime, MaxTime  int64
+	IndexPostingStats *index.PostingsStats
 }
 
-type rangeHead struct {
+// Stats returns important current HEAD statistics. Note that it is expensive to
+// calculate these.
+func (h *Head) Stats(statsByLabelName string) *Stats {
+	return &Stats{
+		NumSeries:         h.NumSeries(),
+		MaxTime:           h.MaxTime(),
+		MinTime:           h.MinTime(),
+		IndexPostingStats: h.PostingsCardinalityStats(statsByLabelName),
+	}
+}
+
+// RangeHead allows querying Head via an IndexReader, ChunkReader and tombstones.Reader
+// but only within a restricted range.  Used for queries and compactions.
+type RangeHead struct {
 	head       *Head
 	mint, maxt int64
 }
 
-func (h *rangeHead) Index() (IndexReader, error) {
+// NewRangeHead returns a *RangeHead.
+// There are no restrictions on mint/maxt.
+func NewRangeHead(head *Head, mint, maxt int64) *RangeHead {
+	return &RangeHead{
+		head: head,
+		mint: mint,
+		maxt: maxt,
+	}
+}
+
+func (h *RangeHead) Index() (IndexReader, error) {
 	return h.head.indexRange(h.mint, h.maxt), nil
 }
 
-func (h *rangeHead) Chunks() (ChunkReader, error) {
-	return h.head.chunksRange(h.mint, h.maxt), nil
+func (h *RangeHead) Chunks() (ChunkReader, error) {
+	return h.head.chunksRange(h.mint, h.maxt, h.head.iso.State(h.mint, h.maxt))
 }
 
-func (h *rangeHead) Tombstones() (tombstones.Reader, error) {
-	return emptyTombstoneReader, nil
+func (h *RangeHead) Tombstones() (tombstones.Reader, error) {
+	return h.head.tombstones, nil
 }
 
-func (h *rangeHead) MinTime() int64 {
+func (h *RangeHead) MinTime() int64 {
 	return h.mint
 }
 
-func (h *rangeHead) MaxTime() int64 {
+// MaxTime returns the max time of actual data fetch-able from the head.
+// This controls the chunks time range which is closed [b.MinTime, b.MaxTime].
+func (h *RangeHead) MaxTime() int64 {
 	return h.maxt
 }
 
-func (h *rangeHead) NumSeries() uint64 {
+// BlockMaxTime returns the max time of the potential block created from this head.
+// It's different to MaxTime as we need to add +1 millisecond to block maxt because block
+// intervals are half-open: [b.MinTime, b.MaxTime). Block intervals are always +1 than the total samples it includes.
+func (h *RangeHead) BlockMaxTime() int64 {
+	return h.MaxTime() + 1
+}
+
+func (h *RangeHead) NumSeries() uint64 {
 	return h.head.NumSeries()
 }
 
-func (h *rangeHead) Meta() BlockMeta {
+func (h *RangeHead) Meta() BlockMeta {
 	return BlockMeta{
 		MinTime: h.MinTime(),
 		MaxTime: h.MaxTime(),
@@ -725,259 +1090,16 @@ func (h *rangeHead) Meta() BlockMeta {
 	}
 }
 
-// initAppender is a helper to initialize the time bounds of the head
-// upon the first sample it receives.
-type initAppender struct {
-	app  Appender
-	head *Head
-}
-
-func (a *initAppender) Add(lset labels.Labels, t int64, v float64) (uint64, error) {
-	if a.app != nil {
-		return a.app.Add(lset, t, v)
-	}
-	a.head.initTime(t)
-	a.app = a.head.appender()
-
-	return a.app.Add(lset, t, v)
-}
-
-func (a *initAppender) AddFast(ref uint64, t int64, v float64) error {
-	if a.app == nil {
-		return ErrNotFound
-	}
-	return a.app.AddFast(ref, t, v)
-}
-
-func (a *initAppender) Commit() error {
-	if a.app == nil {
-		return nil
-	}
-	return a.app.Commit()
-}
-
-func (a *initAppender) Rollback() error {
-	if a.app == nil {
-		return nil
-	}
-	return a.app.Rollback()
-}
-
-// Appender returns a new Appender on the database.
-func (h *Head) Appender() Appender {
-	h.metrics.activeAppenders.Inc()
-
-	// The head cache might not have a starting point yet. The init appender
-	// picks up the first appended timestamp as the base.
-	if h.MinTime() == math.MaxInt64 {
-		return &initAppender{head: h}
-	}
-	return h.appender()
-}
-
-func (h *Head) appender() *headAppender {
-	return &headAppender{
-		head: h,
-		// Set the minimum valid time to whichever is greater the head min valid time or the compaciton window.
-		// This ensures that no samples will be added within the compaction window to avoid races.
-		minValidTime: max(atomic.LoadInt64(&h.minValidTime), h.MaxTime()-h.chunkRange/2),
-		mint:         math.MaxInt64,
-		maxt:         math.MinInt64,
-		samples:      h.getAppendBuffer(),
-		sampleSeries: h.getSeriesBuffer(),
-	}
-}
-
-func max(a, b int64) int64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func (h *Head) getAppendBuffer() []record.RefSample {
-	b := h.appendPool.Get()
-	if b == nil {
-		return make([]record.RefSample, 0, 512)
-	}
-	return b.([]record.RefSample)
-}
-
-func (h *Head) putAppendBuffer(b []record.RefSample) {
-	//lint:ignore SA6002 safe to ignore and actually fixing it has some performance penalty.
-	h.appendPool.Put(b[:0])
-}
-
-func (h *Head) getSeriesBuffer() []*memSeries {
-	b := h.seriesPool.Get()
-	if b == nil {
-		return make([]*memSeries, 0, 512)
-	}
-	return b.([]*memSeries)
-}
-
-func (h *Head) putSeriesBuffer(b []*memSeries) {
-	//lint:ignore SA6002 safe to ignore and actually fixing it has some performance penalty.
-	h.seriesPool.Put(b[:0])
-}
-
-func (h *Head) getBytesBuffer() []byte {
-	b := h.bytesPool.Get()
-	if b == nil {
-		return make([]byte, 0, 1024)
-	}
-	return b.([]byte)
-}
-
-func (h *Head) putBytesBuffer(b []byte) {
-	//lint:ignore SA6002 safe to ignore and actually fixing it has some performance penalty.
-	h.bytesPool.Put(b[:0])
-}
-
-type headAppender struct {
-	head         *Head
-	minValidTime int64 // No samples below this timestamp are allowed.
-	mint, maxt   int64
-
-	series       []record.RefSeries
-	samples      []record.RefSample
-	sampleSeries []*memSeries
-}
-
-func (a *headAppender) Add(lset labels.Labels, t int64, v float64) (uint64, error) {
-	if t < a.minValidTime {
-		return 0, ErrOutOfBounds
-	}
-
-	// Ensure no empty labels have gotten through.
-	lset = lset.WithoutEmpty()
-
-	s, created := a.head.getOrCreate(lset.Hash(), lset)
-	if created {
-		a.series = append(a.series, record.RefSeries{
-			Ref:    s.ref,
-			Labels: lset,
-		})
-	}
-	return s.ref, a.AddFast(s.ref, t, v)
-}
-
-func (a *headAppender) AddFast(ref uint64, t int64, v float64) error {
-	if t < a.minValidTime {
-		return ErrOutOfBounds
-	}
-
-	s := a.head.series.getByID(ref)
-	if s == nil {
-		return errors.Wrap(ErrNotFound, "unknown series")
-	}
-	s.Lock()
-	if err := s.appendable(t, v); err != nil {
-		s.Unlock()
-		return err
-	}
-	s.pendingCommit = true
-	s.Unlock()
-
-	if t < a.mint {
-		a.mint = t
-	}
-	if t > a.maxt {
-		a.maxt = t
-	}
-
-	a.samples = append(a.samples, record.RefSample{
-		Ref: ref,
-		T:   t,
-		V:   v,
-	})
-	a.sampleSeries = append(a.sampleSeries, s)
-	return nil
-}
-
-func (a *headAppender) log() error {
-	if a.head.wal == nil {
-		return nil
-	}
-
-	buf := a.head.getBytesBuffer()
-	defer func() { a.head.putBytesBuffer(buf) }()
-
-	var rec []byte
-	var enc record.Encoder
-
-	if len(a.series) > 0 {
-		rec = enc.Series(a.series, buf)
-		buf = rec[:0]
-
-		if err := a.head.wal.Log(rec); err != nil {
-			return errors.Wrap(err, "log series")
-		}
-	}
-	if len(a.samples) > 0 {
-		rec = enc.Samples(a.samples, buf)
-		buf = rec[:0]
-
-		if err := a.head.wal.Log(rec); err != nil {
-			return errors.Wrap(err, "log samples")
-		}
-	}
-	return nil
-}
-
-func (a *headAppender) Commit() error {
-	defer a.head.metrics.activeAppenders.Dec()
-	defer a.head.putAppendBuffer(a.samples)
-	defer a.head.putSeriesBuffer(a.sampleSeries)
-
-	if err := a.log(); err != nil {
-		return errors.Wrap(err, "write to WAL")
-	}
-
-	total := len(a.samples)
-	var series *memSeries
-	for i, s := range a.samples {
-		series = a.sampleSeries[i]
-		series.Lock()
-		ok, chunkCreated := series.append(s.T, s.V)
-		series.pendingCommit = false
-		series.Unlock()
-
-		if !ok {
-			total--
-		}
-		if chunkCreated {
-			a.head.metrics.chunks.Inc()
-			a.head.metrics.chunksCreated.Inc()
-		}
-	}
-
-	a.head.metrics.samplesAppended.Add(float64(total))
-	a.head.updateMinMaxTime(a.mint, a.maxt)
-
-	return nil
-}
-
-func (a *headAppender) Rollback() error {
-	a.head.metrics.activeAppenders.Dec()
-	var series *memSeries
-	for i := range a.samples {
-		series = a.sampleSeries[i]
-		series.Lock()
-		series.pendingCommit = false
-		series.Unlock()
-	}
-	a.head.putAppendBuffer(a.samples)
-
-	// Series are created in the head memory regardless of rollback. Thus we have
-	// to log them to the WAL in any case.
-	a.samples = nil
-	return a.log()
+// String returns an human readable representation of the range head. It's important to
+// keep this function in order to avoid the struct dump when the head is stringified in
+// errors or logs.
+func (h *RangeHead) String() string {
+	return fmt.Sprintf("range head (mint: %d, maxt: %d)", h.MinTime(), h.MaxTime())
 }
 
 // Delete all samples in the range of [mint, maxt] for series that satisfy the given
 // label matchers.
-func (h *Head) Delete(mint, maxt int64, ms ...labels.Matcher) error {
+func (h *Head) Delete(mint, maxt int64, ms ...*labels.Matcher) error {
 	// Do not delete anything beyond the currently valid range.
 	mint, maxt = clampInterval(mint, maxt, h.MinTime(), h.MaxTime())
 
@@ -989,96 +1111,60 @@ func (h *Head) Delete(mint, maxt int64, ms ...labels.Matcher) error {
 	}
 
 	var stones []tombstones.Stone
-	dirty := false
 	for p.Next() {
-		series := h.series.getByID(p.At())
+		series := h.series.getByID(chunks.HeadSeriesRef(p.At()))
 
+		series.RLock()
 		t0, t1 := series.minTime(), series.maxTime()
+		series.RUnlock()
 		if t0 == math.MinInt64 || t1 == math.MinInt64 {
 			continue
 		}
 		// Delete only until the current values and not beyond.
 		t0, t1 = clampInterval(mint, maxt, t0, t1)
-		if h.wal != nil {
-			stones = append(stones, tombstones.Stone{Ref: p.At(), Intervals: tombstones.Intervals{{Mint: t0, Maxt: t1}}})
-		}
-		if err := h.chunkRewrite(p.At(), tombstones.Intervals{{Mint: t0, Maxt: t1}}); err != nil {
-			return errors.Wrap(err, "delete samples")
-		}
-		dirty = true
+		stones = append(stones, tombstones.Stone{Ref: p.At(), Intervals: tombstones.Intervals{{Mint: t0, Maxt: t1}}})
 	}
 	if p.Err() != nil {
 		return p.Err()
 	}
-	var enc record.Encoder
 	if h.wal != nil {
-		// Although we don't store the stones in the head
-		// we need to write them to the WAL to mark these as deleted
-		// after a restart while loading the WAL.
+		var enc record.Encoder
 		if err := h.wal.Log(enc.Tombstones(stones, nil)); err != nil {
 			return err
 		}
 	}
-	if dirty {
-		h.gc()
-	}
-
-	return nil
-}
-
-// chunkRewrite re-writes the chunks which overlaps with deleted ranges
-// and removes the samples in the deleted ranges.
-// Chunks is deleted if no samples are left at the end.
-func (h *Head) chunkRewrite(ref uint64, dranges tombstones.Intervals) (err error) {
-	if len(dranges) == 0 {
-		return nil
-	}
-
-	ms := h.series.getByID(ref)
-	ms.Lock()
-	defer ms.Unlock()
-	if len(ms.chunks) == 0 {
-		return nil
-	}
-
-	metas := ms.chunksMetas()
-	mint, maxt := metas[0].MinTime, metas[len(metas)-1].MaxTime
-	it := newChunkSeriesIterator(metas, dranges, mint, maxt)
-
-	ms.reset()
-	for it.Next() {
-		t, v := it.At()
-		ok, _ := ms.append(t, v)
-		if !ok {
-			level.Warn(h.logger).Log("msg", "failed to add sample during delete")
-		}
+	for _, s := range stones {
+		h.tombstones.AddInterval(storage.SeriesRef(s.Ref), s.Intervals[0])
 	}
 
 	return nil
 }
 
 // gc removes data before the minimum timestamp from the head.
-func (h *Head) gc() {
+// It returns the actual min times of the chunks present in the Head.
+func (h *Head) gc() int64 {
 	// Only data strictly lower than this timestamp must be deleted.
 	mint := h.MinTime()
 
 	// Drop old chunks and remember series IDs and hashes if they can be
 	// deleted entirely.
-	deleted, chunksRemoved := h.series.gc(mint)
+	deleted, chunksRemoved, actualMint := h.series.gc(mint)
 	seriesRemoved := len(deleted)
 
 	h.metrics.seriesRemoved.Add(float64(seriesRemoved))
 	h.metrics.chunksRemoved.Add(float64(chunksRemoved))
 	h.metrics.chunks.Sub(float64(chunksRemoved))
-	// Using AddUint64 to subtract series removed.
-	// See: https://golang.org/pkg/sync/atomic/#AddUint64.
-	atomic.AddUint64(&h.numSeries, ^uint64(seriesRemoved-1))
+	h.numSeries.Sub(uint64(seriesRemoved))
 
 	// Remove deleted series IDs from the postings lists.
 	h.postings.Delete(deleted)
 
+	// Remove tombstones referring to the deleted series.
+	h.tombstones.DeleteTombstones(deleted)
+	h.tombstones.TruncateBefore(mint)
+
 	if h.wal != nil {
-		_, last, _ := h.wal.Segments()
+		_, last, _ := wal.Segments(h.wal.Dir())
 		h.deletedMtx.Lock()
 		// Keep series records until we're past segment 'last'
 		// because the WAL will still have samples records with
@@ -1087,71 +1173,22 @@ func (h *Head) gc() {
 		// that reads the WAL, wouldn't be able to use those
 		// samples since we would have no labels for that ref ID.
 		for ref := range deleted {
-			h.deleted[ref] = last
+			h.deleted[chunks.HeadSeriesRef(ref)] = last
 		}
 		h.deletedMtx.Unlock()
 	}
 
-	// Rebuild symbols and label value indices from what is left in the postings terms.
-	symbols := make(map[string]struct{}, len(h.symbols))
-	values := make(map[string]stringset, len(h.values))
-
-	if err := h.postings.Iter(func(t labels.Label, _ index.Postings) error {
-		symbols[t.Name] = struct{}{}
-		symbols[t.Value] = struct{}{}
-
-		ss, ok := values[t.Name]
-		if !ok {
-			ss = stringset{}
-			values[t.Name] = ss
-		}
-		ss.set(t.Value)
-		return nil
-	}); err != nil {
-		// This should never happen, as the iteration function only returns nil.
-		panic(err)
-	}
-
-	h.symMtx.Lock()
-
-	h.symbols = symbols
-	h.values = values
-
-	h.symMtx.Unlock()
+	return actualMint
 }
 
 // Tombstones returns a new reader over the head's tombstones
 func (h *Head) Tombstones() (tombstones.Reader, error) {
-	return emptyTombstoneReader, nil
-}
-
-// Index returns an IndexReader against the block.
-func (h *Head) Index() (IndexReader, error) {
-	return h.indexRange(math.MinInt64, math.MaxInt64), nil
-}
-
-func (h *Head) indexRange(mint, maxt int64) *headIndexReader {
-	if hmin := h.MinTime(); hmin > mint {
-		mint = hmin
-	}
-	return &headIndexReader{head: h, mint: mint, maxt: maxt}
-}
-
-// Chunks returns a ChunkReader against the block.
-func (h *Head) Chunks() (ChunkReader, error) {
-	return h.chunksRange(math.MinInt64, math.MaxInt64), nil
-}
-
-func (h *Head) chunksRange(mint, maxt int64) *headChunkReader {
-	if hmin := h.MinTime(); hmin > mint {
-		mint = hmin
-	}
-	return &headChunkReader{head: h, mint: mint, maxt: maxt}
+	return h.tombstones, nil
 }
 
 // NumSeries returns the number of active series in the head.
 func (h *Head) NumSeries() uint64 {
-	return atomic.LoadUint64(&h.numSeries)
+	return h.numSeries.Load()
 }
 
 // Meta returns meta information about the head.
@@ -1171,271 +1208,75 @@ func (h *Head) Meta() BlockMeta {
 
 // MinTime returns the lowest time bound on visible data in the head.
 func (h *Head) MinTime() int64 {
-	return atomic.LoadInt64(&h.minTime)
+	return h.minTime.Load()
 }
 
 // MaxTime returns the highest timestamp seen in data of the head.
 func (h *Head) MaxTime() int64 {
-	return atomic.LoadInt64(&h.maxTime)
+	return h.maxTime.Load()
 }
 
 // compactable returns whether the head has a compactable range.
 // The head has a compactable range when the head time range is 1.5 times the chunk range.
 // The 0.5 acts as a buffer of the appendable window.
 func (h *Head) compactable() bool {
-	return h.MaxTime()-h.MinTime() > h.chunkRange/2*3
+	return h.MaxTime()-h.MinTime() > h.chunkRange.Load()/2*3
 }
 
 // Close flushes the WAL and closes the head.
+// It also takes a snapshot of in-memory chunks if enabled.
 func (h *Head) Close() error {
-	if h.wal == nil {
-		return nil
+	h.closedMtx.Lock()
+	defer h.closedMtx.Unlock()
+	h.closed = true
+	errs := tsdb_errors.NewMulti(h.chunkDiskMapper.Close())
+	if h.wal != nil {
+		errs.Add(h.wal.Close())
 	}
-	return h.wal.Close()
-}
-
-type headChunkReader struct {
-	head       *Head
-	mint, maxt int64
-}
-
-func (h *headChunkReader) Close() error {
-	return nil
-}
-
-// packChunkID packs a seriesID and a chunkID within it into a global 8 byte ID.
-// It panicks if the seriesID exceeds 5 bytes or the chunk ID 3 bytes.
-func packChunkID(seriesID, chunkID uint64) uint64 {
-	if seriesID > (1<<40)-1 {
-		panic("series ID exceeds 5 bytes")
+	if errs.Err() == nil && h.opts.EnableMemorySnapshotOnShutdown {
+		errs.Add(h.performChunkSnapshot())
 	}
-	if chunkID > (1<<24)-1 {
-		panic("chunk ID exceeds 3 bytes")
-	}
-	return (seriesID << 24) | chunkID
+	return errs.Err()
 }
 
-func unpackChunkID(id uint64) (seriesID, chunkID uint64) {
-	return id >> 24, (id << 40) >> 40
+// String returns an human readable representation of the TSDB head. It's important to
+// keep this function in order to avoid the struct dump when the head is stringified in
+// errors or logs.
+func (h *Head) String() string {
+	return "head"
 }
 
-// Chunk returns the chunk for the reference number.
-func (h *headChunkReader) Chunk(ref uint64) (chunkenc.Chunk, error) {
-	sid, cid := unpackChunkID(ref)
-
-	s := h.head.series.getByID(sid)
-	// This means that the series has been garbage collected.
-	if s == nil {
-		return nil, ErrNotFound
-	}
-
-	s.Lock()
-	c := s.chunk(int(cid))
-
-	// This means that the chunk has been garbage collected or is outside
-	// the specified range.
-	if c == nil || !c.OverlapsClosedInterval(h.mint, h.maxt) {
-		s.Unlock()
-		return nil, ErrNotFound
-	}
-	s.Unlock()
-
-	return &safeChunk{
-		Chunk: c.chunk,
-		s:     s,
-		cid:   int(cid),
-	}, nil
-}
-
-type safeChunk struct {
-	chunkenc.Chunk
-	s   *memSeries
-	cid int
-}
-
-func (c *safeChunk) Iterator(reuseIter chunkenc.Iterator) chunkenc.Iterator {
-	c.s.Lock()
-	it := c.s.iterator(c.cid, reuseIter)
-	c.s.Unlock()
-	return it
-}
-
-type headIndexReader struct {
-	head       *Head
-	mint, maxt int64
-}
-
-func (h *headIndexReader) Close() error {
-	return nil
-}
-
-func (h *headIndexReader) Symbols() (map[string]struct{}, error) {
-	h.head.symMtx.RLock()
-	defer h.head.symMtx.RUnlock()
-
-	res := make(map[string]struct{}, len(h.head.symbols))
-
-	for s := range h.head.symbols {
-		res[s] = struct{}{}
-	}
-	return res, nil
-}
-
-// LabelValues returns the possible label values
-func (h *headIndexReader) LabelValues(names ...string) (index.StringTuples, error) {
-	if len(names) != 1 {
-		return nil, encoding.ErrInvalidSize
-	}
-
-	h.head.symMtx.RLock()
-	sl := make([]string, 0, len(h.head.values[names[0]]))
-	for s := range h.head.values[names[0]] {
-		sl = append(sl, s)
-	}
-	h.head.symMtx.RUnlock()
-	sort.Strings(sl)
-
-	return index.NewStringTuples(sl, len(names))
-}
-
-// LabelNames returns all the unique label names present in the head.
-func (h *headIndexReader) LabelNames() ([]string, error) {
-	h.head.symMtx.RLock()
-	defer h.head.symMtx.RUnlock()
-	labelNames := make([]string, 0, len(h.head.values))
-	for name := range h.head.values {
-		if name == "" {
-			continue
-		}
-		labelNames = append(labelNames, name)
-	}
-	sort.Strings(labelNames)
-	return labelNames, nil
-}
-
-// Postings returns the postings list iterator for the label pair.
-func (h *headIndexReader) Postings(name, value string) (index.Postings, error) {
-	return h.head.postings.Get(name, value), nil
-}
-
-func (h *headIndexReader) SortedPostings(p index.Postings) index.Postings {
-	series := make([]*memSeries, 0, 128)
-
-	// Fetch all the series only once.
-	for p.Next() {
-		s := h.head.series.getByID(p.At())
-		if s == nil {
-			level.Debug(h.head.logger).Log("msg", "looked up series not found")
-		} else {
-			series = append(series, s)
-		}
-	}
-	if err := p.Err(); err != nil {
-		return index.ErrPostings(errors.Wrap(err, "expand postings"))
-	}
-
-	sort.Slice(series, func(i, j int) bool {
-		return labels.Compare(series[i].lset, series[j].lset) < 0
-	})
-
-	// Convert back to list.
-	ep := make([]uint64, 0, len(series))
-	for _, p := range series {
-		ep = append(ep, p.ref)
-	}
-	return index.NewListPostings(ep)
-}
-
-// Series returns the series for the given reference.
-func (h *headIndexReader) Series(ref uint64, lbls *labels.Labels, chks *[]chunks.Meta) error {
-	s := h.head.series.getByID(ref)
-
-	if s == nil {
-		h.head.metrics.seriesNotFound.Inc()
-		return ErrNotFound
-	}
-	*lbls = append((*lbls)[:0], s.lset...)
-
-	s.Lock()
-	defer s.Unlock()
-
-	*chks = (*chks)[:0]
-
-	for i, c := range s.chunks {
-		// Do not expose chunks that are outside of the specified range.
-		if !c.OverlapsClosedInterval(h.mint, h.maxt) {
-			continue
-		}
-		// Set the head chunks as open (being appended to).
-		maxTime := c.maxTime
-		if s.headChunk == c {
-			maxTime = math.MaxInt64
-		}
-
-		*chks = append(*chks, chunks.Meta{
-			MinTime: c.minTime,
-			MaxTime: maxTime,
-			Ref:     packChunkID(s.ref, uint64(s.chunkID(i))),
-		})
-	}
-
-	return nil
-}
-
-func (h *headIndexReader) LabelIndices() ([][]string, error) {
-	h.head.symMtx.RLock()
-	defer h.head.symMtx.RUnlock()
-	res := [][]string{}
-	for s := range h.head.values {
-		res = append(res, []string{s})
-	}
-	return res, nil
-}
-
-func (h *Head) getOrCreate(hash uint64, lset labels.Labels) (*memSeries, bool) {
-	// Just using `getOrSet` below would be semantically sufficient, but we'd create
+func (h *Head) getOrCreate(hash uint64, lset labels.Labels) (*memSeries, bool, error) {
+	// Just using `getOrCreateWithID` below would be semantically sufficient, but we'd create
 	// a new series on every sample inserted via Add(), which causes allocations
 	// and makes our series IDs rather random and harder to compress in postings.
 	s := h.series.getByHash(hash, lset)
 	if s != nil {
-		return s, false
+		return s, false, nil
 	}
 
 	// Optimistically assume that we are the first one to create the series.
-	id := atomic.AddUint64(&h.lastSeriesID, 1)
+	id := chunks.HeadSeriesRef(h.lastSeriesID.Inc())
 
 	return h.getOrCreateWithID(id, hash, lset)
 }
 
-func (h *Head) getOrCreateWithID(id, hash uint64, lset labels.Labels) (*memSeries, bool) {
-	s := newMemSeries(lset, id, h.chunkRange)
-
-	s, created := h.series.getOrSet(hash, s)
+func (h *Head) getOrCreateWithID(id chunks.HeadSeriesRef, hash uint64, lset labels.Labels) (*memSeries, bool, error) {
+	s, created, err := h.series.getOrSet(hash, lset, func() *memSeries {
+		return newMemSeries(lset, id, h.chunkRange.Load(), &h.memChunkPool, h.opts.IsolationDisabled)
+	})
+	if err != nil {
+		return nil, false, err
+	}
 	if !created {
-		return s, false
+		return s, false, nil
 	}
 
 	h.metrics.seriesCreated.Inc()
-	atomic.AddUint64(&h.numSeries, 1)
+	h.numSeries.Inc()
 
-	h.postings.Add(id, lset)
-
-	h.symMtx.Lock()
-	defer h.symMtx.Unlock()
-
-	for _, l := range lset {
-		valset, ok := h.values[l.Name]
-		if !ok {
-			valset = stringset{}
-			h.values[l.Name] = valset
-		}
-		valset.set(l.Value)
-
-		h.symbols[l.Name] = struct{}{}
-		h.symbols[l.Value] = struct{}{}
-	}
-
-	return s, true
+	h.postings.Add(storage.SeriesRef(id), lset)
+	return s, true, nil
 }
 
 // seriesHashmap is a simple hashmap for memSeries by their label set. It is built
@@ -1446,7 +1287,7 @@ type seriesHashmap map[uint64][]*memSeries
 
 func (m seriesHashmap) get(hash uint64, lset labels.Labels) *memSeries {
 	for _, s := range m[hash] {
-		if s.lset.Equals(lset) {
+		if labels.Equal(s.lset, lset) {
 			return s
 		}
 	}
@@ -1456,7 +1297,7 @@ func (m seriesHashmap) get(hash uint64, lset labels.Labels) *memSeries {
 func (m seriesHashmap) set(hash uint64, s *memSeries) {
 	l := m[hash]
 	for i, prev := range l {
-		if prev.lset.Equals(s.lset) {
+		if labels.Equal(prev.lset, s.lset) {
 			l[i] = s
 			return
 		}
@@ -1467,7 +1308,7 @@ func (m seriesHashmap) set(hash uint64, s *memSeries) {
 func (m seriesHashmap) del(hash uint64, lset labels.Labels) {
 	var rem []*memSeries
 	for _, s := range m[hash] {
-		if !s.lset.Equals(lset) {
+		if !labels.Equal(s.lset, lset) {
 			rem = append(rem, s)
 		}
 	}
@@ -1478,20 +1319,24 @@ func (m seriesHashmap) del(hash uint64, lset labels.Labels) {
 	}
 }
 
-// stripeSeries locks modulo ranges of IDs and hashes to reduce lock contention.
+const (
+	// DefaultStripeSize is the default number of entries to allocate in the stripeSeries hash map.
+	DefaultStripeSize = 1 << 14
+)
+
+// stripeSeries holds series by HeadSeriesRef ("ID") and also by hash of their labels.
+// ID-based lookups via (getByID()) are preferred over getByHash() for performance reasons.
+// It locks modulo ranges of IDs and hashes to reduce lock contention.
 // The locks are padded to not be on the same cache line. Filling the padded space
 // with the maps was profiled to be slower – likely due to the additional pointer
 // dereferences.
 type stripeSeries struct {
-	series [stripeSize]map[uint64]*memSeries
-	hashes [stripeSize]seriesHashmap
-	locks  [stripeSize]stripeLock
+	size                    int
+	series                  []map[chunks.HeadSeriesRef]*memSeries // Sharded by ref. A series ref is the value of `size` when the series was being newly added.
+	hashes                  []seriesHashmap                       // Sharded by label hash.
+	locks                   []stripeLock                          // Sharded by ref for series access, by label hash for hashes access.
+	seriesLifecycleCallback SeriesLifecycleCallback
 }
-
-const (
-	stripeSize = 1 << 14
-	stripeMask = stripeSize - 1
-)
 
 type stripeLock struct {
 	sync.RWMutex
@@ -1499,11 +1344,17 @@ type stripeLock struct {
 	_ [40]byte
 }
 
-func newStripeSeries() *stripeSeries {
-	s := &stripeSeries{}
+func newStripeSeries(stripeSize int, seriesCallback SeriesLifecycleCallback) *stripeSeries {
+	s := &stripeSeries{
+		size:                    stripeSize,
+		series:                  make([]map[chunks.HeadSeriesRef]*memSeries, stripeSize),
+		hashes:                  make([]seriesHashmap, stripeSize),
+		locks:                   make([]stripeLock, stripeSize),
+		seriesLifecycleCallback: seriesCallback,
+	}
 
 	for i := range s.series {
-		s.series[i] = map[uint64]*memSeries{}
+		s.series[i] = map[chunks.HeadSeriesRef]*memSeries{}
 	}
 	for i := range s.hashes {
 		s.hashes[i] = seriesHashmap{}
@@ -1513,14 +1364,19 @@ func newStripeSeries() *stripeSeries {
 
 // gc garbage collects old chunks that are strictly before mint and removes
 // series entirely that have no chunks left.
-func (s *stripeSeries) gc(mint int64) (map[uint64]struct{}, int) {
+// note: returning map[chunks.HeadSeriesRef]struct{} would be more accurate,
+// but the returned map goes into postings.Delete() which expects a map[storage.SeriesRef]struct
+// and there's no easy way to cast maps.
+func (s *stripeSeries) gc(mint int64) (map[storage.SeriesRef]struct{}, int, int64) {
 	var (
-		deleted  = map[uint64]struct{}{}
-		rmChunks = 0
+		deleted                  = map[storage.SeriesRef]struct{}{}
+		deletedForCallback       = []labels.Labels{}
+		rmChunks                 = 0
+		actualMint         int64 = math.MaxInt64
 	)
 	// Run through all series and truncate old chunks. Mark those with no
 	// chunks left as deleted and store their ID.
-	for i := 0; i < stripeSize; i++ {
+	for i := 0; i < s.size; i++ {
 		s.locks[i].Lock()
 
 		for hash, all := range s.hashes[i] {
@@ -1528,7 +1384,11 @@ func (s *stripeSeries) gc(mint int64) (map[uint64]struct{}, int) {
 				series.Lock()
 				rmChunks += series.truncateChunksBefore(mint)
 
-				if len(series.chunks) > 0 || series.pendingCommit {
+				if len(series.mmappedChunks) > 0 || series.headChunk != nil || series.pendingCommit {
+					seriesMint := series.minTime()
+					if seriesMint < actualMint {
+						actualMint = seriesMint
+					}
 					series.Unlock()
 					continue
 				}
@@ -1538,15 +1398,16 @@ func (s *stripeSeries) gc(mint int64) (map[uint64]struct{}, int) {
 				// series alike.
 				// If we don't hold them all, there's a very small chance that a series receives
 				// samples again while we are half-way into deleting it.
-				j := int(series.ref & stripeMask)
+				j := int(series.ref) & (s.size - 1)
 
 				if i != j {
 					s.locks[j].Lock()
 				}
 
-				deleted[series.ref] = struct{}{}
+				deleted[storage.SeriesRef(series.ref)] = struct{}{}
 				s.hashes[i].del(hash, series.lset)
 				delete(s.series[j], series.ref)
+				deletedForCallback = append(deletedForCallback, series.lset)
 
 				if i != j {
 					s.locks[j].Unlock()
@@ -1557,13 +1418,20 @@ func (s *stripeSeries) gc(mint int64) (map[uint64]struct{}, int) {
 		}
 
 		s.locks[i].Unlock()
+
+		s.seriesLifecycleCallback.PostDeletion(deletedForCallback...)
+		deletedForCallback = deletedForCallback[:0]
 	}
 
-	return deleted, rmChunks
+	if actualMint == math.MaxInt64 {
+		actualMint = mint
+	}
+
+	return deleted, rmChunks, actualMint
 }
 
-func (s *stripeSeries) getByID(id uint64) *memSeries {
-	i := id & stripeMask
+func (s *stripeSeries) getByID(id chunks.HeadSeriesRef) *memSeries {
+	i := uint64(id) & uint64(s.size-1)
 
 	s.locks[i].RLock()
 	series := s.series[i][id]
@@ -1573,7 +1441,7 @@ func (s *stripeSeries) getByID(id uint64) *memSeries {
 }
 
 func (s *stripeSeries) getByHash(hash uint64, lset labels.Labels) *memSeries {
-	i := hash & stripeMask
+	i := hash & uint64(s.size-1)
 
 	s.locks[i].RLock()
 	series := s.hashes[i].get(hash, lset)
@@ -1582,25 +1450,46 @@ func (s *stripeSeries) getByHash(hash uint64, lset labels.Labels) *memSeries {
 	return series
 }
 
-func (s *stripeSeries) getOrSet(hash uint64, series *memSeries) (*memSeries, bool) {
-	i := hash & stripeMask
+func (s *stripeSeries) getOrSet(hash uint64, lset labels.Labels, createSeries func() *memSeries) (*memSeries, bool, error) {
+	// PreCreation is called here to avoid calling it inside the lock.
+	// It is not necessary to call it just before creating a series,
+	// rather it gives a 'hint' whether to create a series or not.
+	preCreationErr := s.seriesLifecycleCallback.PreCreation(lset)
 
+	// Create the series, unless the PreCreation() callback as failed.
+	// If failed, we'll not allow to create a new series anyway.
+	var series *memSeries
+	if preCreationErr == nil {
+		series = createSeries()
+	}
+
+	i := hash & uint64(s.size-1)
 	s.locks[i].Lock()
 
-	if prev := s.hashes[i].get(hash, series.lset); prev != nil {
+	if prev := s.hashes[i].get(hash, lset); prev != nil {
 		s.locks[i].Unlock()
-		return prev, false
+		return prev, false, nil
 	}
-	s.hashes[i].set(hash, series)
+	if preCreationErr == nil {
+		s.hashes[i].set(hash, series)
+	}
 	s.locks[i].Unlock()
 
-	i = series.ref & stripeMask
+	if preCreationErr != nil {
+		// The callback prevented creation of series.
+		return nil, false, preCreationErr
+	}
+	// Setting the series in the s.hashes marks the creation of series
+	// as any further calls to this methods would return that series.
+	s.seriesLifecycleCallback.PostCreation(series.lset)
+
+	i = uint64(series.ref) & uint64(s.size-1)
 
 	s.locks[i].Lock()
 	s.series[i][series.ref] = series
 	s.locks[i].Unlock()
 
-	return series, true
+	return series, true, nil
 }
 
 type sample struct {
@@ -1608,231 +1497,118 @@ type sample struct {
 	v float64
 }
 
-func (s sample) T() int64 {
-	return s.t
-}
-
-func (s sample) V() float64 {
-	return s.v
-}
+func newSample(t int64, v float64) tsdbutil.Sample { return sample{t, v} }
+func (s sample) T() int64                          { return s.t }
+func (s sample) V() float64                        { return s.v }
 
 // memSeries is the in-memory representation of a series. None of its methods
 // are goroutine safe and it is the caller's responsibility to lock it.
 type memSeries struct {
-	sync.Mutex
+	sync.RWMutex
 
-	ref          uint64
-	lset         labels.Labels
-	chunks       []*memChunk
-	headChunk    *memChunk
+	ref  chunks.HeadSeriesRef
+	lset labels.Labels
+
+	// Immutable chunks on disk that have not yet gone into a block, in order of ascending time stamps.
+	// When compaction runs, chunks get moved into a block and all pointers are shifted like so:
+	//
+	//                                    /------- let's say these 2 chunks get stored into a block
+	//                                    |  |
+	// before compaction: mmappedChunks=[p5,p6,p7,p8,p9] firstChunkID=5
+	//  after compaction: mmappedChunks=[p7,p8,p9]       firstChunkID=7
+	//
+	// pN is the pointer to the mmappedChunk referered to by HeadChunkID=N
+	mmappedChunks []*mmappedChunk
+
+	mmMaxTime    int64     // Max time of any mmapped chunk, only used during WAL replay.
+	headChunk    *memChunk // Most recent chunk in memory that's still being built.
 	chunkRange   int64
-	firstChunkID int
+	firstChunkID chunks.HeadChunkID // HeadChunkID for mmappedChunks[0]
 
-	nextAt        int64 // Timestamp at which to cut the next chunk.
-	sampleBuf     [4]sample
+	nextAt int64 // Timestamp at which to cut the next chunk.
+
+	// We keep the last 4 samples here (in addition to appending them to the chunk) so we don't need coordination between appender and querier.
+	// Even the most compact encoding of a sample takes 2 bits, so the last byte is not contended.
+	sampleBuf [4]sample
+
 	pendingCommit bool // Whether there are samples waiting to be committed to this series.
 
-	app chunkenc.Appender // Current appender for the chunk.
+	// Current appender for the head chunk. Set when a new head chunk is cut.
+	// It is nil only if headChunk is nil. E.g. if there was an appender that created a new series, but rolled back the commit
+	// (the first sample would create a headChunk, hence appender, but rollback skipped it while the Append() call would create a series).
+	app chunkenc.Appender
+
+	memChunkPool *sync.Pool
+
+	// txs is nil if isolation is disabled.
+	txs *txRing
 }
 
-func newMemSeries(lset labels.Labels, id uint64, chunkRange int64) *memSeries {
+func newMemSeries(lset labels.Labels, id chunks.HeadSeriesRef, chunkRange int64, memChunkPool *sync.Pool, isolationDisabled bool) *memSeries {
 	s := &memSeries{
-		lset:       lset,
-		ref:        id,
-		chunkRange: chunkRange,
-		nextAt:     math.MinInt64,
+		lset:         lset,
+		ref:          id,
+		chunkRange:   chunkRange,
+		nextAt:       math.MinInt64,
+		memChunkPool: memChunkPool,
+	}
+	if !isolationDisabled {
+		s.txs = newTxRing(4)
 	}
 	return s
 }
 
 func (s *memSeries) minTime() int64 {
-	if len(s.chunks) == 0 {
-		return math.MinInt64
+	if len(s.mmappedChunks) > 0 {
+		return s.mmappedChunks[0].minTime
 	}
-	return s.chunks[0].minTime
+	if s.headChunk != nil {
+		return s.headChunk.minTime
+	}
+	return math.MinInt64
 }
 
 func (s *memSeries) maxTime() int64 {
 	c := s.head()
-	if c == nil {
-		return math.MinInt64
+	if c != nil {
+		return c.maxTime
 	}
-	return c.maxTime
+	if len(s.mmappedChunks) > 0 {
+		return s.mmappedChunks[len(s.mmappedChunks)-1].maxTime
+	}
+	return math.MinInt64
 }
 
-func (s *memSeries) cut(mint int64) *memChunk {
-	c := &memChunk{
-		chunk:   chunkenc.NewXORChunk(),
-		minTime: mint,
-		maxTime: math.MinInt64,
-	}
-	s.chunks = append(s.chunks, c)
-	s.headChunk = c
-
-	// Set upper bound on when the next chunk must be started. An earlier timestamp
-	// may be chosen dynamically at a later point.
-	s.nextAt = rangeForTimestamp(mint, s.chunkRange)
-
-	app, err := c.chunk.Appender()
-	if err != nil {
-		panic(err)
-	}
-	s.app = app
-	return c
-}
-
-func (s *memSeries) chunksMetas() []chunks.Meta {
-	metas := make([]chunks.Meta, 0, len(s.chunks))
-	for _, chk := range s.chunks {
-		metas = append(metas, chunks.Meta{Chunk: chk.chunk, MinTime: chk.minTime, MaxTime: chk.maxTime})
-	}
-	return metas
-}
-
-// reset re-initialises all the variable in the memSeries except 'lset', 'ref',
-// and 'chunkRange', like how it would appear after 'newMemSeries(...)'.
-func (s *memSeries) reset() {
-	s.chunks = nil
-	s.headChunk = nil
-	s.firstChunkID = 0
-	s.nextAt = math.MinInt64
-	s.sampleBuf = [4]sample{}
-	s.pendingCommit = false
-	s.app = nil
-}
-
-// appendable checks whether the given sample is valid for appending to the series.
-func (s *memSeries) appendable(t int64, v float64) error {
-	c := s.head()
-	if c == nil {
-		return nil
-	}
-
-	if t > c.maxTime {
-		return nil
-	}
-	if t < c.maxTime {
-		return ErrOutOfOrderSample
-	}
-	// We are allowing exact duplicates as we can encounter them in valid cases
-	// like federation and erroring out at that time would be extremely noisy.
-	if math.Float64bits(s.sampleBuf[3].v) != math.Float64bits(v) {
-		return ErrAmendSample
-	}
-	return nil
-}
-
-func (s *memSeries) chunk(id int) *memChunk {
-	ix := id - s.firstChunkID
-	if ix < 0 || ix >= len(s.chunks) {
-		return nil
-	}
-	return s.chunks[ix]
-}
-
-func (s *memSeries) chunkID(pos int) int {
-	return pos + s.firstChunkID
-}
-
-// truncateChunksBefore removes all chunks from the series that have not timestamp
-// at or after mint. Chunk IDs remain unchanged.
+// truncateChunksBefore removes all chunks from the series that
+// have no timestamp at or after mint.
+// Chunk IDs remain unchanged.
 func (s *memSeries) truncateChunksBefore(mint int64) (removed int) {
-	var k int
-	for i, c := range s.chunks {
-		if c.maxTime >= mint {
-			break
-		}
-		k = i + 1
-	}
-	s.chunks = append(s.chunks[:0], s.chunks[k:]...)
-	s.firstChunkID += k
-	if len(s.chunks) == 0 {
+	if s.headChunk != nil && s.headChunk.maxTime < mint {
+		// If head chunk is truncated, we can truncate all mmapped chunks.
+		removed = 1 + len(s.mmappedChunks)
+		s.firstChunkID += chunks.HeadChunkID(removed)
 		s.headChunk = nil
-	} else {
-		s.headChunk = s.chunks[len(s.chunks)-1]
+		s.mmappedChunks = nil
+		return removed
 	}
-
-	return k
+	if len(s.mmappedChunks) > 0 {
+		for i, c := range s.mmappedChunks {
+			if c.maxTime >= mint {
+				break
+			}
+			removed = i + 1
+		}
+		s.mmappedChunks = append(s.mmappedChunks[:0], s.mmappedChunks[removed:]...)
+		s.firstChunkID += chunks.HeadChunkID(removed)
+	}
+	return removed
 }
 
-// append adds the sample (t, v) to the series.
-func (s *memSeries) append(t int64, v float64) (success, chunkCreated bool) {
-	// Based on Gorilla white papers this offers near-optimal compression ratio
-	// so anything bigger that this has diminishing returns and increases
-	// the time range within which we have to decompress all samples.
-	const samplesPerChunk = 120
-
-	c := s.head()
-
-	if c == nil {
-		c = s.cut(t)
-		chunkCreated = true
-	}
-	numSamples := c.chunk.NumSamples()
-
-	// Out of order sample.
-	if c.maxTime >= t {
-		return false, chunkCreated
-	}
-	// If we reach 25% of a chunk's desired sample count, set a definitive time
-	// at which to start the next chunk.
-	// At latest it must happen at the timestamp set when the chunk was cut.
-	if numSamples == samplesPerChunk/4 {
-		s.nextAt = computeChunkEndTime(c.minTime, c.maxTime, s.nextAt)
-	}
-	if t >= s.nextAt {
-		c = s.cut(t)
-		chunkCreated = true
-	}
-	s.app.Append(t, v)
-
-	c.maxTime = t
-
-	s.sampleBuf[0] = s.sampleBuf[1]
-	s.sampleBuf[1] = s.sampleBuf[2]
-	s.sampleBuf[2] = s.sampleBuf[3]
-	s.sampleBuf[3] = sample{t: t, v: v}
-
-	return true, chunkCreated
-}
-
-// computeChunkEndTime estimates the end timestamp based the beginning of a chunk,
-// its current timestamp and the upper bound up to which we insert data.
-// It assumes that the time range is 1/4 full.
-func computeChunkEndTime(start, cur, max int64) int64 {
-	a := (max - start) / ((cur - start + 1) * 4)
-	if a == 0 {
-		return max
-	}
-	return start + (max-start)/a
-}
-
-func (s *memSeries) iterator(id int, it chunkenc.Iterator) chunkenc.Iterator {
-	c := s.chunk(id)
-	// TODO(fabxc): Work around! A querier may have retrieved a pointer to a series' chunk,
-	// which got then garbage collected before it got accessed.
-	// We must ensure to not garbage collect as long as any readers still hold a reference.
-	if c == nil {
-		return chunkenc.NewNopIterator()
-	}
-
-	if id-s.firstChunkID < len(s.chunks)-1 {
-		return c.chunk.Iterator(it)
-	}
-	// Serve the last 4 samples for the last chunk from the sample buffer
-	// as their compressed bytes may be mutated by added samples.
-	if msIter, ok := it.(*memSafeIterator); ok {
-		msIter.Iterator = c.chunk.Iterator(msIter.Iterator)
-		msIter.i = -1
-		msIter.total = c.chunk.NumSamples()
-		msIter.buf = s.sampleBuf
-		return msIter
-	}
-	return &memSafeIterator{
-		Iterator: c.chunk.Iterator(it),
-		i:        -1,
-		total:    c.chunk.NumSamples(),
-		buf:      s.sampleBuf,
+// cleanupAppendIDsBelow cleans up older appendIDs. Has to be called after
+// acquiring lock.
+func (s *memSeries) cleanupAppendIDsBelow(bound uint64) {
+	if s.txs != nil {
+		s.txs.cleanupAppendIDsBelow(bound)
 	}
 }
 
@@ -1845,53 +1621,58 @@ type memChunk struct {
 	minTime, maxTime int64
 }
 
-// Returns true if the chunk overlaps [mint, maxt].
+// OverlapsClosedInterval returns true if the chunk overlaps [mint, maxt].
 func (mc *memChunk) OverlapsClosedInterval(mint, maxt int64) bool {
-	return mc.minTime <= maxt && mint <= mc.maxTime
+	return overlapsClosedInterval(mc.minTime, mc.maxTime, mint, maxt)
 }
 
-type memSafeIterator struct {
-	chunkenc.Iterator
-
-	i     int
-	total int
-	buf   [4]sample
+func overlapsClosedInterval(mint1, maxt1, mint2, maxt2 int64) bool {
+	return mint1 <= maxt2 && mint2 <= maxt1
 }
 
-func (it *memSafeIterator) Next() bool {
-	if it.i+1 >= it.total {
-		return false
+// mappedChunks describes a head chunk on disk that has been mmapped
+type mmappedChunk struct {
+	ref              chunks.ChunkDiskMapperRef
+	numSamples       uint16
+	minTime, maxTime int64
+}
+
+// Returns true if the chunk overlaps [mint, maxt].
+func (mc *mmappedChunk) OverlapsClosedInterval(mint, maxt int64) bool {
+	return overlapsClosedInterval(mc.minTime, mc.maxTime, mint, maxt)
+}
+
+type noopSeriesLifecycleCallback struct{}
+
+func (noopSeriesLifecycleCallback) PreCreation(labels.Labels) error { return nil }
+func (noopSeriesLifecycleCallback) PostCreation(labels.Labels)      {}
+func (noopSeriesLifecycleCallback) PostDeletion(...labels.Labels)   {}
+
+func (h *Head) Size() int64 {
+	var walSize int64
+	if h.wal != nil {
+		walSize, _ = h.wal.Size()
 	}
-	it.i++
-	if it.total-it.i > 4 {
-		return it.Iterator.Next()
-	}
-	return true
+	cdmSize, _ := h.chunkDiskMapper.Size()
+	return walSize + cdmSize
 }
 
-func (it *memSafeIterator) At() (int64, float64) {
-	if it.total-it.i > 4 {
-		return it.Iterator.At()
-	}
-	s := it.buf[4-(it.total-it.i)]
-	return s.t, s.v
+func (h *RangeHead) Size() int64 {
+	return h.head.Size()
 }
 
-type stringset map[string]struct{}
+func (h *Head) startWALReplayStatus(startFrom, last int) {
+	h.stats.WALReplayStatus.Lock()
+	defer h.stats.WALReplayStatus.Unlock()
 
-func (ss stringset) set(s string) {
-	ss[s] = struct{}{}
+	h.stats.WALReplayStatus.Min = startFrom
+	h.stats.WALReplayStatus.Max = last
+	h.stats.WALReplayStatus.Current = startFrom
 }
 
-func (ss stringset) String() string {
-	return strings.Join(ss.slice(), ",")
-}
+func (h *Head) updateWALReplayStatusRead(current int) {
+	h.stats.WALReplayStatus.Lock()
+	defer h.stats.WALReplayStatus.Unlock()
 
-func (ss stringset) slice() []string {
-	slice := make([]string, 0, len(ss))
-	for k := range ss {
-		slice = append(slice, k)
-	}
-	sort.Strings(slice)
-	return slice
+	h.stats.WALReplayStatus.Current = current
 }

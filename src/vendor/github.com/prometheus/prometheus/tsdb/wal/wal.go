@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -27,11 +28,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/prometheus/prometheus/tsdb/fileutil"
 )
 
@@ -72,9 +74,18 @@ func (p *page) reset() {
 	p.flushed = 0
 }
 
+// SegmentFile represents the underlying file used to store a segment.
+type SegmentFile interface {
+	Stat() (os.FileInfo, error)
+	Sync() error
+	io.Writer
+	io.Reader
+	io.Closer
+}
+
 // Segment represents a segment file.
 type Segment struct {
-	*os.File
+	SegmentFile
 	dir string
 	i   int
 }
@@ -107,7 +118,7 @@ func (e *CorruptionErr) Error() string {
 // OpenWriteSegment opens segment k in dir. The returned segment is ready for new appends.
 func OpenWriteSegment(logger log.Logger, dir string, k int) (*Segment, error) {
 	segName := SegmentName(dir, k)
-	f, err := os.OpenFile(segName, os.O_WRONLY|os.O_APPEND, 0666)
+	f, err := os.OpenFile(segName, os.O_WRONLY|os.O_APPEND, 0o666)
 	if err != nil {
 		return nil, err
 	}
@@ -122,22 +133,22 @@ func OpenWriteSegment(logger log.Logger, dir string, k int) (*Segment, error) {
 	// If it was torn mid-record, a full read (which the caller should do anyway
 	// to ensure integrity) will detect it as a corruption by the end.
 	if d := stat.Size() % pageSize; d != 0 {
-		level.Warn(logger).Log("msg", "last page of the wal is torn, filling it with zeros", "segment", segName)
+		level.Warn(logger).Log("msg", "Last page of the wal is torn, filling it with zeros", "segment", segName)
 		if _, err := f.Write(make([]byte, pageSize-d)); err != nil {
 			f.Close()
 			return nil, errors.Wrap(err, "zero-pad torn page")
 		}
 	}
-	return &Segment{File: f, i: k, dir: dir}, nil
+	return &Segment{SegmentFile: f, i: k, dir: dir}, nil
 }
 
 // CreateSegment creates a new segment k in dir.
 func CreateSegment(dir string, k int) (*Segment, error) {
-	f, err := os.OpenFile(SegmentName(dir, k), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile(SegmentName(dir, k), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
 		return nil, err
 	}
-	return &Segment{File: f, i: k, dir: dir}, nil
+	return &Segment{SegmentFile: f, i: k, dir: dir}, nil
 }
 
 // OpenReadSegment opens the segment with the given filename.
@@ -150,7 +161,7 @@ func OpenReadSegment(fn string) (*Segment, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Segment{File: f, i: k, dir: filepath.Dir(fn)}, nil
+	return &Segment{SegmentFile: f, i: k, dir: filepath.Dir(fn)}, nil
 }
 
 // WAL is a write ahead log that stores records in segment files.
@@ -187,9 +198,10 @@ type walMetrics struct {
 	truncateFail    prometheus.Counter
 	truncateTotal   prometheus.Counter
 	currentSegment  prometheus.Gauge
+	writesFailed    prometheus.Counter
 }
 
-func newWALMetrics(w *WAL, r prometheus.Registerer) *walMetrics {
+func newWALMetrics(r prometheus.Registerer) *walMetrics {
 	m := &walMetrics{}
 
 	m.fsyncDuration = prometheus.NewSummary(prometheus.SummaryOpts{
@@ -217,6 +229,10 @@ func newWALMetrics(w *WAL, r prometheus.Registerer) *walMetrics {
 		Name: "prometheus_tsdb_wal_segment_current",
 		Help: "WAL segment index that TSDB is currently writing to.",
 	})
+	m.writesFailed = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "prometheus_tsdb_wal_writes_failed_total",
+		Help: "Total number of WAL writes that failed.",
+	})
 
 	if r != nil {
 		r.MustRegister(
@@ -226,6 +242,7 @@ func newWALMetrics(w *WAL, r prometheus.Registerer) *walMetrics {
 			m.truncateFail,
 			m.truncateTotal,
 			m.currentSegment,
+			m.writesFailed,
 		)
 	}
 
@@ -243,7 +260,7 @@ func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSi
 	if segmentSize%pageSize != 0 {
 		return nil, errors.New("invalid segment size")
 	}
-	if err := os.MkdirAll(dir, 0777); err != nil {
+	if err := os.MkdirAll(dir, 0o777); err != nil {
 		return nil, errors.Wrap(err, "create dir")
 	}
 	if logger == nil {
@@ -258,9 +275,9 @@ func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSi
 		stopc:       make(chan chan struct{}),
 		compress:    compress,
 	}
-	w.metrics = newWALMetrics(w, reg)
+	w.metrics = newWALMetrics(reg)
 
-	_, last, err := w.Segments()
+	_, last, err := Segments(w.Dir())
 	if err != nil {
 		return nil, errors.Wrap(err, "get segment range")
 	}
@@ -272,7 +289,7 @@ func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSi
 		writeSegmentIndex = last + 1
 	}
 
-	segment, err := CreateSegment(w.dir, writeSegmentIndex)
+	segment, err := CreateSegment(w.Dir(), writeSegmentIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +304,7 @@ func NewSize(logger log.Logger, reg prometheus.Registerer, dir string, segmentSi
 }
 
 // Open an existing WAL.
-func Open(logger log.Logger, reg prometheus.Registerer, dir string) (*WAL, error) {
+func Open(logger log.Logger, dir string) (*WAL, error) {
 	if logger == nil {
 		logger = log.NewNopLogger()
 	}
@@ -344,15 +361,15 @@ func (w *WAL) Repair(origErr error) error {
 	if cerr.Segment < 0 {
 		return errors.New("corruption error does not specify position")
 	}
-	level.Warn(w.logger).Log("msg", "starting corruption repair",
+	level.Warn(w.logger).Log("msg", "Starting corruption repair",
 		"segment", cerr.Segment, "offset", cerr.Offset)
 
 	// All segments behind the corruption can no longer be used.
-	segs, err := listSegments(w.dir)
+	segs, err := listSegments(w.Dir())
 	if err != nil {
 		return errors.Wrap(err, "list segments")
 	}
-	level.Warn(w.logger).Log("msg", "deleting all segments newer than corrupted segment", "segment", cerr.Segment)
+	level.Warn(w.logger).Log("msg", "Deleting all segments newer than corrupted segment", "segment", cerr.Segment)
 
 	for _, s := range segs {
 		if w.segment.i == s.index {
@@ -367,23 +384,23 @@ func (w *WAL) Repair(origErr error) error {
 		if s.index <= cerr.Segment {
 			continue
 		}
-		if err := os.Remove(filepath.Join(w.dir, s.name)); err != nil {
+		if err := os.Remove(filepath.Join(w.Dir(), s.name)); err != nil {
 			return errors.Wrapf(err, "delete segment:%v", s.index)
 		}
 	}
 	// Regardless of the corruption offset, no record reaches into the previous segment.
 	// So we can safely repair the WAL by removing the segment and re-inserting all
 	// its records up to the corruption.
-	level.Warn(w.logger).Log("msg", "rewrite corrupted segment", "segment", cerr.Segment)
+	level.Warn(w.logger).Log("msg", "Rewrite corrupted segment", "segment", cerr.Segment)
 
-	fn := SegmentName(w.dir, cerr.Segment)
+	fn := SegmentName(w.Dir(), cerr.Segment)
 	tmpfn := fn + ".repair"
 
 	if err := fileutil.Rename(fn, tmpfn); err != nil {
 		return err
 	}
 	// Create a clean segment and make it the active one.
-	s, err := CreateSegment(w.dir, cerr.Segment)
+	s, err := CreateSegment(w.Dir(), cerr.Segment)
 	if err != nil {
 		return err
 	}
@@ -431,14 +448,11 @@ func (w *WAL) Repair(origErr error) error {
 	// We always want to start writing to a new Segment rather than an existing
 	// Segment, which is handled by NewSize, but earlier in Repair we're deleting
 	// all segments that come after the corrupted Segment. Recreate a new Segment here.
-	s, err = CreateSegment(w.dir, cerr.Segment+1)
+	s, err = CreateSegment(w.Dir(), cerr.Segment+1)
 	if err != nil {
 		return err
 	}
-	if err := w.setSegment(s); err != nil {
-		return err
-	}
-	return nil
+	return w.setSegment(s)
 }
 
 // SegmentName builds a segment name for the directory.
@@ -455,13 +469,17 @@ func (w *WAL) NextSegment() error {
 
 // nextSegment creates the next segment and closes the previous one.
 func (w *WAL) nextSegment() error {
+	if w.closed {
+		return errors.New("wal is closed")
+	}
+
 	// Only flush the current page if it actually holds data.
 	if w.page.alloc > 0 {
 		if err := w.flushPage(true); err != nil {
 			return err
 		}
 	}
-	next, err := CreateSegment(w.dir, w.segment.Index()+1)
+	next, err := CreateSegment(w.Dir(), w.segment.Index()+1)
 	if err != nil {
 		return errors.Wrap(err, "create new segment file")
 	}
@@ -509,8 +527,10 @@ func (w *WAL) flushPage(clear bool) error {
 	if clear {
 		p.alloc = pageSize // Write till end of page.
 	}
+
 	n, err := w.segment.Write(p.buf[p.flushed:p.alloc])
 	if err != nil {
+		p.flushed += n
 		return err
 	}
 	p.flushed += n
@@ -575,6 +595,7 @@ func (w *WAL) Log(recs ...[]byte) error {
 	// a bit of extra logic here frees them from that overhead.
 	for i, r := range recs {
 		if err := w.log(r, i == len(recs)-1); err != nil {
+			w.metrics.writesFailed.Inc()
 			return err
 		}
 	}
@@ -593,6 +614,24 @@ func (w *WAL) log(rec []byte, final bool) error {
 			return err
 		}
 	}
+
+	// Compress the record before calculating if a new segment is needed.
+	compressed := false
+	if w.compress &&
+		len(rec) > 0 &&
+		// If MaxEncodedLen is less than 0 the record is too large to be compressed.
+		snappy.MaxEncodedLen(len(rec)) >= 0 {
+		// The snappy library uses `len` to calculate if we need a new buffer.
+		// In order to allocate as few buffers as possible make the length
+		// equal to the capacity.
+		w.snappyBuf = w.snappyBuf[:cap(w.snappyBuf)]
+		w.snappyBuf = snappy.Encode(w.snappyBuf, rec)
+		if len(w.snappyBuf) < len(rec) {
+			rec = w.snappyBuf
+			compressed = true
+		}
+	}
+
 	// If the record is too big to fit within the active page in the current
 	// segment, terminate the active segment and advance to the next one.
 	// This ensures that records do not cross segment boundaries.
@@ -602,19 +641,6 @@ func (w *WAL) log(rec []byte, final bool) error {
 	if len(rec) > left {
 		if err := w.nextSegment(); err != nil {
 			return err
-		}
-	}
-
-	compressed := false
-	if w.compress && len(rec) > 0 {
-		// The snappy library uses `len` to calculate if we need a new buffer.
-		// In order to allocate as few buffers as possible make the length
-		// equal to the capacity.
-		w.snappyBuf = w.snappyBuf[:cap(w.snappyBuf)]
-		w.snappyBuf = snappy.Encode(w.snappyBuf, rec)
-		if len(w.snappyBuf) < len(rec) {
-			rec = w.snappyBuf
-			compressed = true
 		}
 	}
 
@@ -655,6 +681,9 @@ func (w *WAL) log(rec []byte, final bool) error {
 
 		if w.page.full() {
 			if err := w.flushPage(true); err != nil {
+				// TODO When the flushing fails at this point and the record has not been
+				// fully written to the buffer, we end up with a corrupted WAL because some part of the
+				// record have been written to the buffer, while the rest of the record will be discarded.
 				return err
 			}
 		}
@@ -671,17 +700,20 @@ func (w *WAL) log(rec []byte, final bool) error {
 	return nil
 }
 
-// Segments returns the range [first, n] of currently existing segments.
-// If no segments are found, first and n are -1.
-func (w *WAL) Segments() (first, last int, err error) {
-	refs, err := listSegments(w.dir)
+// LastSegmentAndOffset returns the last segment number of the WAL
+// and the offset in that file upto which the segment has been filled.
+func (w *WAL) LastSegmentAndOffset() (seg, offset int, err error) {
+	w.mtx.Lock()
+	defer w.mtx.Unlock()
+
+	_, seg, err = Segments(w.Dir())
 	if err != nil {
-		return 0, 0, err
+		return
 	}
-	if len(refs) == 0 {
-		return -1, -1, nil
-	}
-	return refs[0].index, refs[len(refs)-1].index, nil
+
+	offset = (w.donePages * pageSize) + w.page.alloc
+
+	return
 }
 
 // Truncate drops all segments before i.
@@ -692,7 +724,7 @@ func (w *WAL) Truncate(i int) (err error) {
 			w.metrics.truncateFail.Inc()
 		}
 	}()
-	refs, err := listSegments(w.dir)
+	refs, err := listSegments(w.Dir())
 	if err != nil {
 		return err
 	}
@@ -700,7 +732,7 @@ func (w *WAL) Truncate(i int) (err error) {
 		if r.index >= i {
 			break
 		}
-		if err = os.Remove(filepath.Join(w.dir, r.name)); err != nil {
+		if err = os.Remove(filepath.Join(w.Dir(), r.name)); err != nil {
 			return err
 		}
 	}
@@ -709,7 +741,7 @@ func (w *WAL) Truncate(i int) (err error) {
 
 func (w *WAL) fsync(f *Segment) error {
 	start := time.Now()
-	err := f.File.Sync()
+	err := f.Sync()
 	w.metrics.fsyncDuration.Observe(time.Since(start).Seconds())
 	return err
 }
@@ -721,6 +753,11 @@ func (w *WAL) Close() (err error) {
 
 	if w.closed {
 		return errors.New("wal already closed")
+	}
+
+	if w.segment == nil {
+		w.closed = true
+		return nil
 	}
 
 	// Flush the last page and zero out all its remaining size.
@@ -746,31 +783,45 @@ func (w *WAL) Close() (err error) {
 	return nil
 }
 
+// Segments returns the range [first, n] of currently existing segments.
+// If no segments are found, first and n are -1.
+func Segments(walDir string) (first, last int, err error) {
+	refs, err := listSegments(walDir)
+	if err != nil {
+		return 0, 0, err
+	}
+	if len(refs) == 0 {
+		return -1, -1, nil
+	}
+	return refs[0].index, refs[len(refs)-1].index, nil
+}
+
 type segmentRef struct {
 	name  string
 	index int
 }
 
 func listSegments(dir string) (refs []segmentRef, err error) {
-	files, err := fileutil.ReadDir(dir)
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
-	var last int
-	for _, fn := range files {
+	for _, f := range files {
+		fn := f.Name()
 		k, err := strconv.Atoi(fn)
 		if err != nil {
 			continue
 		}
-		if len(refs) > 0 && k > last+1 {
-			return nil, errors.New("segments are not sequential")
-		}
 		refs = append(refs, segmentRef{name: fn, index: k})
-		last = k
 	}
 	sort.Slice(refs, func(i, j int) bool {
 		return refs[i].index < refs[j].index
 	})
+	for i := 0; i < len(refs)-1; i++ {
+		if refs[i].index+1 != refs[i+1].index {
+			return nil, errors.New("segments are not sequential")
+		}
+	}
 	return refs, nil
 }
 
@@ -825,11 +876,32 @@ type segmentBufReader struct {
 	off  int // Offset of read data into current segment.
 }
 
+// nolint:revive // TODO: Consider exporting segmentBufReader
 func NewSegmentBufReader(segs ...*Segment) *segmentBufReader {
+	if len(segs) == 0 {
+		return &segmentBufReader{}
+	}
+
 	return &segmentBufReader{
 		buf:  bufio.NewReaderSize(segs[0], 16*pageSize),
 		segs: segs,
 	}
+}
+
+// nolint:revive
+func NewSegmentBufReaderWithOffset(offset int, segs ...*Segment) (sbr *segmentBufReader, err error) {
+	if offset == 0 || len(segs) == 0 {
+		return NewSegmentBufReader(segs...), nil
+	}
+
+	sbr = &segmentBufReader{
+		buf:  bufio.NewReaderSize(segs[0], 16*pageSize),
+		segs: segs,
+	}
+	if offset > 0 {
+		_, err = sbr.buf.Discard(offset)
+	}
+	return sbr, err
 }
 
 func (r *segmentBufReader) Close() (err error) {
@@ -843,6 +915,10 @@ func (r *segmentBufReader) Close() (err error) {
 
 // Read implements io.Reader.
 func (r *segmentBufReader) Read(b []byte) (n int, err error) {
+	if len(r.segs) == 0 {
+		return 0, io.EOF
+	}
+
 	n, err = r.buf.Read(b)
 	r.off += n
 
@@ -875,4 +951,10 @@ func (r *segmentBufReader) Read(b []byte) (n int, err error) {
 	r.off = 0
 	r.buf.Reset(r.segs[r.cur])
 	return n, nil
+}
+
+// Computing size of the WAL.
+// We do this by adding the sizes of all the files under the WAL dir.
+func (w *WAL) Size() (int64, error) {
+	return fileutil.DirSize(w.Dir())
 }

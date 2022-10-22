@@ -2,6 +2,7 @@ package promql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -13,9 +14,11 @@ import (
 
 	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
-	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/promql"
+	"github.com/prometheus/prometheus/promql/parser"
 	"github.com/prometheus/prometheus/storage"
+	"github.com/prometheus/prometheus/tsdb/chunkenc"
 )
 
 type PromQL struct {
@@ -87,9 +90,8 @@ func (q *PromQL) InstantQuery(ctx context.Context, req *logcache_v1.PromQL_Insta
 		errf: func(e error) { closureErr = e },
 	}
 	queryable := promql.NewEngine(promql.EngineOpts{
-		MaxConcurrent: 10,
-		MaxSamples:    50000000,
-		Timeout:       q.queryTimeout,
+		MaxSamples: 50000000,
+		Timeout:    q.queryTimeout,
 	})
 
 	var requestTime time.Time
@@ -103,7 +105,7 @@ func (q *PromQL) InstantQuery(ctx context.Context, req *logcache_v1.PromQL_Insta
 		}
 	}
 
-	qq, err := queryable.NewInstantQuery(lcq, req.Query, requestTime)
+	qq, err := queryable.NewInstantQuery(lcq, nil, req.Query, requestTime)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +128,7 @@ func (q *PromQL) toInstantQueryResult(r *promql.Result) (*logcache_v1.PromQL_Ins
 	}
 
 	switch r.Value.Type() {
-	case promql.ValueTypeScalar:
+	case parser.ValueTypeScalar:
 		s := r.Value.(promql.Scalar)
 		return &logcache_v1.PromQL_InstantQueryResult{
 			Result: &logcache_v1.PromQL_InstantQueryResult_Scalar{
@@ -137,7 +139,7 @@ func (q *PromQL) toInstantQueryResult(r *promql.Result) (*logcache_v1.PromQL_Ins
 			},
 		}, nil
 
-	case promql.ValueTypeVector:
+	case parser.ValueTypeVector:
 		var samples []*logcache_v1.PromQL_Sample
 		for _, s := range r.Value.(promql.Vector) {
 			metric := make(map[string]string)
@@ -161,7 +163,7 @@ func (q *PromQL) toInstantQueryResult(r *promql.Result) (*logcache_v1.PromQL_Ins
 			},
 		}, nil
 
-	case promql.ValueTypeMatrix:
+	case parser.ValueTypeMatrix:
 		var series []*logcache_v1.PromQL_Series
 		for _, s := range r.Value.(promql.Matrix) {
 			metric := make(map[string]string)
@@ -210,9 +212,8 @@ func (q *PromQL) RangeQuery(ctx context.Context, req *logcache_v1.PromQL_RangeQu
 		errf: func(e error) { closureErr = e },
 	}
 	queryable := promql.NewEngine(promql.EngineOpts{
-		MaxConcurrent: 10,
-		MaxSamples:    50000000,
-		Timeout:       q.queryTimeout,
+		MaxSamples: 50000000,
+		Timeout:    q.queryTimeout,
 	})
 
 	step, err := ParseStep(req.Step)
@@ -231,7 +232,7 @@ func (q *PromQL) RangeQuery(ctx context.Context, req *logcache_v1.PromQL_RangeQu
 		return nil, fmt.Errorf("couldn't parse end: %s", err)
 	}
 
-	qq, err := queryable.NewRangeQuery(lcq, req.Query, startTime, endTime, step)
+	qq, err := queryable.NewRangeQuery(lcq, nil, req.Query, startTime, endTime, step)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +255,7 @@ func (q *PromQL) toRangeQueryResult(r *promql.Result) (*logcache_v1.PromQL_Range
 	}
 
 	switch r.Value.Type() {
-	case promql.ValueTypeMatrix:
+	case parser.ValueTypeMatrix:
 		var series []*logcache_v1.PromQL_Series
 		for _, s := range r.Value.(promql.Matrix) {
 			metric := make(map[string]string)
@@ -318,13 +319,13 @@ type LogCacheQuerier struct {
 	errf       func(error)
 }
 
-func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Matcher) (storage.SeriesSet, storage.Warnings, error) {
+func (l *LogCacheQuerier) Select(sortSeries bool, hints *storage.SelectHints, matchers ...*labels.Matcher) storage.SeriesSet {
 	var (
 		metric string
 		ls     []labels.Label
 	)
 	sourceIDs := make(map[string]struct{})
-	for _, l := range ll {
+	for _, l := range matchers {
 		if l.Name == "__name__" {
 			metric = l.Value
 			continue
@@ -342,7 +343,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 	if len(sourceIDs) == 0 {
 		err := fmt.Errorf("Metric '%s' does not have a 'source_id' label.", metric)
 		l.errf(err)
-		return nil, nil, err
+		return nil
 	}
 
 	builder := newSeriesBuilder()
@@ -363,7 +364,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 
 		if err != nil {
 			l.errf(err)
-			return nil, nil, err
+			return nil
 		}
 
 		for _, e := range envelopeBatch.GetEnvelopes().GetBatch() {
@@ -417,7 +418,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 		}
 	}
 
-	return builder.buildSeriesSet(), nil, nil
+	return builder.buildSeriesSet()
 }
 
 func checkMapForSanitizedMetricName(gauge *loggregator_v2.Gauge, metric string) *loggregator_v2.GaugeValue {
@@ -460,12 +461,14 @@ func (l *LogCacheQuerier) hasLabels(tags map[string]string, ls []labels.Label) b
 	return true
 }
 
-func (l *LogCacheQuerier) LabelValues(name string) ([]string, storage.Warnings, error) {
-	panic("not implemented")
+// LabelValues implements storage.Querier and is a noop.
+func (l *LogCacheQuerier) LabelValues(string, ...*labels.Matcher) ([]string, storage.Warnings, error) {
+	return nil, nil, errors.New("not implemented")
 }
 
-func (l *LogCacheQuerier) LabelNames() ([]string, storage.Warnings, error) {
-	panic("not implemented")
+// LabelNames implements storage.Querier and is a noop.
+func (l *LogCacheQuerier) LabelNames(...*labels.Matcher) ([]string, storage.Warnings, error) {
+	return nil, nil, errors.New("not implemented")
 }
 
 func (l *LogCacheQuerier) Close() error {
@@ -491,6 +494,10 @@ func (c *concreteSeriesSet) Err() error {
 	return nil
 }
 
+func (c *concreteSeriesSet) Warnings() storage.Warnings {
+	return nil
+}
+
 // concreteSeries implements storage.Series.
 type concreteSeries struct {
 	labels labels.Labels
@@ -506,7 +513,7 @@ func (c *concreteSeries) Labels() labels.Labels {
 	return labels.New(c.labels...)
 }
 
-func (c *concreteSeries) Iterator() storage.SeriesIterator {
+func (c *concreteSeries) Iterator() chunkenc.Iterator {
 	return newConcreteSeriersIterator(c)
 }
 
@@ -516,7 +523,7 @@ type concreteSeriesIterator struct {
 	series *concreteSeries
 }
 
-func newConcreteSeriersIterator(series *concreteSeries) storage.SeriesIterator {
+func newConcreteSeriersIterator(series *concreteSeries) chunkenc.Iterator {
 	return &concreteSeriesIterator{
 		cur:    -1,
 		series: series,
@@ -614,14 +621,14 @@ func (b *seriesSetBuilder) buildSeriesSet() storage.SeriesSet {
 
 // TODO - move elsewhere and clean up [#160353522]
 func ExtractSourceIds(query string) ([]string, error) {
-	expr, err := promql.ParseExpr(query)
+	expr, err := parser.ParseExpr(query)
 	if err != nil {
 		return nil, err
 	}
 
 	visitor := newSourceIDVisitor()
 
-	err = promql.Walk(
+	err = parser.Walk(
 		visitor,
 		expr,
 		nil,
@@ -649,16 +656,16 @@ func newSourceIDVisitor() *sourceIDVisitor {
 	}
 }
 
-func (s *sourceIDVisitor) Visit(node promql.Node, _ []promql.Node) (promql.Visitor, error) {
+func (s *sourceIDVisitor) Visit(node parser.Node, _ []parser.Node) (parser.Visitor, error) {
 	if node == nil {
 		return nil, nil
 	}
 
 	switch selector := node.(type) {
-	case *promql.VectorSelector:
+	case *parser.VectorSelector:
 		s.addSourceIDsFromMatchers(selector.LabelMatchers)
-	case *promql.MatrixSelector:
-		s.addSourceIDsFromMatchers(selector.LabelMatchers)
+	case *parser.MatrixSelector:
+		s.addSourceIDsFromMatchers(selector.VectorSelector.(*parser.VectorSelector).LabelMatchers)
 	}
 
 	return s, nil
@@ -685,14 +692,14 @@ func addSourceIDsFromLabelMatcher(sourceIDs map[string]struct{}, labelMatcher *l
 }
 
 func ReplaceSourceIdSets(query string, sourceIDExpansions map[string][]string) (string, error) {
-	expr, err := promql.ParseExpr(query)
+	expr, err := parser.ParseExpr(query)
 	if err != nil {
 		return "", err
 	}
 
 	visitor := newSourceIdReplacementVisitor(sourceIDExpansions)
 
-	err = promql.Walk(
+	err = parser.Walk(
 		visitor,
 		expr,
 		nil,
@@ -714,16 +721,16 @@ func newSourceIdReplacementVisitor(sourceIdSets map[string][]string) *sourceIdRe
 	}
 }
 
-func (s *sourceIdReplacementVisitor) Visit(node promql.Node, _ []promql.Node) (promql.Visitor, error) {
+func (s *sourceIdReplacementVisitor) Visit(node parser.Node, _ []parser.Node) (parser.Visitor, error) {
 	if node == nil {
 		return nil, nil
 	}
 
 	switch selector := node.(type) {
-	case *promql.VectorSelector:
+	case *parser.VectorSelector:
 		s.replaceInMatchers(selector.LabelMatchers)
-	case *promql.MatrixSelector:
-		s.replaceInMatchers(selector.LabelMatchers)
+	case *parser.MatrixSelector:
+		s.replaceInMatchers(selector.VectorSelector.(*parser.VectorSelector).LabelMatchers)
 	}
 
 	return s, nil
