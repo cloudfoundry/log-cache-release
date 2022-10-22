@@ -115,12 +115,13 @@ func RegisterPromQLQuerierHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/InstantQuery", runtime.WithHTTPPathPattern("/api/v1/query"))
+		var err error
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/InstantQuery", runtime.WithHTTPPathPattern("/api/v1/query"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_PromQLQuerier_InstantQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_PromQLQuerier_InstantQuery_0(ctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -138,12 +139,13 @@ func RegisterPromQLQuerierHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/RangeQuery", runtime.WithHTTPPathPattern("/api/v1/query_range"))
+		var err error
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/RangeQuery", runtime.WithHTTPPathPattern("/api/v1/query_range"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_PromQLQuerier_RangeQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_PromQLQuerier_RangeQuery_0(ctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -200,12 +202,13 @@ func RegisterPromQLQuerierHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/InstantQuery", runtime.WithHTTPPathPattern("/api/v1/query"))
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/InstantQuery", runtime.WithHTTPPathPattern("/api/v1/query"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_PromQLQuerier_InstantQuery_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_PromQLQuerier_InstantQuery_0(ctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -220,12 +223,13 @@ func RegisterPromQLQuerierHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/RangeQuery", runtime.WithHTTPPathPattern("/api/v1/query_range"))
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/logcache.v1.PromQLQuerier/RangeQuery", runtime.WithHTTPPathPattern("/api/v1/query_range"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_PromQLQuerier_RangeQuery_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_PromQLQuerier_RangeQuery_0(ctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
