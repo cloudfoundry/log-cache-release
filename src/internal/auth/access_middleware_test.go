@@ -7,7 +7,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/auth"
 
 	"code.cloudfoundry.org/log-cache/internal/testing"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

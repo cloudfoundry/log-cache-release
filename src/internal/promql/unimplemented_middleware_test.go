@@ -7,7 +7,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/promql"
 
 	"github.com/Benjamintf1/unmarshalledmatchers"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

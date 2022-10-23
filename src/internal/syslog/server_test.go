@@ -15,8 +15,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"code.cloudfoundry.org/log-cache/internal/testing"
 	"code.cloudfoundry.org/tlsconfig"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

@@ -11,22 +11,24 @@ import (
 
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	"code.cloudfoundry.org/log-cache/internal/cache/store"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("store under high concurrent load", func() {
-	timeoutInSeconds := 300
+	var (
+		wg    sync.WaitGroup
+		s     *store.Store
+		start time.Time
+	)
 
-	It("", func(done Done) {
-		var wg sync.WaitGroup
-
+	BeforeEach(func() {
 		sp := newSpyPruner()
 		sp.numberToPrune = 128
 		sm := testhelpers.NewMetricsRegistry()
+		s = store.NewStore(2500, TruncationInterval, PrunesPerGC, sp, sm)
 
-		loadStore := store.NewStore(2500, TruncationInterval, PrunesPerGC, sp, sm)
-		start := time.Now()
+		start = time.Now()
 		var envelopesWritten uint64
 
 		// 10 writers per sourceId, 10k envelopes per writer
@@ -38,7 +40,7 @@ var _ = Describe("store under high concurrent load", func() {
 
 					for envelopes := 0; envelopes < 500; envelopes++ {
 						e := buildTypedEnvelope(time.Now().UnixNano(), sourceId, &loggregator_v2.Log{})
-						loadStore.Put(e, sourceId)
+						s.Put(e, sourceId)
 						atomic.AddUint64(&envelopesWritten, 1)
 						time.Sleep(50 * time.Microsecond)
 					}
@@ -47,24 +49,33 @@ var _ = Describe("store under high concurrent load", func() {
 		}
 
 		for readers := 0; readers < 10; readers++ {
+			wg.Add(1)
 			go func() {
+				defer wg.Done()
 				for i := 0; i < 100; i++ {
-					loadStore.Meta()
+					s.Meta()
 					time.Sleep(10 * time.Millisecond)
 				}
 			}()
 		}
+	})
 
+	It("works", func() {
+		done := make(chan struct{})
 		go func() {
 			wg.Wait()
-			// fmt.Printf("Finished writing %d envelopes in %s\n", atomic.LoadUint64(&envelopesWritten), time.Since(start))
 			close(done)
 		}()
 
-		Consistently(func() int64 {
-			envelopes := loadStore.Get("index-9", start, time.Now(), nil, nil, 100000, false)
-			return int64(len(envelopes))
-		}, timeoutInSeconds).Should(BeNumerically("<=", 2500))
-
-	}, float64(timeoutInSeconds))
+		for {
+			select {
+			case <-done:
+				return
+			default:
+				envelopes := s.Get("index-9", start, time.Now(), nil, nil, 100000, false)
+				Expect(len(envelopes)).Should(BeNumerically("<=", 2500))
+				time.Sleep(time.Duration(time.Millisecond * 10))
+			}
+		}
+	})
 })
