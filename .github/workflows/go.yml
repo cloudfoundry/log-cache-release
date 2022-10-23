@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version-file: "src/go.mod"
-      - run: go run github.com/onsi/ginkgo/ginkgo -r -race -randomizeAllSpecs -randomizeSuites
+      - run: go run github.com/onsi/ginkgo/v2/ginkgo -r --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace
         working-directory: src
 
   vet:

@@ -3,7 +3,7 @@ package store_test
 import (
 	"code.cloudfoundry.org/log-cache/internal/cache/store"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

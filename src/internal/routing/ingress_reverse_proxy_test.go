@@ -12,7 +12,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/routing"
 	"google.golang.org/grpc"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
