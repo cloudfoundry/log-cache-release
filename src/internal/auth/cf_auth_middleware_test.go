@@ -14,8 +14,7 @@ import (
 
 	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"github.com/Benjamintf1/unmarshalledmatchers"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

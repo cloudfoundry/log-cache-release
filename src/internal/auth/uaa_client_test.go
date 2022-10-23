@@ -22,8 +22,7 @@ import (
 	"net/http"
 
 	jose "github.com/dvsekhvalnov/jose2go"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
