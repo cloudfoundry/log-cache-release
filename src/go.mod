@@ -5,7 +5,7 @@ go 1.19
 require (
 	code.cloudfoundry.org/go-batching v0.0.0-20220601181205-303abfc14b83
 	code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655
-	code.cloudfoundry.org/go-envstruct v1.5.0
+	code.cloudfoundry.org/go-envstruct v1.6.0
 	code.cloudfoundry.org/go-log-cache v1.0.1-0.20221018060643-5866ce9a4570
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.3
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20220408214155-d9c3faa1e9e3
