@@ -67,7 +67,7 @@ var _ = Describe("CAPIClient", func() {
 
 		It("sourceIDs from expired cached tokens are not authorized", func() {
 			tc := setup(
-				auth.WithCacheExpirationInterval(250 * time.Millisecond),
+				auth.WithCacheExpirationInterval(50 * time.Millisecond),
 			)
 
 			tc.capiClient.resps = []response{
@@ -79,17 +79,12 @@ var _ = Describe("CAPIClient", func() {
 				"token-0",
 			)).To(BeTrue())
 
-			time.Sleep(251 * time.Millisecond)
-
 			tc.capiClient.resps = []response{
 				newCapiResp(http.StatusNotFound), // app not found
 				newCapiResp(http.StatusNotFound), // fallthrough to see if it's a service
 			}
 
-			Expect(tc.client.IsAuthorized(
-				"8208c86c-7afe-45f8-8999-4883d5868cf2",
-				"token-0",
-			)).To(BeFalse())
+			Eventually(tc.client.IsAuthorized).WithArguments("8208c86c-7afe-45f8-8999-4883d5868cf2", "token-0").Should(BeFalse())
 		})
 
 		It("regularly removes tokens from cache", func() {
