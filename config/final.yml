@@ -2,4 +2,4 @@ final_name: log-cache
 blobstore:
   provider: gcs
   options:
-    bucket_name: log-cache-release-blobs
+    bucket_name: log-cache-release
