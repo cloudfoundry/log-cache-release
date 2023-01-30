@@ -49,8 +49,8 @@ github.com/cespare/xxhash
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry/gosigar v1.3.4
-## explicit; go 1.18
+# github.com/cloudfoundry/gosigar v1.3.5
+## explicit; go 1.19
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows
 # github.com/dvsekhvalnov/jose2go v1.5.1-0.20211102184025-feb89cf56911
