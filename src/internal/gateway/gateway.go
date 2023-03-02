@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	logcacheMarshaler "code.cloudfoundry.org/log-cache/pkg/marshaler"
 )
 

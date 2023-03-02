@@ -9,7 +9,7 @@ import (
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
 	diodes "code.cloudfoundry.org/go-diodes"
-	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
