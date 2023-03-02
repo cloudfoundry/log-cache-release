@@ -18,7 +18,7 @@ import (
 	"crypto/x509"
 
 	"code.cloudfoundry.org/go-envstruct"
-	client "code.cloudfoundry.org/go-log-cache"
+	client "code.cloudfoundry.org/go-log-cache/v2"
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"

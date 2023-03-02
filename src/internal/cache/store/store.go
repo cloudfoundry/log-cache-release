@@ -10,7 +10,7 @@ import (
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
-	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	"github.com/emirpasic/gods/trees/avltree"
 	"github.com/emirpasic/gods/utils"
