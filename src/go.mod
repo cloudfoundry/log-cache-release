@@ -23,7 +23,7 @@ require (
 	github.com/onsi/gomega v1.27.2
 	github.com/prometheus/client_golang v1.14.0
 	github.com/prometheus/client_model v0.3.0
-	github.com/prometheus/common v0.41.0
+	github.com/prometheus/common v0.42.0
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil/v3 v3.23.2
 	golang.org/x/net v0.8.0
