@@ -6,6 +6,7 @@ templates:
   log_cache_ca.crt.erb: config/certs/log_cache_ca.crt
   log_cache.crt.erb: config/certs/log_cache.crt
   log_cache.key.erb: config/certs/log_cache.key
+  syslog_client_ca.crt.erb: config/certs/syslog_client_ca.crt
   syslog.crt.erb: config/certs/syslog.crt
   syslog.key.erb: config/certs/syslog.key
   prom_scraper_config.yml.erb: config/prom_scraper_config.yml
@@ -34,6 +35,9 @@ properties:
   syslog_idle_timeout:
     description: "Timeout for the Syslog Server connection"
     default: "2m"
+
+  syslog_client_ca_cert:
+    description: The CA certificate for key/cert verification.
 
   metrics.port:
     description: "The port for the Syslog Server to bind a health endpoint"
