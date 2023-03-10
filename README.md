@@ -21,8 +21,7 @@ is caching the data for the requested source ID.
 Log Cache is included by default in 
 [Cloud Foundry's cf-deployment](https://github.com/cloudfoundry/cf-deployment).
 
-By default Log Cache receives data from syslog agents which is an add on which runs on all instance groups by default. Log Cache can also be configured
-to read from the Reverse Log Proxy instead, though this option is not recommended because of firehose scalability limits.
+By default, Log Cache receives data from syslog agents which is an add on which runs on all instance groups by default.
 
 Log Cache is queried by Cloud Controller for app instance metrics such as CPU usage and memory when retrieving details for applications and 
 by the cf cli directly to retrieve recent logs. It can also be queried using the Log Cache CLI plugin to retrieve system component metrics.
