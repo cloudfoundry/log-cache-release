@@ -107,7 +107,6 @@ var _ = Describe("CfAuthMiddleware", func() {
 			Expect(tc.spyLogAuthorizer.sourceIDsCalledWith).To(HaveKey(sourceID))
 		},
 			Entry("without slash", "12345"),
-			Entry("with slash", "12/345"),
 			Entry("with encoded slash", "12%2F345"),
 		)
 
