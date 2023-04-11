@@ -73,7 +73,7 @@ type promqlErrorBody struct {
 
 func (m CFAuthMiddlewareProvider) Middleware(h http.Handler) http.Handler {
 	router := chi.NewRouter()
-	router.HandleFunc("/api/v1/read/{sourceID:.*}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/api/v1/read/{sourceID}", func(w http.ResponseWriter, r *http.Request) {
 		sourceID := chi.URLParam(r, "sourceID")
 
 		authToken := r.Header.Get("Authorization")
