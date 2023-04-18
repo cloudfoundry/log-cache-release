@@ -72,6 +72,9 @@ github.com/emirpasic/gods/containers
 github.com/emirpasic/gods/trees
 github.com/emirpasic/gods/trees/avltree
 github.com/emirpasic/gods/utils
+# github.com/go-chi/chi/v5 v5.0.8
+## explicit; go 1.14
+github.com/go-chi/chi/v5
 # github.com/go-kit/kit v0.9.0
 ## explicit
 github.com/go-kit/kit/log
@@ -111,9 +114,6 @@ github.com/google/go-cmp/cmp/internal/value
 # github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38
 ## explicit; go 1.14
 github.com/google/pprof/profile
-# github.com/gorilla/mux v1.8.0
-## explicit; go 1.12
-github.com/gorilla/mux
 # github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 ## explicit; go 1.17
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule

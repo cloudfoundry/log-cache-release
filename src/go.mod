@@ -16,7 +16,6 @@ require (
 	github.com/cloudfoundry/gosigar v1.3.10
 	github.com/dvsekhvalnov/jose2go v1.5.1-0.20211102184025-feb89cf56911
 	github.com/emirpasic/gods v1.18.1
-	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
 	github.com/onsi/ginkgo/v2 v2.9.2
@@ -30,6 +29,8 @@ require (
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
 )
+
+require github.com/go-chi/chi/v5 v5.0.8
 
 require (
 	github.com/OneOfOne/xxhash v1.2.8 // indirect

@@ -10,7 +10,7 @@ import (
 	"context"
 
 	rpc "code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"google.golang.org/protobuf/encoding/protojson"
 
 	//TODO: why is this calling log-cache. use go-log-cache?
@@ -72,11 +72,10 @@ type promqlErrorBody struct {
 }
 
 func (m CFAuthMiddlewareProvider) Middleware(h http.Handler) http.Handler {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/v1/read/{sourceID:.*}", func(w http.ResponseWriter, r *http.Request) {
-		sourceID, ok := mux.Vars(r)["sourceID"]
-		if !ok {
+	router := chi.NewRouter()
+	router.HandleFunc("/api/v1/read/{sourceID}", func(w http.ResponseWriter, r *http.Request) {
+		sourceID := chi.URLParam(r, "sourceID")
+		if sourceID == "" {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
