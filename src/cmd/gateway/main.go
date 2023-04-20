@@ -7,6 +7,7 @@ import (
 	"time"
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
+	"code.cloudfoundry.org/tlsconfig"
 
 	"net/http"
 
@@ -16,6 +17,7 @@ import (
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -75,8 +77,19 @@ func main() {
 		gatewayOptions = append(gatewayOptions, WithGatewayTLSServer(cfg.ProxyCertPath, cfg.ProxyKeyPath))
 	}
 	if cfg.TLS.HasAnyCredential() {
+		tlsConfig, err := tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(cfg.TLS.CertPath, cfg.TLS.KeyPath),
+		).Client(
+			tlsconfig.WithAuthorityFromFile(cfg.TLS.CAPath),
+			tlsconfig.WithServerName("log-cache"),
+		)
+		if err != nil {
+			panic(err)
+		}
+
 		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
-			grpc.WithTransportCredentials(cfg.TLS.Credentials("log-cache")),
+			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024)),
 		),
 		)

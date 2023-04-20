@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	"code.cloudfoundry.org/tlsconfig"
+
 	//nolint:gosec
 	_ "net/http/pprof"
 
@@ -23,7 +25,6 @@ import (
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/promql"
-	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
 )
 
 func main() {
@@ -182,10 +183,16 @@ func buildUAAClient(cfg *Config, loggr *log.Logger) *http.Client {
 	if cfg.UAA.CAPath == "" {
 		return uaaClient
 	}
-	tlsConfig := sharedtls.NewBaseTLSConfig()
-	tlsConfig.InsecureSkipVerify = cfg.SkipCertVerify
 
-	tlsConfig.RootCAs = loadCA(cfg.UAA.CAPath, loggr)
+	tlsConfig, err := tlsconfig.Build(
+		tlsconfig.WithInternalServiceDefaults(),
+	).Client(
+		tlsconfig.WithAuthorityFromFile(cfg.UAA.CAPath),
+	)
+	if err != nil {
+		panic(err)
+	}
+	tlsConfig.InsecureSkipVerify = cfg.SkipCertVerify
 
 	uaaClient.Transport = &http.Transport{
 		TLSHandshakeTimeout: 10 * time.Second,
@@ -205,12 +212,17 @@ func buildCAPIClient(cfg *Config, loggr *log.Logger) *http.Client {
 		return capiClient
 	}
 
-	tlsConfig := sharedtls.NewBaseTLSConfig()
-	tlsConfig.ServerName = cfg.CAPI.CommonName
-
-	tlsConfig.RootCAs = loadCA(cfg.CAPI.CAPath, loggr)
-
+	tlsConfig, err := tlsconfig.Build(
+		tlsconfig.WithInternalServiceDefaults(),
+	).Client(
+		tlsconfig.WithAuthorityFromFile(cfg.CAPI.CAPath),
+		tlsconfig.WithServerName(cfg.CAPI.CommonName),
+	)
+	if err != nil {
+		panic(err)
+	}
 	tlsConfig.InsecureSkipVerify = cfg.SkipCertVerify
+
 	capiClient.Transport = &http.Transport{
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     tlsConfig,

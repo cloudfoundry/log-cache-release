@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/go-metric-registry/testhelpers"
+	"code.cloudfoundry.org/tlsconfig"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -17,7 +18,6 @@ import (
 	rpc "code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	. "code.cloudfoundry.org/log-cache/internal/cache"
-	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
 
 	"code.cloudfoundry.org/log-cache/internal/testing"
 	. "github.com/onsi/ginkgo/v2"
@@ -25,12 +25,19 @@ import (
 )
 
 func tlsLogCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMetricsRegistry, *tls.Config) {
-	var err error
-	tlsConfig, err := sharedtls.NewMutualTLSConfig(
-		testing.LogCacheTestCerts.CA(),
-		testing.LogCacheTestCerts.Cert("log-cache"),
-		testing.LogCacheTestCerts.Key("log-cache"),
-		"log-cache",
+	clientTlsConfig, err := tlsconfig.Build(
+		tlsconfig.WithInternalServiceDefaults(),
+		tlsconfig.WithIdentityFromFile(testing.LogCacheTestCerts.Cert("log-cache"), testing.LogCacheTestCerts.Key("log-cache")),
+	).Client(
+		tlsconfig.WithAuthorityFromFile(testing.LogCacheTestCerts.CA()),
+		tlsconfig.WithServerName("log-cache"),
+	)
+	Expect(err).ToNot(HaveOccurred())
+	tlsConfig, err := tlsconfig.Build(
+		tlsconfig.WithInternalServiceDefaults(),
+		tlsconfig.WithIdentityFromFile(testing.LogCacheTestCerts.Cert("log-cache"), testing.LogCacheTestCerts.Key("log-cache")),
+	).Server(
+		tlsconfig.WithClientAuthenticationFromFile(testing.LogCacheTestCerts.CA()),
 	)
 	Expect(err).ToNot(HaveOccurred())
 
@@ -43,15 +50,14 @@ func tlsLogCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMe
 		log.New(io.Discard, "", 0),
 		WithAddr("127.0.0.1:0"),
 		WithClustered(0, []string{"my-addr", peerAddr},
-			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
+			grpc.WithTransportCredentials(credentials.NewTLS(clientTlsConfig)),
 		),
 		WithServerOpts(
 			grpc.Creds(credentials.NewTLS(tlsConfig)),
 		),
 	)
 	cache.Start()
-
-	return cache, peer, spyMetrics, tlsConfig
+	return cache, peer, spyMetrics, clientTlsConfig
 }
 
 func logCacheTestSetup() (*LogCache, *testing.SpyLogCache, *testhelpers.SpyMetricsRegistry) {

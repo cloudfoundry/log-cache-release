@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/log-cache/internal/auth"
-	sharedtls "code.cloudfoundry.org/log-cache/internal/tls"
+	"code.cloudfoundry.org/tlsconfig"
 )
 
 type CFAuthProxy struct {
@@ -125,10 +125,20 @@ func (p *CFAuthProxy) Start(readyChecker func() error) {
 	if err != nil {
 		log.Fatalf("failed to start listener: %s", err)
 	}
-
+	var tlsConfig *tls.Config
+	if !p.tlsDisabled {
+		tlsConfig, err = tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(p.certPath, p.keyPath),
+		).Server()
+		if err != nil {
+			fmt.Printf("failed to create tls config: %s\n", err)
+			log.Fatalf("failed to create tls config: %s", err)
+		}
+	}
 	server := &http.Server{
 		Handler:           p.accessMiddleware(p.promMiddleware(p.authMiddleware(p.reverseProxy()))),
-		TLSConfig:         sharedtls.NewBaseTLSConfig(),
+		TLSConfig:         tlsConfig,
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 
