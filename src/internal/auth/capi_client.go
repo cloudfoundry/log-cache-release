@@ -221,12 +221,12 @@ func (c *CAPIClient) doPaginatedResourceRequest(req *http.Request, authToken str
 func (c *CAPIClient) doResourceRequest(req *http.Request, authToken string, metric metrics.Gauge) ([]resource, *url.URL, error) {
 	resp, err := c.doRequest(req, authToken, metric)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed CAPI request (%s) with error: %s", req.URL.Path, err)
+		return nil, nil, fmt.Errorf("failed CAPI request (%s) with error: %s", req.URL.EscapedPath(), err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, nil, fmt.Errorf(
 			"failed CAPI request (%s) with status: %d (%s)",
-			req.URL.Path,
+			req.URL.EscapedPath(),
 			resp.StatusCode,
 			http.StatusText(resp.StatusCode),
 		)
@@ -247,7 +247,7 @@ func (c *CAPIClient) doResourceRequest(req *http.Request, authToken string, metr
 
 	err = json.NewDecoder(resp.Body).Decode(&apps)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to decode resource list request (%s): %s", req.URL.Path, err)
+		return nil, nil, fmt.Errorf("failed to decode resource list request (%s): %s", req.URL.EscapedPath(), err)
 	}
 
 	var nextPageURL *url.URL
@@ -293,12 +293,12 @@ func (c *CAPIClient) doRequest(req *http.Request, authToken string, reporter met
 	reporter.Set(float64(time.Since(start)))
 
 	if err != nil {
-		c.log.Printf("CAPI request (%s) failed: %s", req.URL.Path, err)
+		c.log.Printf("CAPI request (%s) failed: %s", req.URL.EscapedPath(), err)
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		c.log.Printf("CAPI request (%s) returned: %d", req.URL.Path, resp.StatusCode)
+		c.log.Printf("CAPI request (%s) returned: %d", req.URL.EscapedPath(), resp.StatusCode)
 		cleanup(resp)
 		return resp, nil
 	}
