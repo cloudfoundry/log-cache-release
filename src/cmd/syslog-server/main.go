@@ -16,7 +16,9 @@ import (
 	. "code.cloudfoundry.org/log-cache/internal/nozzle"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
+	"code.cloudfoundry.org/tlsconfig"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -91,7 +93,17 @@ func main() {
 
 	nozzleOptions := []NozzleOption{}
 	if cfg.LogCacheTLS.HasAnyCredential() {
-		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(cfg.LogCacheTLS.Credentials("log-cache"))))
+		tlsConfig, err := tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(cfg.LogCacheTLS.CertPath, cfg.LogCacheTLS.KeyPath),
+		).Client(
+			tlsconfig.WithAuthorityFromFile(cfg.LogCacheTLS.CAPath),
+			tlsconfig.WithServerName("log-cache"),
+		)
+		if err != nil {
+			panic(err)
+		}
+		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))))
 	} else {
 		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(insecure.NewCredentials())))
 	}

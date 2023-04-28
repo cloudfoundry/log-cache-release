@@ -14,11 +14,13 @@ import (
 	"time"
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
+	"code.cloudfoundry.org/tlsconfig"
 
 	"code.cloudfoundry.org/go-envstruct"
 	. "code.cloudfoundry.org/log-cache/internal/cache"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -98,10 +100,29 @@ func main() {
 	}
 	var transport grpc.DialOption
 	if cfg.TLS.HasAnyCredential() {
-		transport = grpc.WithTransportCredentials(
-			cfg.TLS.Credentials("log-cache"),
+		tlsConfigClient, err := tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(cfg.TLS.CertPath, cfg.TLS.KeyPath),
+		).Client(
+			tlsconfig.WithAuthorityFromFile(cfg.TLS.CAPath),
+			tlsconfig.WithServerName("log-cache"),
 		)
-		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(cfg.TLS.Credentials("log-cache")), grpc.MaxRecvMsgSize(50*1024*1024)))
+		if err != nil {
+			panic(err)
+		}
+		transport = grpc.WithTransportCredentials(
+			credentials.NewTLS(tlsConfigClient),
+		)
+		tlsConfigServer, err := tlsconfig.Build(
+			tlsconfig.WithInternalServiceDefaults(),
+			tlsconfig.WithIdentityFromFile(cfg.TLS.CertPath, cfg.TLS.KeyPath),
+		).Server(
+			tlsconfig.WithClientAuthenticationFromFile(cfg.TLS.CAPath),
+		)
+		if err != nil {
+			panic(err)
+		}
+		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(credentials.NewTLS(tlsConfigServer)), grpc.MaxRecvMsgSize(50*1024*1024)))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
