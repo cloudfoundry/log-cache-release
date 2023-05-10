@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20220601181205-303abfc14b83
 	code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655
 	code.cloudfoundry.org/go-envstruct v1.6.0
-	code.cloudfoundry.org/go-log-cache/v2 v2.0.0
+	code.cloudfoundry.org/go-log-cache/v2 v2.0.1
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.4
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20220408214155-d9c3faa1e9e3
 	code.cloudfoundry.org/tlsconfig v0.0.0-20220621140725-0e6fbd869921
@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
 	github.com/shirou/gopsutil/v3 v3.23.4
 	golang.org/x/net v0.10.0
-	google.golang.org/grpc v1.54.0
+	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 )
 
@@ -66,7 +66,7 @@ require (
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/tools v0.8.0 // indirect
-	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect
+	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
