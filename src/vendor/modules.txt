@@ -72,7 +72,7 @@ github.com/emirpasic/gods/containers
 github.com/emirpasic/gods/trees
 github.com/emirpasic/gods/trees/avltree
 github.com/emirpasic/gods/utils
-# github.com/go-chi/chi/v5 v5.0.8
+# github.com/go-chi/chi/v5 v5.0.10
 ## explicit; go 1.14
 github.com/go-chi/chi/v5
 # github.com/go-kit/kit v0.9.0
