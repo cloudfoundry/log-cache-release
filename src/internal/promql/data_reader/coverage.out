@@ -1,0 +1,7 @@
+mode: atomic
+code.cloudfoundry.org/log-cache/internal/promql/data_reader/walking_data_reader.go:16.68,20.2 1 1
+code.cloudfoundry.org/log-cache/internal/promql/data_reader/walking_data_reader.go:25.38,29.78 2 1
+code.cloudfoundry.org/log-cache/internal/promql/data_reader/walking_data_reader.go:29.78,32.3 2 0
+code.cloudfoundry.org/log-cache/internal/promql/data_reader/walking_data_reader.go:40.2,40.34 1 1
+code.cloudfoundry.org/log-cache/internal/promql/data_reader/walking_data_reader.go:40.34,42.3 1 1
+code.cloudfoundry.org/log-cache/internal/promql/data_reader/walking_data_reader.go:44.2,48.8 1 0
