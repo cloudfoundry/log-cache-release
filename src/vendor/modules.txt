@@ -114,7 +114,7 @@ github.com/google/go-cmp/cmp/internal/value
 # github.com/google/pprof v0.0.0-20230817174616-7a8ec2ada47b
 ## explicit; go 1.19
 github.com/google/pprof/profile
-# github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2
+# github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
 ## explicit; go 1.17
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
 github.com/grpc-ecosystem/grpc-gateway/v2/runtime
@@ -294,15 +294,15 @@ golang.org/x/text/unicode/norm
 ## explicit; go 1.18
 golang.org/x/tools/go/ast/inspector
 golang.org/x/tools/internal/typeparams
-# google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130
+# google.golang.org/genproto v0.0.0-20230803162519-f966b187b2e5
 ## explicit; go 1.19
 google.golang.org/genproto/internal
-# google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
+# google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.57.0
