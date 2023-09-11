@@ -16,7 +16,7 @@ require (
 	github.com/cloudfoundry/gosigar v1.3.25
 	github.com/dvsekhvalnov/jose2go v1.5.1-0.20211102184025-feb89cf56911
 	github.com/emirpasic/gods v1.18.1
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
