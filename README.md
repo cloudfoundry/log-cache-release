@@ -1,99 +1,60 @@
 # Log Cache Release
 
-A BOSH release providing an in-memory caching layer for logs and metrics emitted by [Cloud Foundry] applications and system components.
+The in-memory caching layer for logs and metrics in [Cloud Foundry]. Log Cache is a collection of microservices packaged and distributed as a [BOSH] release.
 
-## Deployment
+## Getting started
 
-Log Cache is built for [Cloud Foundry] and is not intended for use outside of [Cloud Foundry] deployments, like [cf-deployment].
+Some fundamental knowledge of [BOSH], [Cloud Foundry], and [Golang](https://go.dev/) are recommended in order to grok this repo and its contents.
 
-It is meant to be deployed as a collection of microservices on a node within [Cloud Foundry]. Log Cache nodes are horizontally scalable, and source IDs (e.g. application GUID, unique string, etc) of envelopes are hashed to determine which Log Cache node will host which envelopes. Envelopes can be sent to any Log Cache node and they will be forwarded on to the correct node. Similarly, Log Cache clients can reach out to any Log Cache node for logs or metrics, and will be forwarded to the appropriate node for the source ID they are requesting.
+### Prerequisites
 
-Within [cf-deployment], Log Cache interacts with a number of other components by default:
-* Log Cache receives data from Syslog Agents, which are added on to every VM.
-* Cloud Controller queries Log Cache for app instance metrics such as CPU usage and memory when retrieving details for applications.
-* The cf CLi queries Log Cache directly to retrieve recent logs for applications.
+* [BOSH]: a deployment on an IAAS that supports [Ubuntu Stemcells].
 
-### Jobs
+### Deployment
 
-* **log-cache ([spec](jobs/log-cache/spec)) ([main.go](src/cmd/log-cache/main.go))**: stores the logs and metrics.
-* **log-cache-cf-auth-proxy (spec) (main.go)**: authenticates and proxies requests from Log Cache clients.
-* **log-cache-gateway (spec) (main.go)**: authenticates and proxies requests from Log Cache clients.
-* **log-cache-syslog-server (spec) (main.go)**: authenticates and proxies requests from Log Cache clients.
+See the `log-cache` instance group within [cf-deployment]. It is not recommended to run this release outside of a Cloud Foundry deployment.
 
-### Configuration
+#### Jobs
 
-#### Scaling
+This release contains the following jobs:
 
-Numerous variables affect the retention of Log Cache:
+* **log-cache ([spec](jobs/log-cache/spec)) ([main.go](src/cmd/log-cache/main.go))**: an in-memory cache for [loggregator envelopes].
+* **log-cache-cf-auth-proxy ([spec](jobs/log-cache-cf-auth-proxy/spec)) ([main.go](src/cmd/cf-auth-proxy/main.go))**: authenticates Log Cache client HTTPS requests with [UAA](https://github.com/cloudfoundry/uaa) or [Cloud Controller] and proxies them to the log-cache-gateway.
+* **log-cache-gateway ([spec](jobs/log-cache-gateway/spec)) ([main.go](src/cmd/gateway/main.go))**: accepts HTTP requests for logs and metrics from Log Cache clients and forwards them to log-cache via gRPC.
+* **log-cache-syslog-server ([spec](jobs/log-cache-syslog-server/spec)) ([main.go](src/cmd/syslog-server/main.go))**: accepts incoming [loggregator envelopes] via [syslog](https://en.wikipedia.org/wiki/Syslog) and forwards them to log-cache via gRPC.
 
-Number of instances - Increasing adds more storage space, allows higher throughput and reduces contention between sources
+### Learn more
 
-Max Per Source ID - Increasing allows a higher max storage allowance, but may decrease the storage of less noisy apps on the same node
+* [Logging and metrics in Cloud Foundry](https://docs.cloudfoundry.org/loggregator/data-sources.html)
+* [Advanced documentation](docs)
+* [#logging-and-metrics](https://cloudfoundry.slack.com/archives/CUW93AF3M) in Cloud Foundry Slack
 
-Memory per instance - Increasing allows more storage in general, but any given instance may not be able to take advantage of that increase due to max per source id
+## FAQ
 
-Memory limit - Increasing memory limit allows for more storage, but may cause out of memory errors and crashing if set too high for the total throughput of the system
+### Accessing the Log Cache directly
 
-Larger CPUs - Increasing the CPU budget per instance should allow higher throughput
+To access logs and metrics in Log Cache directly, install the [Log Cache cf CLI plugin](https://github.com/cloudfoundry/log-cache-cli#installing) or query the [API](src/README.md). Only authenticated clients can communicate with Log Cache, and the logs and metrics that can be retrieved are determined by the level of access your authentication allows.
 
-Log Cache is known to exceed memory limits under high throughput/stress. If you see your log-cache reaching higher memory
-then you have set, you might want to scale your log-cache up. Either solely in terms of CPU per instance, or more instances.
+> [!NOTE]
+> Accessing Log Cache directly is the only way to retrieve system component metrics from Log Cache.
 
-You can monitor the performance of log cache per source id (app or platform component) using the Log Cache CLI. The command `cf log-meta` allows viewing
-the amount of logs and metrics as well as the period of time for those logs and metrics for each source on the system. This can be used in conjunction with scaling
-to target your use cases. For simple pushes, a low retention period may be adequate. For running analysis on metrics for debugging and scaling, higher retention
-periods may be desired; although one should remember all logs and metrics will always be lost upon crashes or re-deploys of log-cache.
+### System component logs
 
-#### Log Cache Syslog Server TLS and mutual TLS configuration
+System component logs are not stored within Log Cache at present. This is in order to prioritize application logs and metrics, as well as system component metrics.
 
-If someone runs Cloud Foundry with a hardened setup in terms of security, they might want to activate TLS or even mutual TLS(mTLS) for the incoming connections to the Log Cache Syslog Server. The activation of TLS and mTLS is optional and is configured by the presence of the needed certificates. For TLS a syslog certificate or syslog key should be present in the BPM configuration and for mTLS a syslog client CA certificate should be present in the BPM configuration. Check the BOSH [BPM template](jobs/log-cache-syslog-server/templates/bpm.yml.erb) and the [spec](jobs/log-cache-syslog-server/spec) for details.
+### Reliability during deployments
 
-#### Reliability
+Log Cache is an in-memory database, and as such will drop its entire cache when it is restarted. Because of that, clients should plan for Log Cache to not be available 100% of the time. For example, [Cloud Controller] depends on Log Cache, but can can function without it, and informs its users that Log Cache is unavailable when necessary.
 
-Log Cache is an in memory cache and as such will drop envelopes when it restarts. Users should not expect 100% availability of
-logs in Log Cache and should plan accordingly. For example, Cloud Controller can function without Log Cache though users are
-informed that Log Cache is unavailable.
+### Availability during AZ failures
 
-### Diagram
+Log Cache is built to be horizontally scalable by hashing source IDs (e.g. application GUID, unique string, etc) of logs and metrics, and assigning them to Log Cache nodes. This assignment is done during deployments, so logs and metrics assigned to a Log Cache node that becomes unavailable due to an AZ failure will also be unavailable.
 
-```mermaid
-flowchart RL
-    origin([Log and metric sources])
-    requests([Log Cache clients])
-
-    subgraph Log Cache VM
-    log-cache[(log-cache)]
-    log-cache-syslog-server
-    log-cache-cf-auth-proxy
-    log-cache-gateway
-    end
-
-    origin-. syslog .->log-cache-syslog-server
-    log-cache-syslog-server-- loggregator envelopes -->log-cache
-
-    requests-..->gorouter{GoRouter}
-    gorouter-..->log-cache-cf-auth-proxy
-    log-cache-cf-auth-proxy-. Authenticate .->uaa{UAA}
-    log-cache-cf-auth-proxy-->log-cache-gateway
-    log-cache-gateway-- gRPC -->log-cache
-```
-
-## How do I use it?
-
-### From the `cf` CLI
-
-Application developers using Cloud Foundry will use Log Cache automatically. Build logs while running
-`cf push` are streamed through Log Cache. Application logs when running `cf logs` are retrieved from Log Cache.
-Application metrics when running `cf app APP_NAME` are retrieved from Log Cache.
-
-### Using the Log Cache CLI plugin
-To query Log Cache directly users or operators can install the [Log Cache CLI plugin](https://github.com/cloudfoundry/log-cache-cli)
-by running `cf install-plugin -r CF-Community "log-cache"` which provides additional commands in the CLI for querying logs and metrics
-stored in log cache. This is useful for querying system component metrics which are not exposed otherwise. See the CLI plugin README for details. 
-
-### Log Cache API
-Documentation about the internals of Log Cache and its API can be found [here](https://github.com/cloudfoundry/log-cache-release/blob/main/src/README.md)
+This situation can be rectified in case of an AZ failure by redeploying with a configuration that does not attempt to place Log Cache in the AZ that is experiencing a failure.
 
 
-[Cloud Foundry]: https://www.cloudfoundry.org/
+[BOSH]: https://bosh.io/docs/
 [cf-deployment]: https://github.com/cloudfoundry/cf-deployment
+[Cloud Controller]: https://github.com/cloudfoundry/cloud_controller_ng
+[Cloud Foundry]: https://www.cloudfoundry.org/
+[loggregator envelopes]: https://github.com/cloudfoundry/loggregator-api#v2-envelope
