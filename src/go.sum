@@ -8,8 +8,8 @@ code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655 h1:3IlYr3dIyX
 code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655/go.mod h1:T+qZrTfw8xwdJgVRD5pSvVyx4CeqsP30YQooBYFADRc=
 code.cloudfoundry.org/go-envstruct v1.6.0 h1:n3ReWhxIb8T8Pedu2ONAtWZxHmytPl9MmLfm1M4x8E0=
 code.cloudfoundry.org/go-envstruct v1.6.0/go.mod h1:d36KAtkHU9KBkz1yvLM3oRoWTvZ2ipSPchQ2BX/p0pk=
-code.cloudfoundry.org/go-log-cache/v2 v2.0.4 h1:9XI1LEw8Rn9fEKdo0H8OiBy4Ht5AceofDscFXVIkj24=
-code.cloudfoundry.org/go-log-cache/v2 v2.0.4/go.mod h1:rUxVA779QWySkT3GyliM15wVi0tmIaZNddnDs89PNLc=
+code.cloudfoundry.org/go-log-cache/v2 v2.0.5 h1:NLPBNVAmT7EoSMRVtMXxWo48wUtmgNBNAB9ME04zLgU=
+code.cloudfoundry.org/go-log-cache/v2 v2.0.5/go.mod h1:xnLGKirmT7LyObOnxRDhuRZbcGuj04MrvH8anQyqrpA=
 code.cloudfoundry.org/go-loggregator/v9 v9.0.8 h1:Ntt6dubOuV2Rk2Yw0C2OOvaGjZNWSKJoWM72ihTaPo4=
 code.cloudfoundry.org/go-loggregator/v9 v9.0.8/go.mod h1:+U07+rozDh39Wd0MmS5Bd9mn/gOwg8NLqv3gnxRvuHI=
 code.cloudfoundry.org/go-metric-registry v0.0.0-20220408214155-d9c3faa1e9e3 h1:zA9jf3tXGc0eSLqaOL1gvRZDBQg4U7r4wJQF6KtCtWY=
@@ -195,8 +195,9 @@ github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
-github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
+github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367/go.mod h1:HP5RmnzzSNb993RKQDq4+1A4ia9nllfqcQFTQJedwGI=
 github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf/go.mod h1:HP5RmnzzSNb993RKQDq4+1A4ia9nllfqcQFTQJedwGI=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
@@ -325,8 +326,8 @@ github.com/onsi/ginkgo/v2 v2.13.0/go.mod h1:TE309ZR8s5FsKKpuB1YAQYBzCaAfUgatB/xl
 github.com/onsi/gomega v0.0.0-20170829124025-dcabb60a477c/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
 github.com/onsi/gomega v0.0.0-20190113212917-5533ce8a0da3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
 github.com/onsi/gomega v1.5.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
-github.com/onsi/gomega v1.28.0 h1:i2rg/p9n/UqIDAMFUJ6qIUUMcsqOuUHgbpbu235Vr1c=
-github.com/onsi/gomega v1.28.0/go.mod h1:A1H2JE76sI14WIP57LMKj7FVfCHx3g3BcZVjJG8bjX8=
+github.com/onsi/gomega v1.28.1 h1:MijcGUbfYuznzK/5R4CPNoUP/9Xvuo20sXfEm6XxoTA=
+github.com/onsi/gomega v1.28.1/go.mod h1:9sxs+SwGrKI0+PWe4Fxa9tFQQBG5xSsSbMXOI8PPpoQ=
 github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9/go.mod h1:PLldrQSroqzH70Xl+1DQcGnefIbqsKR7UDaiux3zV+w=
 github.com/opentracing/opentracing-go v1.1.0 h1:pWlfV3Bxv7k65HYwkikxat0+s3pV4bsqf19k25Ur8rU=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=

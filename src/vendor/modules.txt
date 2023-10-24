@@ -7,7 +7,7 @@ code.cloudfoundry.org/go-diodes
 # code.cloudfoundry.org/go-envstruct v1.6.0
 ## explicit; go 1.19
 code.cloudfoundry.org/go-envstruct
-# code.cloudfoundry.org/go-log-cache/v2 v2.0.4
+# code.cloudfoundry.org/go-log-cache/v2 v2.0.5
 ## explicit; go 1.19
 code.cloudfoundry.org/go-log-cache/v2
 code.cloudfoundry.org/go-log-cache/v2/internal
@@ -104,7 +104,7 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/golang/snappy v0.0.1
 ## explicit
 github.com/golang/snappy
-# github.com/google/go-cmp v0.5.9
+# github.com/google/go-cmp v0.6.0
 ## explicit; go 1.13
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/internal/diff
@@ -158,7 +158,7 @@ github.com/onsi/ginkgo/v2/internal/parallel_support
 github.com/onsi/ginkgo/v2/internal/testingtproxy
 github.com/onsi/ginkgo/v2/reporters
 github.com/onsi/ginkgo/v2/types
-# github.com/onsi/gomega v1.28.0
+# github.com/onsi/gomega v1.28.1
 ## explicit; go 1.18
 github.com/onsi/gomega
 github.com/onsi/gomega/format
