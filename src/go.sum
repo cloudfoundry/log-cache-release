@@ -8,8 +8,8 @@ code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655 h1:3IlYr3dIyX
 code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655/go.mod h1:T+qZrTfw8xwdJgVRD5pSvVyx4CeqsP30YQooBYFADRc=
 code.cloudfoundry.org/go-envstruct v1.6.0 h1:n3ReWhxIb8T8Pedu2ONAtWZxHmytPl9MmLfm1M4x8E0=
 code.cloudfoundry.org/go-envstruct v1.6.0/go.mod h1:d36KAtkHU9KBkz1yvLM3oRoWTvZ2ipSPchQ2BX/p0pk=
-code.cloudfoundry.org/go-log-cache/v2 v2.0.4 h1:9XI1LEw8Rn9fEKdo0H8OiBy4Ht5AceofDscFXVIkj24=
-code.cloudfoundry.org/go-log-cache/v2 v2.0.4/go.mod h1:rUxVA779QWySkT3GyliM15wVi0tmIaZNddnDs89PNLc=
+code.cloudfoundry.org/go-log-cache/v2 v2.0.5 h1:NLPBNVAmT7EoSMRVtMXxWo48wUtmgNBNAB9ME04zLgU=
+code.cloudfoundry.org/go-log-cache/v2 v2.0.5/go.mod h1:xnLGKirmT7LyObOnxRDhuRZbcGuj04MrvH8anQyqrpA=
 code.cloudfoundry.org/go-loggregator/v9 v9.0.8 h1:Ntt6dubOuV2Rk2Yw0C2OOvaGjZNWSKJoWM72ihTaPo4=
 code.cloudfoundry.org/go-loggregator/v9 v9.0.8/go.mod h1:+U07+rozDh39Wd0MmS5Bd9mn/gOwg8NLqv3gnxRvuHI=
 code.cloudfoundry.org/go-metric-registry v0.0.0-20220408214155-d9c3faa1e9e3 h1:zA9jf3tXGc0eSLqaOL1gvRZDBQg4U7r4wJQF6KtCtWY=

@@ -7,7 +7,7 @@ code.cloudfoundry.org/go-diodes
 # code.cloudfoundry.org/go-envstruct v1.6.0
 ## explicit; go 1.19
 code.cloudfoundry.org/go-envstruct
-# code.cloudfoundry.org/go-log-cache/v2 v2.0.4
+# code.cloudfoundry.org/go-log-cache/v2 v2.0.5
 ## explicit; go 1.19
 code.cloudfoundry.org/go-log-cache/v2
 code.cloudfoundry.org/go-log-cache/v2/internal
