@@ -1,12 +1,16 @@
 # Scaling
 
+A factsheet for operators to consider when scaling Log Cache.
+
+---
+
+## Variables to tweak
+
 Numerous variables affect the retention of Log Cache:
 
-Number of instances - Increasing adds more storage space, allows higher throughput and reduces contention between sources
-
-Max Per Source ID - Increasing allows a higher max storage allowance, but may decrease the storage of less noisy apps on the same node
-
-Memory per instance - Increasing allows more storage in general, but any given instance may not be able to take advantage of that increase due to max per source id
+* **Number of nodes**: Increasing the number of Log Cache nodes adds more storage space, allows higher throughput and reduces contention between sources.
+* **Max envelopes per source ID**: Increasing this allows more envelopes to be stored per source ID a higher max storage allowance, but may decrease the storage of less noisy apps on the same node.
+* **Memory per instance**: Increasing allows more storage in general, but any given instance may not be able to take advantage of that increase due to max per source id
 
 Memory limit - Increasing memory limit allows for more storage, but may cause out of memory errors and crashing if set too high for the total throughput of the system
 

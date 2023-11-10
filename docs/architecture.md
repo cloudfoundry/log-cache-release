@@ -51,17 +51,17 @@ The token must have one of the following:
 * `logs.admin` scope.
 * A relevant Cloud Controller role.
 
-Either of those scopes are sufficient to return data for any source IDs.
+Having one of those two scopes is sufficient to return data for any source ID.
 
 > [!IMPORTANT]
-> The `doppler.firehose` or the `logs.admin` scope is required in order to retrieve system component metrics from Log Cache.
+> Either the `doppler.firehose` scope or the `logs.admin` scope is required in order to retrieve system component metrics from Log Cache.
 
 > [!WARNING]
 > These authentication requirements can be bypassed completely by querying the log-cache job directly via gRPC with the correct certificates for mTLS authentication.
 
 ## Clients
 
-Log Cache clients should use the [Go Client Library for Log Cache](https://github.com/cloudfoundry/go-log-cache) to communicate with Log Cache:
+Log Cache clients should use the [Go Client Library for Log Cache](https://github.com/cloudfoundry/go-log-cache) to communicate with Log Cache. Here are some useful links within that library:
 * [Protobuf definitions](https://github.com/cloudfoundry/go-log-cache/tree/main/api/v1)
 * [Go generated code](https://github.com/cloudfoundry/go-log-cache/tree/main/rpc/logcache_v1)
 * [Examples](https://github.com/cloudfoundry/go-log-cache/tree/main/examples)
@@ -71,13 +71,7 @@ Log Cache clients should use the [Go Client Library for Log Cache](https://githu
 
 ---
 
-Log Cache nodes are horizontally scalable, and source IDs (e.g. application GUID, unique string, etc) of envelopes are hashed to determine which Log Cache node will host which envelopes. Envelopes can be sent to any Log Cache node and they will be forwarded on to the correct node. Similarly, Log Cache clients can reach out to any Log Cache node for logs or metrics, and will be forwarded to the appropriate node for the source ID they are requesting.
 
-### Scaling
-
-#### Horizontal Scaling
-
-Log Cache is built to be horizontally scalable by hashing source IDs (e.g. application GUID, unique string, etc) of envelopes and assigning each hash to an individual node.
 
 #### Vertical Scaling
 
