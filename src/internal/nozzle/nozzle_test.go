@@ -100,7 +100,7 @@ var _ = Describe("Nozzle", func() {
 				},
 			))
 
-			Eventually(streamConnector.envelopes).Should(HaveLen(0))
+			Eventually(streamConnector.envelopes).Should(BeEmpty())
 		})
 	})
 
@@ -167,7 +167,7 @@ var _ = Describe("Nozzle", func() {
 				},
 			))
 
-			Eventually(streamConnector.envelopes).Should(HaveLen(0))
+			Eventually(streamConnector.envelopes).Should(BeEmpty())
 		})
 
 		It("writes each envelope to the LogCache", func() {

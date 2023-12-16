@@ -156,7 +156,7 @@ var _ = Describe("CfAuthMiddleware", func() {
 
 			var m rpc.MetaResponse
 			msg, err := io.ReadAll(tc.recorder.Body)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(protojson.Unmarshal(msg, &m)).To(Succeed())
 
 			Expect(m.Meta).To(HaveLen(2))
@@ -182,7 +182,7 @@ var _ = Describe("CfAuthMiddleware", func() {
 			Expect(tc.recorder.Code).To(Equal(http.StatusOK))
 			var m rpc.MetaResponse
 			msg, err := io.ReadAll(tc.recorder.Body)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(protojson.Unmarshal(msg, &m)).To(Succeed())
 			Expect(m.Meta).To(HaveLen(2))
 			Expect(m.Meta).To(HaveKey("source-0"))
