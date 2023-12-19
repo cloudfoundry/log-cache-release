@@ -27,7 +27,7 @@ updates:
   directory: "/src"
   target-branch: "v2.x"
   schedule:
-    interval: ""weekly""
+    interval: "weekly"
   labels:
   - "v2.x"
   - "go"
