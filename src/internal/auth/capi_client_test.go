@@ -58,11 +58,11 @@ var _ = Describe("CAPIClient", func() {
 
 			By("calling isAuthorized the first time and caching response")
 			Expect(tc.client.IsAuthorized("37cbff06-79ef-4146-a7b0-01838940f185", "some-token")).To(BeTrue())
-			Expect(len(tc.capiClient.requests)).To(Equal(1))
+			Expect(tc.capiClient.requests).To(HaveLen(1))
 
 			By("calling isAuthorized the second time and pulling from the cache")
 			Expect(tc.client.IsAuthorized("37cbff06-79ef-4146-a7b0-01838940f185", "some-token")).To(BeTrue())
-			Expect(len(tc.capiClient.requests)).To(Equal(1))
+			Expect(tc.capiClient.requests).To(HaveLen(1))
 		})
 
 		It("sourceIDs from expired cached tokens are not authorized", func() {
@@ -176,14 +176,14 @@ var _ = Describe("CAPIClient", func() {
 			}
 
 			authorized := tc.client.IsAuthorized("app-guid", "some-token")
-			Expect(len(tc.capiClient.requests)).To(Equal(1))
+			Expect(tc.capiClient.requests).To(HaveLen(1))
 			Expect(authorized).To(BeTrue())
 
 			tc.capiClient.resps = []response{
 				newCapiResp(http.StatusOK),
 			}
 			Expect(tc.client.IsAuthorized("service-guid", "some-token")).To(BeTrue())
-			Expect(len(tc.capiClient.requests)).To(Equal(2))
+			Expect(tc.capiClient.requests).To(HaveLen(2))
 		})
 
 		It("stores the latency", func() {
@@ -501,7 +501,7 @@ var _ = Describe("CAPIClient", func() {
 			tc := setup()
 
 			tc.client.GetRelatedSourceIds([]string{}, "some-token")
-			Expect(tc.capiClient.requests).To(HaveLen(0))
+			Expect(tc.capiClient.requests).To(BeEmpty())
 		})
 
 		It("stores the latency", func() {
@@ -524,7 +524,7 @@ var _ = Describe("CAPIClient", func() {
 				{status: http.StatusNotFound},
 			}
 			sourceIds := tc.client.GetRelatedSourceIds([]string{"app-name"}, "some-token")
-			Expect(sourceIds).To(HaveLen(0))
+			Expect(sourceIds).To(BeEmpty())
 		})
 
 		It("returns no source IDs when the request returns a non-200 status code", func() {
@@ -534,7 +534,7 @@ var _ = Describe("CAPIClient", func() {
 				{err: errors.New("intentional error")},
 			}
 			sourceIds := tc.client.GetRelatedSourceIds([]string{"app-name"}, "some-token")
-			Expect(sourceIds).To(HaveLen(0))
+			Expect(sourceIds).To(BeEmpty())
 		})
 
 		It("returns no source IDs when JSON decoding fails", func() {
@@ -544,7 +544,7 @@ var _ = Describe("CAPIClient", func() {
 				{status: http.StatusOK, body: []byte(`{`)},
 			}
 			sourceIds := tc.client.GetRelatedSourceIds([]string{"app-name"}, "some-token")
-			Expect(sourceIds).To(HaveLen(0))
+			Expect(sourceIds).To(BeEmpty())
 		})
 	})
 })

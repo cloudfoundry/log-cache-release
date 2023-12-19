@@ -557,7 +557,7 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(len(result.GetVector().GetSamples())).To(Equal(2))
+			Expect(result.GetVector().GetSamples()).To(HaveLen(2))
 			Expect(result.GetVector().GetSamples()[0].GetMetric()).To(Equal(map[string]string{
 				"deployment": "cf",
 				"tag-name":   "tag-value",
@@ -606,7 +606,7 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(len(result.GetMatrix().GetSeries())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()).To(HaveLen(2))
 			Expect(result.GetMatrix().GetSeries()[0].GetMetric()).To(Equal(map[string]string{
 				"deployment": "cf",
 				"tag-name":   "tag-value",
@@ -615,12 +615,12 @@ var _ = Describe("PromqlMarshaler", func() {
 				"deployment": "cf",
 				"tag-name2":  "tag-value2",
 			}))
-			Expect(len(result.GetMatrix().GetSeries()[0].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()).To(HaveLen(2))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetTime()).To(Equal("1.987"))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetValue()).To(Equal(2.5))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetTime()).To(Equal("2.000"))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetValue()).To(Equal(3.5))
-			Expect(len(result.GetMatrix().GetSeries()[1].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()).To(HaveLen(2))
 			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetTime()).To(Equal("1.000"))
 			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetValue()).To(Equal(4.5))
 			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[1].GetTime()).To(Equal("2.000"))
@@ -661,12 +661,12 @@ var _ = Describe("PromqlMarshaler", func() {
 			}`), &result)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(len(result.GetMatrix().GetSeries()[0].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[0].GetPoints()).To(HaveLen(2))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetTime()).To(Equal("1.987"))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[0].GetValue()).To(Equal(2.5))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetTime()).To(Equal("2.000"))
 			Expect(result.GetMatrix().GetSeries()[0].GetPoints()[1].GetValue()).To(Equal(3.5))
-			Expect(len(result.GetMatrix().GetSeries()[1].GetPoints())).To(Equal(2))
+			Expect(result.GetMatrix().GetSeries()[1].GetPoints()).To(HaveLen(2))
 			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetTime()).To(Equal("1.000"))
 			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[0].GetValue()).To(Equal(4.5))
 			Expect(result.GetMatrix().GetSeries()[1].GetPoints()[1].GetTime()).To(Equal("2.000"))

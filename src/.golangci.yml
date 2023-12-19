@@ -11,6 +11,8 @@ linters:
     - gocyclo
     # Inspects source code for security problems.
     - gosec
+    # Enforces standards of using ginkgo and gomega.
+    - ginkgolinter
 
 issues:
   # Disable max issues per linter.

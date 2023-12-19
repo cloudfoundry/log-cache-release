@@ -297,8 +297,8 @@ var _ = Describe("LogCache", func() {
 				return err
 			}
 
-			Expect(len(resp.GetMatrix().GetSeries())).To(Equal(1))
-			Expect(len(resp.GetMatrix().GetSeries()[0].GetPoints())).To(Equal(1))
+			Expect(resp.GetMatrix().GetSeries()).To(HaveLen(1))
+			Expect(resp.GetMatrix().GetSeries()[0].GetPoints()).To(HaveLen(1))
 
 			return nil
 		}

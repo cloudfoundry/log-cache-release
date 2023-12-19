@@ -110,7 +110,7 @@ var _ = Describe("UAAClient", func() {
 			_, err = tc.uaaClient.Read(withBearer(token))
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount))
+			Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount))
 		})
 
 		It("does not allow use of an expired token", func() {
@@ -147,7 +147,7 @@ var _ = Describe("UAAClient", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(c.Token).To(Equal(withBearer(token)))
 
-				Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+				Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 			})
 
 			It("returns an error when the matching public key cannot be retrieved from UAA", func() {
@@ -161,7 +161,7 @@ var _ = Describe("UAAClient", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("failed to decode token: using unknown token key"))
 
-				Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+				Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 			})
 
 			It("returns an error when given a token signed by an public key that was purged from UAA", func() {
@@ -182,7 +182,7 @@ var _ = Describe("UAAClient", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("failed to decode token: using unknown token key"))
 
-				Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 2))
+				Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 2))
 			})
 
 			It("continues to accept previously signed tokens when retrieving public keys from UAA fails", func() {
@@ -193,7 +193,7 @@ var _ = Describe("UAAClient", func() {
 
 				_, err := tc.uaaClient.Read(withBearer(toBeExpiredToken))
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount))
+				Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount))
 
 				newTokenKey := generateLegitTokenKey("testKey2")
 				refreshedToken := tc.CreateSignedTokenUsingPrivateKey(payload, newTokenKey)
@@ -202,11 +202,11 @@ var _ = Describe("UAAClient", func() {
 
 				_, err = tc.uaaClient.Read(withBearer(refreshedToken))
 				Expect(err).To(HaveOccurred())
-				Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+				Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 
 				_, err = tc.uaaClient.Read(withBearer(toBeExpiredToken))
 				Expect(err).ToNot(HaveOccurred())
-				Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+				Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 			})
 		})
 
@@ -221,7 +221,7 @@ var _ = Describe("UAAClient", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("failed to decode token: using unknown token key"))
 
-			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+			Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 		})
 
 		It("returns an error when the provided token cannot be decoded", func() {
@@ -273,7 +273,7 @@ var _ = Describe("UAAClient", func() {
 
 			wg.Wait()
 
-			Expect(len(tc.httpClient.requests)).To(Equal(numRequests + 4))
+			Expect(tc.httpClient.requests).To(HaveLen(numRequests + 4))
 		})
 
 		It("calls UAA correctly", func() {
@@ -427,17 +427,17 @@ var _ = Describe("UAAClient", func() {
 
 			err := tc.uaaClient.RefreshTokenKeys()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+			Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 
 			time.Sleep(100 * time.Millisecond)
 			err = tc.uaaClient.RefreshTokenKeys()
 			Expect(err).To(HaveOccurred())
-			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 1))
+			Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 1))
 
 			time.Sleep(101 * time.Millisecond)
 			err = tc.uaaClient.RefreshTokenKeys()
 			Expect(err).To(HaveOccurred())
-			Expect(len(tc.httpClient.requests)).To(Equal(initialRequestCount + 2))
+			Expect(tc.httpClient.requests).To(HaveLen(initialRequestCount + 2))
 		})
 	})
 })
