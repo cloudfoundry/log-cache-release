@@ -14,7 +14,7 @@ require (
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
 	github.com/cloudfoundry/gosigar v1.3.39
-	github.com/dvsekhvalnov/jose2go v1.5.1-0.20211102184025-feb89cf56911
+	github.com/dvsekhvalnov/jose2go v1.6.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
