@@ -30,5 +30,8 @@ DEPENDENCIES
   rspec
   rspec-its
 
+RUBY VERSION
+   ruby 3.3.0p0
+
 BUNDLED WITH
-   1.17.2
+   2.4.10
