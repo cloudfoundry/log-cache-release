@@ -27,7 +27,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.11
 	golang.org/x/net v0.19.0
 	google.golang.org/grpc v1.60.1
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require github.com/go-chi/chi/v5 v5.0.10
