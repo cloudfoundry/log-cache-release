@@ -5,7 +5,7 @@ go 1.21
 require (
 	code.cloudfoundry.org/go-batching v0.0.0-20220601181205-303abfc14b83
 	code.cloudfoundry.org/go-diodes v0.0.0-20221017175818-728392b37655
-	code.cloudfoundry.org/go-envstruct v1.6.0
+	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.5
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.8
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20220408214155-d9c3faa1e9e3
@@ -18,8 +18,8 @@ require (
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
-	github.com/onsi/ginkgo/v2 v2.13.2
-	github.com/onsi/gomega v1.30.0
+	github.com/onsi/ginkgo/v2 v2.15.0
+	github.com/onsi/gomega v1.31.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/client_model v0.5.0
 	github.com/prometheus/common v0.45.0
