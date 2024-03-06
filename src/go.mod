@@ -30,7 +30,7 @@ require (
 	google.golang.org/protobuf v1.31.0
 )
 
-require github.com/go-chi/chi/v5 v5.0.10
+require github.com/go-chi/chi/v5 v5.0.12
 
 require (
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
