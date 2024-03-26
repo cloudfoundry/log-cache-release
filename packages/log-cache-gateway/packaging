@@ -1,10 +1,12 @@
+#!/bin/bash
+
 set -ex
 
+# shellcheck source=/dev/null
 source /var/vcap/packages/golang-1.21-linux/bosh/compile.env
-export GOPATH=/var/vcap
 
 VERSION=$(cat version)
-go build -mod=vendor \
-  -o ${BOSH_INSTALL_TARGET}/log-cache-gateway \
+go build \
+  -o "${BOSH_INSTALL_TARGET}/log-cache-gateway" \
   -ldflags "-X main.buildVersion=${VERSION}" \
   ./cmd/gateway
