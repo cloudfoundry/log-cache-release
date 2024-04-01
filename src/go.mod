@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/client_model v0.6.0
 	github.com/prometheus/common v0.51.1
 	github.com/prometheus/prometheus v2.13.1+incompatible // pinned
-	github.com/shirou/gopsutil/v3 v3.24.2
+	github.com/shirou/gopsutil/v3 v3.24.3
 	golang.org/x/net v0.22.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
