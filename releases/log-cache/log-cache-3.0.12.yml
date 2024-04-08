@@ -1,0 +1,63 @@
+name: log-cache
+version: 3.0.12
+commit_hash: 614ff115
+uncommitted_changes: false
+jobs:
+- name: log-cache
+  version: 4ec936261bfd548ceff15751029a70e74cd2df53a791427c0a05529b7d5ab0e9
+  fingerprint: 4ec936261bfd548ceff15751029a70e74cd2df53a791427c0a05529b7d5ab0e9
+  sha1: sha256:adece298bb2c203fe8ce610a4175d8923979b5bcd1359c8232622241336361c6
+  packages:
+  - log-cache
+- name: log-cache-cf-auth-proxy
+  version: a88b3484c4425134403dbdb049b2b36b3f19f4c1a1b388b8a819aa249f4ca172
+  fingerprint: a88b3484c4425134403dbdb049b2b36b3f19f4c1a1b388b8a819aa249f4ca172
+  sha1: sha256:6ec47618a4885f8db54f3c13ebceeaef238fd2dc713abc5c87e8d90383a513d5
+  packages:
+  - log-cache-cf-auth-proxy
+- name: log-cache-gateway
+  version: 7b16b026dff213f371857a093c797f0f2e5adf4ad420843c3f94bd2ab7619885
+  fingerprint: 7b16b026dff213f371857a093c797f0f2e5adf4ad420843c3f94bd2ab7619885
+  sha1: sha256:5f6fe77fc62472c1d46dc423ca15f526bef3fe2c3d19383526146ee992fe05a4
+  packages:
+  - log-cache-gateway
+- name: log-cache-syslog-server
+  version: c9aa96cac29268af926f030d0cea5b13bbe310b5d61c776f29df06b848576a94
+  fingerprint: c9aa96cac29268af926f030d0cea5b13bbe310b5d61c776f29df06b848576a94
+  sha1: sha256:e32dd66b87f5dbf9642947c35a4a9370d0659ba9b624c0c86679b27581075301
+  packages:
+  - log-cache-syslog-server
+packages:
+- name: golang-1.21-linux
+  version: 8ce06756a0503c9f757bc2c7b185709fca2c242aa831cdda61e161d87300e2e2
+  fingerprint: 8ce06756a0503c9f757bc2c7b185709fca2c242aa831cdda61e161d87300e2e2
+  sha1: sha256:449c137f8a059c4b64b37647d972c68264bd263d2dcc18cb7d5f501c614bdc8f
+  dependencies: []
+- name: log-cache
+  version: ed62d798148000594fa5bed321c2f78eff7381f0ba678d31c043b5be479838f3
+  fingerprint: ed62d798148000594fa5bed321c2f78eff7381f0ba678d31c043b5be479838f3
+  sha1: sha256:4083e3e873b5fc213badbd3c0b50d2cda263581e2b604379d30579d6f2fa4e15
+  dependencies:
+  - golang-1.21-linux
+- name: log-cache-cf-auth-proxy
+  version: bb7791a568d62ab592b93d1fcd97f2b1fd833595a89f6cd79d0758633522f0ef
+  fingerprint: bb7791a568d62ab592b93d1fcd97f2b1fd833595a89f6cd79d0758633522f0ef
+  sha1: sha256:ec399a4fbc91d94dddf6306e6346a5b5c72793ed4779b6d29253ad9c7b046d27
+  dependencies:
+  - golang-1.21-linux
+- name: log-cache-gateway
+  version: 883aa59e1e5f2e783d2ea1069162205f7d1e9576626883de05ca9a713f028355
+  fingerprint: 883aa59e1e5f2e783d2ea1069162205f7d1e9576626883de05ca9a713f028355
+  sha1: sha256:54c2accb1c5e794e0fb4501f741b632e7012dfd4b0fcd719e067d59bb6c0cd83
+  dependencies:
+  - golang-1.21-linux
+- name: log-cache-syslog-server
+  version: 1ea64ee91f5d66acdd03f9b4a770b72954ea9d254a21085e6ffb41c1afeb7718
+  fingerprint: 1ea64ee91f5d66acdd03f9b4a770b72954ea9d254a21085e6ffb41c1afeb7718
+  sha1: sha256:d260f3257abbf493dc1cf0191d5da4ea1ba4435f6fa1a5c9177e28d66c665de7
+  dependencies:
+  - golang-1.21-linux
+license:
+  version: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
+  fingerprint: d4cf0e579318e6efe5c3b6e99f8f3d774a101106794e5898f1d666f7a3225e55
+  sha1: sha256:2000a9108971515512266634e3df558eb6884951e0d5074d05b9a9c0e8115498
