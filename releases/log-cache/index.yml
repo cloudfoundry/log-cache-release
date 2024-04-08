@@ -135,6 +135,8 @@ builds:
     version: 2.12.7
   b72575eb-6873-4bb6-61c0-c7ca109857bd:
     version: 2.1.0
+  c0c3e244-05ca-4335-5a3a-4153905ce9bb:
+    version: 2.12.17
   c47c661a-d9c8-467e-74dc-9b5b581dc28c:
     version: 2.1.6
   c5feb400-216d-44bd-51b2-4a24c3ce5a61:
