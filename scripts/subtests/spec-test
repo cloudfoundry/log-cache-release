@@ -5,6 +5,7 @@ set -o pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-"${SCRIPT_DIR}/subtests/lint"
-"${SCRIPT_DIR}/subtests/unit-test"
+pushd "${SCRIPT_DIR}/../.." > /dev/null
+    bundle exec rspec
+popd > /dev/null
 
