@@ -1,4 +1,4 @@
-name: Go
+name: scripts
 
 on:
   push:
@@ -11,25 +11,24 @@ on:
     - v[0-9]*
 
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: "src/go.mod"
-      - run: go run github.com/onsi/ginkgo/v2/ginkgo -r --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace
-        working-directory: src
+      - run: ./scripts/subtests/unit-test
 
-  vet:
+  spec-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: ruby/setup-ruby@v1
         with:
-          go-version-file: "src/go.mod"
-      - run: go vet $(go list ./... | grep -v internal/promql$)
-        working-directory: src
+          ruby-version: '2.7'
+          bundler-cache: true
+      - run: ./scripts/subtests/spec-test
 
   lint:
     runs-on: ubuntu-latest
@@ -38,7 +37,4 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: "src/go.mod"
-      - uses: golangci/golangci-lint-action@v4.0.0
-        with:
-          args: --config .golangci.yml
-          working-directory: src
+      - run: ./scripts/subtests/lint
