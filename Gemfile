@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
-ruby '~> 3.3'
+ruby '~> 2.7'
 
 group :development, :test do
-  gem 'bosh-template'
+  gem 'bosh-template', '2.2.1'
   gem 'rspec'
   gem 'rspec-its'
 end
