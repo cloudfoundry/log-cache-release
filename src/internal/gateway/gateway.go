@@ -81,7 +81,7 @@ func WithGatewayLogCacheDialOpts(opts ...grpc.DialOption) GatewayOption {
 	}
 }
 
-// WithGatewayLogCacheDialOpts returns a GatewayOption that the log-cache
+// WithGatewayVersion returns a GatewayOption that sets the log-cache
 // version returned by the info endpoint.
 func WithGatewayVersion(version string) GatewayOption {
 	return func(g *Gateway) {
@@ -89,8 +89,8 @@ func WithGatewayVersion(version string) GatewayOption {
 	}
 }
 
-// WithGatewayLogCacheDialOpts returns a GatewayOption that the log-cache
-// version returned by the info endpoint.
+// WithGatewayVMUptimeFn returns a GatewayOption that sets the VM
+// uptime function.
 func WithGatewayVMUptimeFn(uptimeFn func() int64) GatewayOption {
 	return func(g *Gateway) {
 		g.uptimeFn = uptimeFn
@@ -136,7 +136,7 @@ func (g *Gateway) listenAndServe() {
 		runtime.WithErrorHandler(g.httpErrorHandler),
 	)
 
-	conn, err := grpc.Dial(g.logCacheAddr, g.logCacheDialOpts...)
+	conn, err := grpc.NewClient(g.logCacheAddr, g.logCacheDialOpts...)
 	if err != nil {
 		g.log.Fatalf("failed to dial Log Cache: %s", err)
 	}

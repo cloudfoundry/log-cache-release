@@ -218,7 +218,7 @@ func (c *LogCache) setupRouting(s *store.Store) {
 	// Register peers and current node
 	for i, addr := range c.nodeAddrs {
 		if i != c.nodeIndex {
-			conn, err := grpc.Dial(addr, c.dialOpts...)
+			conn, err := grpc.NewClient(addr, c.dialOpts...)
 			if err != nil {
 				log.Printf("failed to dial %s: %s", addr, err)
 				continue
