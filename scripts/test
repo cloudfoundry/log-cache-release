@@ -7,4 +7,5 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 "${SCRIPT_DIR}/subtests/lint"
 "${SCRIPT_DIR}/subtests/unit-test"
+"${SCRIPT_DIR}/subtests/spec-test"
 
