@@ -90,7 +90,7 @@ var _ = Describe("LogCache", func() {
 			clientTlsConfig.MaxVersion = uint16(clientTLSVersion)
 			clientTlsConfig.CipherSuites = []uint16{tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384}
 
-			insecureConn, err := grpc.Dial(
+			insecureConn, err := grpc.NewClient(
 				cache.Addr(),
 				grpc.WithTransportCredentials(
 					credentials.NewTLS(clientTlsConfig),
@@ -121,7 +121,7 @@ var _ = Describe("LogCache", func() {
 			clientTlsConfig.MaxVersion = tls.VersionTLS12
 			clientTlsConfig.CipherSuites = []uint16{clientCipherSuite}
 
-			insecureConn, err := grpc.Dial(
+			insecureConn, err := grpc.NewClient(
 				cache.Addr(),
 				grpc.WithTransportCredentials(
 					credentials.NewTLS(clientTlsConfig),
@@ -177,7 +177,7 @@ var _ = Describe("LogCache", func() {
 			{Timestamp: 4, SourceId: "src-zero"},
 		})
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -236,7 +236,7 @@ var _ = Describe("LogCache", func() {
 			},
 		})
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -279,7 +279,7 @@ var _ = Describe("LogCache", func() {
 			},
 		})
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -347,7 +347,7 @@ var _ = Describe("LogCache", func() {
 			{SourceId: "src-zero", Timestamp: 1},
 		})
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -386,7 +386,7 @@ var _ = Describe("LogCache", func() {
 			}
 		}
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -432,7 +432,7 @@ var _ = Describe("LogCache", func() {
 		defer cache.Close()
 		peer.MetaResponses = map[string]*rpc.MetaInfo{}
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -486,7 +486,7 @@ var _ = Describe("LogCache", func() {
 			},
 		}
 
-		conn, err := grpc.Dial(cache.Addr(),
+		conn, err := grpc.NewClient(cache.Addr(),
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		)
 		Expect(err).ToNot(HaveOccurred())
@@ -536,7 +536,7 @@ func writeEnvelopes(addr string, es []*loggregator_v2.Envelope) {
 	if err != nil {
 		panic(err)
 	}
-	conn, err := grpc.Dial(addr,
+	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 	)
 	if err != nil {
@@ -564,7 +564,7 @@ func writeEnvelopes(addr string, es []*loggregator_v2.Envelope) {
 }
 
 func writeEnvelopesNoTLS(addr string, es []*loggregator_v2.Envelope) {
-	conn, err := grpc.Dial(addr,
+	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

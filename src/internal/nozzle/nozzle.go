@@ -100,7 +100,7 @@ func WithSelectors(selectors ...string) NozzleOption {
 func (n *Nozzle) Start() {
 	rx := n.s.Stream(context.Background(), n.buildBatchReq())
 
-	conn, err := grpc.Dial(n.addr, n.opts...)
+	conn, err := grpc.NewClient(n.addr, n.opts...)
 	if err != nil {
 		log.Fatalf("failed to dial %s: %s", n.addr, err)
 	}

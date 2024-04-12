@@ -123,7 +123,7 @@ var _ = Describe("LogCache", func() {
 })
 
 func ingressClient(addr string) (client rpc.IngressClient, cleanup func()) {
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
