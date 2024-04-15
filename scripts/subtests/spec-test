@@ -5,7 +5,15 @@ set -o pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+set +e
+bundler_executable=$(which bundle)
+set -e
+if [ -z "${bundler_executable}" ] || [ ! -x "${bundler_executable}" ]; then
+  gem install bundler
+fi
+
 pushd "${SCRIPT_DIR}/../.." > /dev/null
+    bundle install
     bundle exec rspec
 popd > /dev/null
 
