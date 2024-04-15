@@ -20,6 +20,16 @@ jobs:
           go-version-file: "src/go.mod"
       - run: ./scripts/subtests/unit-test
 
+  spec-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7'
+          bundler-cache: true
+      - run: ./scripts/subtests/spec-test
+
   lint:
     runs-on: ubuntu-latest
     steps:
