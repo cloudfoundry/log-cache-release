@@ -14,8 +14,8 @@ code.cloudfoundry.org/go-loggregator/v9 v9.2.0 h1:YNVD654RhMWzG195DZm0gNnrWAJJhE
 code.cloudfoundry.org/go-loggregator/v9 v9.2.0/go.mod h1:AP7PmrWSpyC9ltOQHcwF16BVkAVXS96i8+8gwI4lXRY=
 code.cloudfoundry.org/go-metric-registry v0.0.0-20240325232813-eb1144b007e4 h1:Fhvj2Am/ySajwFky5UKix+NNNCO3jqv/0IgrDeovXM8=
 code.cloudfoundry.org/go-metric-registry v0.0.0-20240325232813-eb1144b007e4/go.mod h1:kRAQ6GTC/+pAWbgKFK6S7zT6pVlUlMFsnk0HDe3Gehc=
-code.cloudfoundry.org/tlsconfig v0.0.0-20240410162701-78a97c114f7f h1:Xftr0ImG0QFvqhzO0OW7fdyTFjVVNWTmDi0DHqykxKY=
-code.cloudfoundry.org/tlsconfig v0.0.0-20240410162701-78a97c114f7f/go.mod h1:gWadw3Y5wh7DrpGzH8kxASbXeAQngtnHAcfJXF9YQsE=
+code.cloudfoundry.org/tlsconfig v0.0.0-20240416163159-16b37d67cb91 h1:NSjgca6N8Ozg5NjSagMJiHgOOsC6TzVEcm6vVwTxuP8=
+code.cloudfoundry.org/tlsconfig v0.0.0-20240416163159-16b37d67cb91/go.mod h1:+tUojmqPan76xFy75nGWE8AgsbTsZO00e72KIzR59Yk=
 contrib.go.opencensus.io/exporter/ocagent v0.6.0/go.mod h1:zmKjrJcdo0aYcVS7bmEeSEBLPA9YJp5bjrofdU3pIXs=
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
@@ -435,8 +435,8 @@ go.mongodb.org/mongo-driver v1.0.3/go.mod h1:u7ryQJ+DOzQmeO7zB6MHyr8jkEQvC8vH7qL
 go.mongodb.org/mongo-driver v1.0.4/go.mod h1:u7ryQJ+DOzQmeO7zB6MHyr8jkEQvC8vH7qLUO4lqsUM=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
-go.step.sm/crypto v0.44.4 h1:Ls5BOGM16AeZoMuiMbK9hbHbvdIEZIPjrrlpYPY5d94=
-go.step.sm/crypto v0.44.4/go.mod h1:gGYw4D+5J8uFhBY6dzOBvDE8iwUo+gaOpKPFLcQwv9Q=
+go.step.sm/crypto v0.44.5 h1:pgppm1g/RlNrKCDDNj/Dd7I42RCH95dL5HP2oL0ckDk=
+go.step.sm/crypto v0.44.5/go.mod h1:gGYw4D+5J8uFhBY6dzOBvDE8iwUo+gaOpKPFLcQwv9Q=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20181025213731-e84da0312774/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20181029021203-45a5f77698d3/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
