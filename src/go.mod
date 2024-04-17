@@ -11,7 +11,7 @@ require (
 	code.cloudfoundry.org/go-log-cache v1.0.1-0.20221018060643-5866ce9a4570
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.0
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20240325232813-eb1144b007e4
-	code.cloudfoundry.org/tlsconfig v0.0.0-20240410162701-78a97c114f7f
+	code.cloudfoundry.org/tlsconfig v0.0.0-20240416163159-16b37d67cb91
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
@@ -65,7 +65,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.step.sm/crypto v0.44.5 // indirect
+	go.step.sm/crypto v0.44.6 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
