@@ -1,4 +1,4 @@
-package tls
+package config
 
 type TLS struct {
 	CAPath   string `env:"CA_PATH,   report"`

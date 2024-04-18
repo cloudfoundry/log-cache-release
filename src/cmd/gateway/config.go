@@ -3,7 +3,6 @@ package main
 import (
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/internal/config"
-	"code.cloudfoundry.org/log-cache/internal/tls"
 )
 
 var buildVersion string
@@ -16,7 +15,7 @@ type Config struct {
 	ProxyKeyPath  string `env:"PROXY_KEY_PATH,           report"`
 	Version       string `env:"-,                        report"`
 
-	TLS           tls.TLS
+	TLS           config.TLS
 	MetricsServer config.MetricsServer
 	UseRFC339     bool `env:"USE_RFC339"`
 }

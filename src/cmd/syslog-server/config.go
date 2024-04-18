@@ -5,7 +5,6 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/internal/config"
-	"code.cloudfoundry.org/log-cache/internal/tls"
 )
 
 // Config is the configuration for a Syslog Server
@@ -13,7 +12,7 @@ type Config struct {
 	LogCacheAddr string `env:"LOG_CACHE_ADDR, required, report"`
 	SyslogPort   int    `env:"SYSLOG_PORT, required, report"`
 
-	LogCacheTLS tls.TLS
+	LogCacheTLS config.TLS
 
 	SyslogTLSCertPath string `env:"SYSLOG_TLS_CERT_PATH, report"`
 	SyslogTLSKeyPath  string `env:"SYSLOG_TLS_KEY_PATH, report"`
