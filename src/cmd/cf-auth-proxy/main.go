@@ -1,19 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/http"
 
-	"code.cloudfoundry.org/tlsconfig"
-
-	//nolint:gosec
-	_ "net/http/pprof"
-
 	"net/url"
 	"os"
 	"time"
+
+	"code.cloudfoundry.org/tlsconfig"
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
@@ -24,6 +20,7 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/auth"
 	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
+	"code.cloudfoundry.org/log-cache/internal/pprof"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 )
 
@@ -67,12 +64,7 @@ func main() {
 	)
 	if cfg.MetricsServer.DebugMetrics {
 		metrics.RegisterDebugMetrics()
-		pprofServer := &http.Server{
-			Addr:              fmt.Sprintf("127.0.0.1:%d", cfg.MetricsServer.PprofPort),
-			Handler:           http.DefaultServeMux,
-			ReadHeaderTimeout: 2 * time.Second,
-		}
-		go func() { loggr.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error()) }()
+		go func() { loggr.Println("PPROF SERVER STOPPED " + pprof.RunServer(cfg.MetricsServer.PprofPort).Error()) }()
 	}
 
 	var options []auth.UAAOption
