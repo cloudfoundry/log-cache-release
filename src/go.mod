@@ -65,7 +65,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.step.sm/crypto v0.44.6 // indirect
+	go.step.sm/crypto v0.44.7 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
