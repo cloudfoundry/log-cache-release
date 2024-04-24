@@ -11,7 +11,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20240325232813-eb1144b007e4
-	code.cloudfoundry.org/tlsconfig v0.0.0-20240417163319-a2cf10de323a
+	code.cloudfoundry.org/tlsconfig v0.0.0-20240423163804-1b0dcf57fddb
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
