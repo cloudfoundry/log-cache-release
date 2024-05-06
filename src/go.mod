@@ -30,7 +30,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.4
 	golang.org/x/net v0.24.0
 	google.golang.org/grpc v1.63.2
-	google.golang.org/protobuf v1.34.0
+	google.golang.org/protobuf v1.34.1
 )
 
 require (
