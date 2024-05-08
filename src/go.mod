@@ -2,15 +2,15 @@ module code.cloudfoundry.org/log-cache
 
 go 1.21.0
 
-toolchain go1.21.9
+toolchain go1.21.10
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20240325232529-c21ea48767e2
-	code.cloudfoundry.org/go-diodes v0.0.0-20240419195010-376885f5f3d4
+	code.cloudfoundry.org/go-batching v0.0.0-20240507185452-b51464486eb5
+	code.cloudfoundry.org/go-diodes v0.0.0-20240507202434-96dd3c119b5c
 	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20240325232813-eb1144b007e4
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20240507185439-f0b17e194563
 	code.cloudfoundry.org/tlsconfig v0.0.0-20240506165053-ee50c1ee9388
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
@@ -20,7 +20,7 @@ require (
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
-	github.com/onsi/ginkgo/v2 v2.17.2
+	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/onsi/gomega v1.33.1
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/client_model v0.6.1
@@ -51,7 +51,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240430035430-e4905b036c4e // indirect
+	github.com/google/pprof v0.0.0-20240508145209-1db217f89380 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240408141607-282e7b5d6b74 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
