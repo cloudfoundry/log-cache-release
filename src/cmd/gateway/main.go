@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -15,31 +15,23 @@ import (
 	_ "net/http/pprof"
 
 	. "code.cloudfoundry.org/log-cache/internal/gateway"
-	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+func init() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
+}
+
 func main() {
-	var gatewayLoggr *log.Logger
+	slog.Info("Starting Log Cache Gateway...")
+	defer slog.Info("Log Cache Gateway stopped.")
 
 	cfg, err := LoadConfig()
 	if err != nil {
-		log.Fatalf("invalid configuration: %s", err)
+		panic(err)
 	}
-
-	if cfg.UseRFC339 {
-		gatewayLoggr = log.New(new(plumbing.LogWriter), "[GATEWAY] ", 0)
-		log.SetOutput(new(plumbing.LogWriter))
-		log.SetFlags(0)
-	} else {
-		gatewayLoggr = log.New(os.Stderr, "[GATEWAY] ", log.LstdFlags)
-		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-	}
-
-	log.Print("Starting Log Cache Gateway...")
-	defer log.Print("Closing Log Cache Gateway.")
 
 	metricServerOption := metrics.WithTLSServer(
 		int(cfg.MetricsServer.Port),
@@ -51,7 +43,7 @@ func main() {
 		metricServerOption = metrics.WithPublicServer(int(cfg.MetricsServer.Port))
 	}
 	m := metrics.NewRegistry(
-		metricsLoggr,
+		slog.NewLogLogger(slog.Default().Handler(), slog.LevelInfo),
 		metricServerOption,
 	)
 	if cfg.MetricsServer.DebugMetrics {
@@ -61,11 +53,10 @@ func main() {
 			Handler:           http.DefaultServeMux,
 			ReadHeaderTimeout: 2 * time.Second,
 		}
-		go func() { log.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error()) }()
+		go func() { slog.Info("pprof server stopped", "error", pprofServer.ListenAndServe().Error()) }()
 	}
 
 	gatewayOptions := []GatewayOption{
-		WithGatewayLogger(gatewayLoggr),
 		WithGatewayVersion(cfg.Version),
 		WithGatewayBlock(),
 	}

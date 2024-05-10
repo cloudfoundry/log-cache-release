@@ -3,7 +3,7 @@ package gateway
 import (
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"time"
@@ -21,8 +21,6 @@ import (
 
 // Gateway provides a RESTful API into LogCache's gRPC API.
 type Gateway struct {
-	log *log.Logger
-
 	logCacheAddr    string
 	logCacheVersion string
 	uptimeFn        func() int64
@@ -40,7 +38,6 @@ type Gateway struct {
 // invoked before using the Gateway.
 func NewGateway(logCacheAddr, gatewayAddr string, opts ...GatewayOption) *Gateway {
 	g := &Gateway{
-		log:          log.New(io.Discard, "", 0),
 		logCacheAddr: logCacheAddr,
 		gatewayAddr:  gatewayAddr,
 		uptimeFn:     uptimeInSeconds,
@@ -55,14 +52,6 @@ func NewGateway(logCacheAddr, gatewayAddr string, opts ...GatewayOption) *Gatewa
 
 // GatewayOption configures a Gateway.
 type GatewayOption func(*Gateway)
-
-// WithGatewayLogger returns a GatewayOption that configures the logger for
-// the Gateway. It defaults to no logging.
-func WithGatewayLogger(l *log.Logger) GatewayOption {
-	return func(g *Gateway) {
-		g.log = l
-	}
-}
 
 // WithGatewayBlock returns a GatewayOption that determines if Start launches
 // a go-routine or not. It defaults to launching a go-routine. If this is set,
@@ -107,12 +96,12 @@ func WithGatewayTLSServer(certPath, keyPath string) GatewayOption {
 // Start starts the gateway to start receiving and forwarding requests. It
 // does not block unless WithGatewayBlock was set.
 func (g *Gateway) Start() {
+	slog.Info("Starting server", "address", g.gatewayAddr)
 	lis, err := net.Listen("tcp", g.gatewayAddr)
 	if err != nil {
-		g.log.Fatalf("failed to listen on addr %s: %s", g.gatewayAddr, err)
+		panic(err)
 	}
 	g.lis = lis
-	g.log.Printf("listening on %s...", lis.Addr().String())
 
 	if g.blockOnStart {
 		g.listenAndServe()
@@ -138,7 +127,7 @@ func (g *Gateway) listenAndServe() {
 
 	conn, err := grpc.NewClient(g.logCacheAddr, g.logCacheDialOpts...)
 	if err != nil {
-		g.log.Fatalf("failed to dial Log Cache: %s", err)
+		panic(err)
 	}
 
 	err = logcache_v1.RegisterEgressHandlerClient(
@@ -147,7 +136,7 @@ func (g *Gateway) listenAndServe() {
 		logcache_v1.NewEgressClient(conn),
 	)
 	if err != nil {
-		g.log.Fatalf("failed to register LogCache handler: %s", err)
+		panic(err)
 	}
 
 	err = logcache_v1.RegisterPromQLQuerierHandlerClient(
@@ -156,7 +145,7 @@ func (g *Gateway) listenAndServe() {
 		logcache_v1.NewPromQLQuerierClient(conn),
 	)
 	if err != nil {
-		g.log.Fatalf("failed to register PromQLQuerier handler: %s", err)
+		panic(err)
 	}
 
 	topLevelMux := http.NewServeMux()
@@ -169,11 +158,11 @@ func (g *Gateway) listenAndServe() {
 	}
 	if g.certPath != "" || g.keyPath != "" {
 		if err := server.ServeTLS(g.lis, g.certPath, g.keyPath); err != nil {
-			g.log.Fatalf("failed to serve HTTPS endpoint: %s", err)
+			panic(err)
 		}
 	} else {
 		if err := server.Serve(g.lis); err != nil {
-			g.log.Fatalf("failed to serve HTTP endpoint: %s", err)
+			panic(err)
 		}
 	}
 }
@@ -181,7 +170,7 @@ func (g *Gateway) listenAndServe() {
 func (g *Gateway) handleInfoEndpoint(w http.ResponseWriter, r *http.Request) {
 	_, err := w.Write([]byte(fmt.Sprintf(`{"version":"%s","vm_uptime":"%d"}`+"\n", g.logCacheVersion, g.uptimeFn())))
 	if err != nil {
-		g.log.Println("Cannot send result for the info endpoint")
+		slog.Error("Failed to send result for the info endpoint", "error", err)
 	}
 }
 
@@ -222,16 +211,16 @@ func (g *Gateway) httpErrorHandler(
 
 	buf, merr := marshaler.Marshal(body)
 	if merr != nil {
-		g.log.Printf("Failed to marshal error message %q: %v", body, merr)
+		slog.Error("Failed to marshal error message", "error", merr)
 		w.WriteHeader(http.StatusInternalServerError)
 		if _, err := io.WriteString(w, fallback); err != nil {
-			g.log.Printf("Failed to write response: %v", err)
+			slog.Error("Failed to write response", "error", err)
 		}
 		return
 	}
 
 	w.WriteHeader(runtime.HTTPStatusFromCode(status.Code(err)))
 	if _, err := w.Write(buf); err != nil {
-		g.log.Printf("Failed to write response: %v", err)
+		slog.Error("Failed to write response", "error", err)
 	}
 }
