@@ -22,7 +22,6 @@ import (
 )
 
 func main() {
-	var metricsLoggr *log.Logger
 	var gatewayLoggr *log.Logger
 
 	cfg, err := LoadConfig()
@@ -31,12 +30,10 @@ func main() {
 	}
 
 	if cfg.UseRFC339 {
-		metricsLoggr = log.New(new(plumbing.LogWriter), "[METRICS] ", 0)
 		gatewayLoggr = log.New(new(plumbing.LogWriter), "[GATEWAY] ", 0)
 		log.SetOutput(new(plumbing.LogWriter))
 		log.SetFlags(0)
 	} else {
-		metricsLoggr = log.New(os.Stderr, "[METRICS] ", log.LstdFlags)
 		gatewayLoggr = log.New(os.Stderr, "[GATEWAY] ", log.LstdFlags)
 		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	}
