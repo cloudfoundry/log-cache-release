@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"fmt"
 	"io"
 	"log/slog"
 	"net"
@@ -168,10 +167,11 @@ func (g *Gateway) listenAndServe() {
 }
 
 func (g *Gateway) handleInfoEndpoint(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte(fmt.Sprintf(`{"version":"%s","vm_uptime":"%d"}`+"\n", g.logCacheVersion, g.uptimeFn())))
-	if err != nil {
-		slog.Error("Failed to send result for the info endpoint", "error", err)
-	}
+	// _, err := w.Write([]byte(fmt.Sprintf(`{"version":"%s","vm_uptime":"%d"}`+"\n", g.logCacheVersion, g.uptimeFn())))
+	// if err != nil {
+	// 	slog.Error("Failed to send result for the info endpoint", "error", err)
+	// }
+	w.Write([]byte("success\n"))
 }
 
 func uptimeInSeconds() int64 {
