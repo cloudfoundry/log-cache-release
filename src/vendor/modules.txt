@@ -20,7 +20,7 @@ code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2
 ## explicit; go 1.21
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers
-# code.cloudfoundry.org/tlsconfig v0.0.0-20240506165053-ee50c1ee9388
+# code.cloudfoundry.org/tlsconfig v0.0.0-20240510172918-c1e19801fe80
 ## explicit; go 1.19
 code.cloudfoundry.org/tlsconfig
 code.cloudfoundry.org/tlsconfig/certtest
@@ -53,7 +53,7 @@ github.com/cespare/xxhash
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry/gosigar v1.3.57
+# github.com/cloudfoundry/gosigar v1.3.58
 ## explicit; go 1.21.0
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows

@@ -11,11 +11,11 @@ require (
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20240507185439-f0b17e194563
-	code.cloudfoundry.org/tlsconfig v0.0.0-20240506165053-ee50c1ee9388
+	code.cloudfoundry.org/tlsconfig v0.0.0-20240510172918-c1e19801fe80
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
-	github.com/cloudfoundry/gosigar v1.3.57
+	github.com/cloudfoundry/gosigar v1.3.58
 	github.com/dvsekhvalnov/jose2go v1.7.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
