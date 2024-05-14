@@ -125,7 +125,7 @@ github.com/influxdata/go-syslog/v3
 github.com/influxdata/go-syslog/v3/common
 github.com/influxdata/go-syslog/v3/octetcounting
 github.com/influxdata/go-syslog/v3/rfc5424
-# github.com/lufia/plan9stats v0.0.0-20240408141607-282e7b5d6b74
+# github.com/lufia/plan9stats v0.0.0-20240513124658-fba389f38bae
 ## explicit; go 1.16
 github.com/lufia/plan9stats
 # github.com/oklog/ulid v1.3.1
@@ -315,12 +315,12 @@ golang.org/x/text/unicode/norm
 ## explicit; go 1.19
 golang.org/x/tools/cover
 golang.org/x/tools/go/ast/inspector
-# google.golang.org/genproto/googleapis/api v0.0.0-20240509183442-62759503f434
+# google.golang.org/genproto/googleapis/api v0.0.0-20240513163218-0867130af1f8
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20240509183442-62759503f434
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20240513163218-0867130af1f8
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.63.2
