@@ -28,7 +28,7 @@ require (
 	github.com/prometheus/prometheus v1.99.0
 	github.com/shirou/gopsutil/v3 v3.24.4
 	golang.org/x/net v0.25.0
-	google.golang.org/grpc v1.63.2
+	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.1
 )
 
@@ -57,7 +57,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/prometheus/procfs v0.14.0 // indirect
+	github.com/prometheus/procfs v0.15.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/square/certstrap v1.3.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
