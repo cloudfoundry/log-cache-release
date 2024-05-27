@@ -1,4 +1,4 @@
-# code.cloudfoundry.org/go-batching v0.0.0-20240507185452-b51464486eb5
+# code.cloudfoundry.org/go-batching v0.0.0-20240522165838-74c69d79243c
 ## explicit; go 1.21
 code.cloudfoundry.org/go-batching
 # code.cloudfoundry.org/go-diodes v0.0.0-20240515174142-71582f284718
@@ -16,11 +16,11 @@ code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1
 ## explicit; go 1.21
 code.cloudfoundry.org/go-loggregator/v9
 code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2
-# code.cloudfoundry.org/go-metric-registry v0.0.0-20240507185439-f0b17e194563
+# code.cloudfoundry.org/go-metric-registry v0.0.0-20240523160243-6c152ef80e25
 ## explicit; go 1.21
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers
-# code.cloudfoundry.org/tlsconfig v0.0.0-20240516170203-d50b3d56ba06
+# code.cloudfoundry.org/tlsconfig v0.0.0-20240522170710-79df114af82a
 ## explicit; go 1.19
 code.cloudfoundry.org/tlsconfig
 code.cloudfoundry.org/tlsconfig/certtest
@@ -53,7 +53,7 @@ github.com/cespare/xxhash
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry/gosigar v1.3.58
+# github.com/cloudfoundry/gosigar v1.3.59
 ## explicit; go 1.21.0
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows
@@ -90,7 +90,7 @@ github.com/go-kit/log/level
 # github.com/go-logfmt/logfmt v0.6.0
 ## explicit; go 1.17
 github.com/go-logfmt/logfmt
-# github.com/go-logr/logr v1.4.1
+# github.com/go-logr/logr v1.4.2
 ## explicit; go 1.18
 github.com/go-logr/logr
 github.com/go-logr/logr/funcr
@@ -111,7 +111,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/pprof v0.0.0-20240509144519-723abb6459b7
+# github.com/google/pprof v0.0.0-20240525223248-4bfdf5a9a2af
 ## explicit; go 1.19
 github.com/google/pprof/profile
 # github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
@@ -131,7 +131,7 @@ github.com/lufia/plan9stats
 # github.com/oklog/ulid v1.3.1
 ## explicit
 github.com/oklog/ulid
-# github.com/onsi/ginkgo/v2 v2.17.3
+# github.com/onsi/ginkgo/v2 v2.19.0
 ## explicit; go 1.20
 github.com/onsi/ginkgo/v2
 github.com/onsi/ginkgo/v2/config
@@ -244,7 +244,7 @@ github.com/tklauser/numcpus
 # github.com/yusufpapurcu/wmi v1.2.4
 ## explicit; go 1.16
 github.com/yusufpapurcu/wmi
-# go.step.sm/crypto v0.45.0
+# go.step.sm/crypto v0.45.1
 ## explicit; go 1.20
 go.step.sm/crypto/fingerprint
 go.step.sm/crypto/internal/bcrypt_pbkdf
@@ -315,12 +315,12 @@ golang.org/x/text/unicode/norm
 ## explicit; go 1.19
 golang.org/x/tools/cover
 golang.org/x/tools/go/ast/inspector
-# google.golang.org/genproto/googleapis/api v0.0.0-20240515191416-fc5f0ca64291
+# google.golang.org/genproto/googleapis/api v0.0.0-20240521202816-d264139d666e
 ## explicit; go 1.20
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20240515191416-fc5f0ca64291
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20240521202816-d264139d666e
 ## explicit; go 1.20
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.64.0
