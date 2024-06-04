@@ -35,6 +35,9 @@ properties:
   syslog_idle_timeout:
     description: "Timeout for the Syslog Server connection"
     default: "2m"
+  syslog_trim_message_whitespace:
+    description: "Defines if the leading and trailing whitespace in the Syslog log messages should be trimmed"
+    default: true
 
   syslog_client_ca_cert:
     description: The CA certificate for key/cert verification.

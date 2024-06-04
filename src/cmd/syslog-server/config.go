@@ -18,8 +18,9 @@ type Config struct {
 	SyslogTLSCertPath string `env:"SYSLOG_TLS_CERT_PATH, report"`
 	SyslogTLSKeyPath  string `env:"SYSLOG_TLS_KEY_PATH, report"`
 
-	SyslogIdleTimeout      time.Duration `env:"SYSLOG_IDLE_TIMEOUT, report"`
-	SyslogMaxMessageLength int           `env:"SYSLOG_MAX_MESSAGE_LENGTH, report"`
+	SyslogIdleTimeout           time.Duration `env:"SYSLOG_IDLE_TIMEOUT, report"`
+	SyslogMaxMessageLength      int           `env:"SYSLOG_MAX_MESSAGE_LENGTH, report"`
+	SyslogTrimMessageWhitespace bool          `env:"SYSLOG_TRIM_MESSAGE_WHITESPACE, report"`
 
 	SyslogClientTrustedCAFile string `env:"SYSLOG_CLIENT_TRUSTED_CA_FILE,  report"`
 
@@ -36,7 +37,8 @@ func LoadConfig() (*Config, error) {
 		MetricsServer: config.MetricsServer{
 			Port: 6061,
 		},
-		SyslogMaxMessageLength: 65 * 1024, // Diego should never send logs bigger than 64Kib
+		SyslogMaxMessageLength:      65 * 1024, // Diego should never send logs bigger than 64Kib
+		SyslogTrimMessageWhitespace: true,
 	}
 
 	if err := envstruct.Load(&c); err != nil {

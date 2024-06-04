@@ -25,14 +25,15 @@ import (
 
 type Server struct {
 	sync.Mutex
-	port             int
-	l                net.Listener
-	envelopes        chan *loggregator_v2.Envelope
-	syslogClientCA   string
-	syslogCert       string
-	syslogKey        string
-	idleTimeout      time.Duration
-	maxMessageLength int
+	port                  int
+	l                     net.Listener
+	envelopes             chan *loggregator_v2.Envelope
+	syslogClientCA        string
+	syslogCert            string
+	syslogKey             string
+	idleTimeout           time.Duration
+	maxMessageLength      int
+	trimMessageWhitespace bool
 
 	ingress        metrics.Counter
 	invalidIngress metrics.Counter
@@ -52,10 +53,11 @@ func NewServer(
 	opts ...ServerOption,
 ) *Server {
 	s := &Server{
-		loggr:            loggr,
-		envelopes:        make(chan *loggregator_v2.Envelope, 100),
-		idleTimeout:      2 * time.Minute,
-		maxMessageLength: 65 * 1024, // Diego should never send logs bigger than 64Kib
+		loggr:                 loggr,
+		envelopes:             make(chan *loggregator_v2.Envelope, 100),
+		idleTimeout:           2 * time.Minute,
+		maxMessageLength:      65 * 1024, // Diego should never send logs bigger than 64Kib
+		trimMessageWhitespace: true,
 	}
 
 	for _, o := range opts {
@@ -83,6 +85,12 @@ func WithServerPort(p int) ServerOption {
 func WithServerMaxMessageLength(l int) ServerOption {
 	return func(s *Server) {
 		s.maxMessageLength = l
+	}
+}
+
+func WithServerTrimMessageWhitespace(t bool) ServerOption {
+	return func(s *Server) {
+		s.trimMessageWhitespace = t
 	}
 }
 
@@ -238,9 +246,15 @@ func (s *Server) convertToEnvelope(msg *rfc5424.SyslogMessage) (*loggregator_v2.
 }
 
 func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg *rfc5424.SyslogMessage) *loggregator_v2.Envelope {
+	var payload string
+	if s.trimMessageWhitespace {
+		payload = strings.TrimSpace(*msg.Message)
+	} else {
+		payload = strings.TrimSuffix(*msg.Message, "\n")
+	}
 	env.Message = &loggregator_v2.Envelope_Log{
 		Log: &loggregator_v2.Log{
-			Payload: []byte(strings.TrimSpace(*msg.Message)),
+			Payload: []byte(payload),
 			Type:    s.typeFromPriority(int(*msg.Priority)),
 		},
 	}

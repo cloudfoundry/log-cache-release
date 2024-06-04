@@ -31,6 +31,7 @@ func newTlsServerTestSetup(opts ...syslog.ServerOption) (*syslog.Server, *testhe
 		syslog.WithSyslogClientCA(testing.LogCacheTestCerts.CA()),
 		syslog.WithServerPort(0),
 		syslog.WithIdleTimeout(100 * time.Millisecond),
+		syslog.WithServerTrimMessageWhitespace(true),
 	}
 	options = append(options, opts...)
 
@@ -149,6 +150,55 @@ var _ = Describe("Syslog", func() {
 				},
 			},
 		))
+	})
+
+	It("trims whitespace in log messages when configured to do so", func() {
+		tests := []struct {
+			trimWhitespace bool
+			expectedMsg    string
+		}{
+			{expectedMsg: "just a test with with whitespace"},
+			{trimWhitespace: true, expectedMsg: "just a test with with whitespace"},
+			{trimWhitespace: false, expectedMsg: "    just a test with with whitespace    "},
+		}
+
+		for i, tc := range tests {
+			var server *syslog.Server
+			if i == 0 {
+				server, _, _ = newTlsServerTestSetup()
+			} else {
+				server, _, _ = newTlsServerTestSetup(syslog.WithServerTrimMessageWhitespace(tc.trimWhitespace))
+			}
+			defer server.Stop()
+
+			tlsConfig := buildClientTLSConfig(tls.VersionTLS12, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384)
+			conn, err := tlsClientConnection(server.Addr(), tlsConfig)
+			Expect(err).ToNot(HaveOccurred())
+
+			const messageWithWhitespace = `174 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [tags@47450 key="value" source_type="actual-source-type"]     just a test with with whitespace    ` + "\n"
+			_, err = fmt.Fprint(conn, messageWithWhitespace)
+			Expect(err).ToNot(HaveOccurred())
+
+			br := loggregator_v2.EgressBatchRequest{}
+			ctx := context.Background()
+			Expect(server.Stream(ctx, &br)()).Should(ContainElement(
+				&loggregator_v2.Envelope{
+					Tags: map[string]string{
+						"source_type": "actual-source-type",
+						"key":         "value",
+					},
+					InstanceId: "2",
+					Timestamp:  12345000,
+					SourceId:   "test-app-id",
+					Message: &loggregator_v2.Envelope_Log{
+						Log: &loggregator_v2.Log{
+							Payload: []byte(tc.expectedMsg),
+							Type:    loggregator_v2.Log_OUT,
+						},
+					},
+				},
+			))
+		}
 	})
 
 	It("max syslog length is configurable", func() {
