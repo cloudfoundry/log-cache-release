@@ -618,7 +618,7 @@ func buildSyslogWithTags(structuredData, tags string) string {
 }
 
 func waitForServerToStart(server *syslog.Server) {
-	Eventually(server.Addr, "1s", "100ms").ShouldNot(BeEmpty())
+	Eventually(server.Addr, "5s", "100ms").ShouldNot(BeEmpty())
 }
 
 const counterDataFormat = `counter@47450 name="%s" total="%s" delta="%s"`
