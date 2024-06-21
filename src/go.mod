@@ -26,13 +26,15 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.54.0
 	github.com/prometheus/prometheus v1.99.0
-	github.com/shirou/gopsutil/v3 v3.24.5
 	golang.org/x/net v0.26.0
 	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.2
 )
 
-require github.com/go-chi/chi/v5 v5.0.13
+require (
+	github.com/go-chi/chi/v5 v5.0.13
+	github.com/shirou/gopsutil/v4 v4.24.5
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
