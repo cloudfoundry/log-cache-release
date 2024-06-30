@@ -186,7 +186,10 @@ func (g *Gateway) handleInfoEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func uptimeInSeconds() int64 {
-	hostStats, _ := host.Info()
+	hostStats, err := host.Info()
+	if err != nil {
+		return -1
+	}
 	return int64(hostStats.Uptime) //#nosec G115
 }
 
