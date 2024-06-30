@@ -6,7 +6,6 @@ import (
 	"code.cloudfoundry.org/log-cache/internal/config"
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
-	"code.cloudfoundry.org/log-cache/internal/tls"
 )
 
 // Config is the configuration for a LogCache.
@@ -57,7 +56,7 @@ type Config struct {
 	// assumed that the current node is the only one.
 	NodeAddrs []string `env:"NODE_ADDRS, report"`
 
-	TLS           tls.TLS
+	TLS           config.TLS
 	MetricsServer config.MetricsServer
 	UseRFC339     bool `env:"USE_RFC339"`
 }
