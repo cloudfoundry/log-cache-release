@@ -32,7 +32,7 @@ require (
 	google.golang.org/protobuf v1.34.2
 )
 
-require github.com/go-chi/chi/v5 v5.0.14
+require github.com/go-chi/chi/v5 v5.1.0
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
