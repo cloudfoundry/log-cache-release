@@ -53,7 +53,7 @@ github.com/cespare/xxhash
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry/gosigar v1.3.63
+# github.com/cloudfoundry/gosigar v1.3.64
 ## explicit; go 1.21.0
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows
