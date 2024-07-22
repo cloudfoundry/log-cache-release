@@ -51,7 +51,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240711041743-f6c9dda6c6da // indirect
+	github.com/google/pprof v0.0.0-20240721033354-7089f98c1d14 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240513124658-fba389f38bae // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
