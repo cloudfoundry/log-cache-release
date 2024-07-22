@@ -9,7 +9,7 @@ import (
 
 	"context"
 
-	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	rpc "code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1"
 	"github.com/gorilla/mux"
 	"google.golang.org/protobuf/encoding/protojson"
 

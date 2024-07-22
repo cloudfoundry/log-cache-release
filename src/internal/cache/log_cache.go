@@ -13,8 +13,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	client "code.cloudfoundry.org/go-log-cache"
-	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	client "code.cloudfoundry.org/go-log-cache/v3"
+	"code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1"
 	"code.cloudfoundry.org/log-cache/internal/cache/store"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 	"code.cloudfoundry.org/log-cache/internal/promql/data_reader"
