@@ -8,8 +8,6 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20240604201829-c8533406dd64
 	code.cloudfoundry.org/go-diodes v0.0.0-20240604201846-c756bfed2ed3
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
-	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20240604201903-7cef498efb7a
 	code.cloudfoundry.org/tlsconfig v0.0.0-20240712175922-ffce9516cec8
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
@@ -32,7 +30,11 @@ require (
 	google.golang.org/protobuf v1.34.2
 )
 
-require github.com/go-chi/chi/v5 v5.1.0
+require (
+	code.cloudfoundry.org/go-log-cache/v3 v3.0.1
+	code.cloudfoundry.org/go-loggregator/v10 v10.0.0
+	github.com/go-chi/chi/v5 v5.1.0
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
