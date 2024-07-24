@@ -2,7 +2,7 @@
 name: log-cache-cf-auth-proxy
 
 dependencies:
-- golang-1.21-linux
+- golang-1.22-linux
 
 files:
 - cmd/cf-auth-proxy/**/*.go
