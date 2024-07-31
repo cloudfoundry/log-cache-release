@@ -24,7 +24,6 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.55.0
 	github.com/prometheus/prometheus v1.99.0
-	github.com/shirou/gopsutil/v3 v3.24.5
 	golang.org/x/net v0.27.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
@@ -34,6 +33,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v3 v3.0.1
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.0
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/shirou/gopsutil/v4 v4.24.6
 )
 
 require (
