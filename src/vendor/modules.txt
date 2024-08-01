@@ -7,8 +7,8 @@ code.cloudfoundry.org/go-diodes
 # code.cloudfoundry.org/go-envstruct v1.7.0
 ## explicit; go 1.21
 code.cloudfoundry.org/go-envstruct
-# code.cloudfoundry.org/go-log-cache/v3 v3.0.1
-## explicit; go 1.21
+# code.cloudfoundry.org/go-log-cache/v3 v3.0.2
+## explicit; go 1.22
 code.cloudfoundry.org/go-log-cache/v3
 code.cloudfoundry.org/go-log-cache/v3/internal
 code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1
@@ -16,7 +16,7 @@ code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1
 ## explicit; go 1.21
 code.cloudfoundry.org/go-loggregator/v10
 code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2
-# code.cloudfoundry.org/go-metric-registry v0.0.0-20240730230437-8d70948403b7
+# code.cloudfoundry.org/go-metric-registry v0.0.0-20240731205343-e778db45fec9
 ## explicit; go 1.21
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers
