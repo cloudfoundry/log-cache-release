@@ -72,8 +72,8 @@ github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible/go.mod h1:nmEj6Dob7S7YxXgwXpfOuvO54S+tGdZdw9fuRZt25Ag=
 github.com/circonus-labs/circonusllhist v0.1.3/go.mod h1:kMXHVDlOchFAehlya5ePtbp5jckzBHf4XRpQvBOLI+I=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/cloudfoundry/gosigar v1.3.66 h1:jWE+XPwDoah3R2OMwBGQKiXI0EAOCkCx3/Ha8f3TQxI=
-github.com/cloudfoundry/gosigar v1.3.66/go.mod h1:NbcQ9Ags2Et3by9WWu8uYF8EjKd7abC7rSfgMruAkf4=
+github.com/cloudfoundry/gosigar v1.3.67 h1:lxhOHHGJLSpPdswa8K2QWufebi+yMorEFvnuliA6pB8=
+github.com/cloudfoundry/gosigar v1.3.67/go.mod h1:DAJUfi339RuSnhEAgtCNXSMltfOvJ1J+FEBRdwtgAWc=
 github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
