@@ -9,11 +9,11 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20240730232652-ce6331b0e7c0
 	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20240731205343-e778db45fec9
-	code.cloudfoundry.org/tlsconfig v0.0.0-20240730181439-b476395a9e4e
+	code.cloudfoundry.org/tlsconfig v0.0.0-20240804182054-12ab4b1e7eda
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
-	github.com/cloudfoundry/gosigar v1.3.66
+	github.com/cloudfoundry/gosigar v1.3.67
 	github.com/dvsekhvalnov/jose2go v1.7.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/gorilla/mux v1.8.1
@@ -72,12 +72,12 @@ require (
 	go.step.sm/crypto v0.51.1 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240730163845-b1a4ccb954bf // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240730163845-b1a4ccb954bf // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240805194559-2c9e96a0b5d4 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240805194559-2c9e96a0b5d4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
