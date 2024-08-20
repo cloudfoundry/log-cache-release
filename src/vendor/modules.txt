@@ -134,7 +134,7 @@ github.com/klauspost/compress/internal/cpuinfo
 github.com/klauspost/compress/internal/snapref
 github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
-# github.com/lufia/plan9stats v0.0.0-20240513124658-fba389f38bae
+# github.com/lufia/plan9stats v0.0.0-20240819163618-b1d8f4d146e7
 ## explicit; go 1.16
 github.com/lufia/plan9stats
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
