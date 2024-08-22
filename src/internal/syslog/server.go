@@ -255,7 +255,7 @@ func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg *rfc5424.Syslo
 	env.Message = &loggregator_v2.Envelope_Log{
 		Log: &loggregator_v2.Log{
 			Payload: []byte(payload),
-			Type:    s.typeFromPriority(int(*msg.Priority)),
+			Type:    s.typeFromPriority(int(*msg.Priority)), //#nosec G115
 		},
 	}
 

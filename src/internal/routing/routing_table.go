@@ -47,8 +47,9 @@ func (t *RoutingTable) Lookup(item string) []int {
 	node := t.hasher.Hash(hashValue)
 
 	var result []int
-	for n := 0; n < int(t.replicationFactor); n++ {
-		result = append(result, (node+n*int(t.replicationFactor))%len(t.addresses))
+	var replicationFactor int = int(t.replicationFactor) //#nosec G115
+	for n := 0; n < replicationFactor; n++ {
+		result = append(result, (node+n*replicationFactor)%len(t.addresses))
 	}
 	for _, r := range t.table {
 		if hashValue >= r.start && hashValue <= r.end {
