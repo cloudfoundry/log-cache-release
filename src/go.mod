@@ -18,7 +18,7 @@ require (
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
-	github.com/onsi/ginkgo/v2 v2.20.0
+	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/prometheus/client_golang v1.20.0
 	github.com/prometheus/client_model v0.6.1
@@ -30,7 +30,7 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/go-log-cache/v3 v3.0.2
+	code.cloudfoundry.org/go-log-cache/v3 v3.0.3
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.0
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/shirou/gopsutil/v4 v4.24.7
