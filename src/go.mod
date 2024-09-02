@@ -33,7 +33,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v3 v3.0.2
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.0
 	github.com/go-chi/chi/v5 v5.1.0
-	github.com/shirou/gopsutil/v4 v4.24.7
+	github.com/shirou/gopsutil/v4 v4.24.8
 )
 
 require (
