@@ -187,7 +187,7 @@ func (g *Gateway) handleInfoEndpoint(w http.ResponseWriter, r *http.Request) {
 
 func uptimeInSeconds() int64 {
 	hostStats, _ := host.Info()
-	return int64(hostStats.Uptime)
+	return int64(hostStats.Uptime) //#nosec G115
 }
 
 type errorBody struct {

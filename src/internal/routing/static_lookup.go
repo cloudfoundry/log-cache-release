@@ -39,5 +39,5 @@ func NewStaticLookup(numOfRoutes int, hasher func(string) uint64) *StaticLookup 
 func (l *StaticLookup) Lookup(sourceID string) int {
 	h := l.hash(sourceID)
 	n, _ := l.t.Floor(h)
-	return int(n.Value.(uint64))
+	return int(n.Value.(uint64)) //#nosec G115
 }
