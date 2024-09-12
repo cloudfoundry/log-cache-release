@@ -5,11 +5,11 @@ go 1.22.0
 toolchain go1.22.7
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20240826183250-00c4aeaff7d0
-	code.cloudfoundry.org/go-diodes v0.0.0-20240813203737-5032edb05ceb
+	code.cloudfoundry.org/go-batching v0.0.0-20240911223457-d5519e55d3b9
+	code.cloudfoundry.org/go-diodes v0.0.0-20240911205836-e7f77fdf9650
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20240828184116-9710cd731bb8
-	code.cloudfoundry.org/tlsconfig v0.4.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20240911230103-8810864fa5d2
+	code.cloudfoundry.org/tlsconfig v0.5.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/common v0.59.1
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.29.0
-	google.golang.org/grpc v1.66.1
+	google.golang.org/grpc v1.66.2
 	google.golang.org/protobuf v1.34.2
 )
 
@@ -53,7 +53,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240903155634-a8630aee4ab9 // indirect
+	github.com/google/pprof v0.0.0-20240910150728-a0b0bb1d4134 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -67,7 +67,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.step.sm/crypto v0.51.2 // indirect
+	go.step.sm/crypto v0.52.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
