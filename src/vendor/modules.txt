@@ -16,7 +16,7 @@ code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1
 ## explicit; go 1.21
 code.cloudfoundry.org/go-loggregator/v10
 code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2
-# code.cloudfoundry.org/go-metric-registry v0.0.0-20240911230103-8810864fa5d2
+# code.cloudfoundry.org/go-metric-registry v0.0.0-20240924162441-23e55bf8b6be
 ## explicit; go 1.22
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers
@@ -33,7 +33,7 @@ filippo.io/edwards25519/field
 github.com/Benjamintf1/unmarshalledmatchers
 # github.com/OneOfOne/xxhash v1.2.8
 ## explicit; go 1.11
-# github.com/alecthomas/units v0.0.0-20240626203959-61d1e3462e30
+# github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b
 ## explicit; go 1.15
 github.com/alecthomas/units
 # github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
@@ -53,7 +53,7 @@ github.com/cespare/xxhash
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry/gosigar v1.3.71
+# github.com/cloudfoundry/gosigar v1.3.72
 ## explicit; go 1.22.0
 github.com/cloudfoundry/gosigar
 github.com/cloudfoundry/gosigar/sys/windows
@@ -111,7 +111,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/pprof v0.0.0-20240910150728-a0b0bb1d4134
+# github.com/google/pprof v0.0.0-20240929191954-255acd752d31
 ## explicit; go 1.22
 github.com/google/pprof/profile
 # github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
@@ -125,8 +125,8 @@ github.com/influxdata/go-syslog/v3
 github.com/influxdata/go-syslog/v3/common
 github.com/influxdata/go-syslog/v3/octetcounting
 github.com/influxdata/go-syslog/v3/rfc5424
-# github.com/klauspost/compress v1.17.9
-## explicit; go 1.20
+# github.com/klauspost/compress v1.17.10
+## explicit; go 1.21
 github.com/klauspost/compress
 github.com/klauspost/compress/fse
 github.com/klauspost/compress/huff0
@@ -257,7 +257,7 @@ github.com/tklauser/numcpus
 # github.com/yusufpapurcu/wmi v1.2.4
 ## explicit; go 1.16
 github.com/yusufpapurcu/wmi
-# go.step.sm/crypto v0.52.0
+# go.step.sm/crypto v0.53.0
 ## explicit; go 1.22
 go.step.sm/crypto/fingerprint
 go.step.sm/crypto/internal/bcrypt_pbkdf
@@ -327,12 +327,12 @@ golang.org/x/text/unicode/norm
 ## explicit; go 1.22.0
 golang.org/x/tools/cover
 golang.org/x/tools/go/ast/inspector
-# google.golang.org/genproto/googleapis/api v0.0.0-20240903143218-8af14fe29dc1
+# google.golang.org/genproto/googleapis/api v0.0.0-20240924160255-9d4c2d233b61
 ## explicit; go 1.21
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20240924160255-9d4c2d233b61
 ## explicit; go 1.21
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.67.0
