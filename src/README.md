@@ -85,9 +85,11 @@ Query Parameters:
   to include more types.
 - **limit** is the maximum number of envelopes to request. The max limit size
   is 1000 and defaults to 100.
+- **descending** is a parameter for sorting in descending order. If the
+  parameter is not provided the results will be sort in ascending order by default.  
 
 ```shell
-$ curl "https://<log-cache-addr>/api/v1/read/<source-id>?start_time=<start-time>&end_time=<end-time>"
+$ curl "https://<log-cache-addr>/api/v1/read/<source-id>?start_time=<start-time>&end_time=<end-time>&descending=true"
 ```
 
 ##### Response Body
