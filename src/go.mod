@@ -5,15 +5,15 @@ go 1.22.0
 toolchain go1.22.8
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20240911223457-d5519e55d3b9
-	code.cloudfoundry.org/go-diodes v0.0.0-20240911205836-e7f77fdf9650
+	code.cloudfoundry.org/go-batching v0.0.0-20241007161653-bed6be6829db
+	code.cloudfoundry.org/go-diodes v0.0.0-20241007161556-ec30366c7912
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20240924162441-23e55bf8b6be
-	code.cloudfoundry.org/tlsconfig v0.6.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20241007183436-1a2326addb3c
+	code.cloudfoundry.org/tlsconfig v0.7.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
-	github.com/cloudfoundry/gosigar v1.3.73
+	github.com/cloudfoundry/gosigar v1.3.74
 	github.com/dvsekhvalnov/jose2go v1.7.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.30.0
 	google.golang.org/grpc v1.67.1
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.1
 )
 
 require (
@@ -45,7 +45,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/ebitengine/purego v0.8.0 // indirect
-	github.com/edsrzf/mmap-go v1.1.0 // indirect
+	github.com/edsrzf/mmap-go v1.2.0 // indirect
 	github.com/go-kit/kit v0.13.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
@@ -54,8 +54,8 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20241001023024-f4c0cfd0cf1d // indirect
-	github.com/klauspost/compress v1.17.10 // indirect
+	github.com/google/pprof v0.0.0-20241009165004-a3522334989c // indirect
+	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
@@ -67,14 +67,14 @@ require (
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.9.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.step.sm/crypto v0.53.0 // indirect
+	go.step.sm/crypto v0.54.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240930140551-af27646dc61f // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240930140551-af27646dc61f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20241007155032-5fefd90f89a9 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241007155032-5fefd90f89a9 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
