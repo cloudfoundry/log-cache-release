@@ -8,7 +8,7 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20241007161653-bed6be6829db
 	code.cloudfoundry.org/go-diodes v0.0.0-20241007161556-ec30366c7912
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20241016180114-4959be80b5ec
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20241025180809-3ab2448983bd
 	code.cloudfoundry.org/tlsconfig v0.7.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
@@ -22,7 +22,7 @@ require (
 	github.com/onsi/gomega v1.34.2
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
-	github.com/prometheus/common v0.60.0
+	github.com/prometheus/common v0.60.1
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.30.0
 	google.golang.org/grpc v1.67.1
@@ -54,7 +54,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20241021161924-4cf4322d492d // indirect
+	github.com/google/pprof v0.0.0-20241023014458-598669927662 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
