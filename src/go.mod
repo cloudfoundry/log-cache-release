@@ -5,27 +5,27 @@ go 1.22.0
 toolchain go1.22.8
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20241007161653-bed6be6829db
-	code.cloudfoundry.org/go-diodes v0.0.0-20241007161556-ec30366c7912
+	code.cloudfoundry.org/go-batching v0.0.0-20241104233206-68f6863ec92a
+	code.cloudfoundry.org/go-diodes v0.0.0-20241104194350-6f18271962f1
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20241025180809-3ab2448983bd
-	code.cloudfoundry.org/tlsconfig v0.7.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20241104233614-1bb1a592dfb9
+	code.cloudfoundry.org/tlsconfig v0.8.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0
-	github.com/cloudfoundry/gosigar v1.3.74
+	github.com/cloudfoundry/gosigar v1.3.75
 	github.com/dvsekhvalnov/jose2go v1.7.0
 	github.com/emirpasic/gods v1.18.1
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.23.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
-	github.com/onsi/ginkgo/v2 v2.20.2
+	github.com/onsi/ginkgo/v2 v2.21.0
 	github.com/onsi/gomega v1.35.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.60.1
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.30.0
-	google.golang.org/grpc v1.67.1
+	google.golang.org/grpc v1.68.0-dev
 	google.golang.org/protobuf v1.35.1
 )
 
@@ -33,7 +33,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v3 v3.0.3
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.1
 	github.com/go-chi/chi/v5 v5.1.0
-	github.com/shirou/gopsutil/v4 v4.24.9
+	github.com/shirou/gopsutil/v4 v4.24.10
 )
 
 require (
@@ -54,7 +54,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20241023014458-598669927662 // indirect
+	github.com/google/pprof v0.0.0-20241101162523-b92577c0c142 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -69,12 +69,12 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.step.sm/crypto v0.54.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241021214115-324edc3d5d38 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20241104194629-dd2ea8efbc28 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241104194629-dd2ea8efbc28 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
