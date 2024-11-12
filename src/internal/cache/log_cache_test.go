@@ -202,7 +202,7 @@ var _ = Describe("LogCache", func() {
 			es = resp.Envelopes.Batch
 			return nil
 		}
-		Eventually(f).Should(BeNil())
+		Eventually(f).Should(Succeed())
 
 		Expect(es[0].Timestamp).To(Equal(int64(4)))
 		Expect(es[0].SourceId).To(Equal("src-zero"))
@@ -258,7 +258,7 @@ var _ = Describe("LogCache", func() {
 
 			return nil
 		}
-		Eventually(f).Should(BeNil())
+		Eventually(f).Should(Succeed())
 	})
 
 	It("queries data via PromQL Range Queries", func() {
@@ -302,7 +302,7 @@ var _ = Describe("LogCache", func() {
 
 			return nil
 		}
-		Eventually(f).Should(BeNil())
+		Eventually(f).Should(Succeed())
 	})
 
 	It("routes envelopes to peers", func() {
@@ -370,7 +370,7 @@ var _ = Describe("LogCache", func() {
 			es = resp.Envelopes.Batch
 			return nil
 		}
-		Eventually(f).Should(BeNil())
+		Eventually(f).Should(Succeed())
 
 		Expect(es[0].Timestamp).To(Equal(int64(1)))
 		Expect(es[0].SourceId).To(Equal("src-zero"))
