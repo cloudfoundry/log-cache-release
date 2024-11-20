@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    bosh-template (2.2.1)
+    bosh-template (2.4.0)
       semi_semantic (~> 1.2.0)
     diff-lcs (1.5.1)
     rspec (3.13.0)
@@ -26,6 +26,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bosh-template (= 2.2.1)
+  bosh-template
   rspec
   rspec-its
+
+RUBY VERSION
+   ruby 3.1.6p260
+
+BUNDLED WITH
+   2.5.23
