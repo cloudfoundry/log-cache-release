@@ -12,7 +12,7 @@ require (
 	code.cloudfoundry.org/tlsconfig v0.10.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
-	github.com/cespare/xxhash v1.1.0
+	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cloudfoundry/gosigar v1.3.77
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
@@ -32,6 +32,7 @@ require (
 require (
 	code.cloudfoundry.org/go-log-cache/v3 v3.0.3
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.1
+	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/shirou/gopsutil/v4 v4.24.10
 )
@@ -43,7 +44,6 @@ require (
 	github.com/benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/ebitengine/purego v0.8.1 // indirect
 	github.com/edsrzf/mmap-go v1.2.0 // indirect
 	github.com/go-kit/kit v0.13.0 // indirect

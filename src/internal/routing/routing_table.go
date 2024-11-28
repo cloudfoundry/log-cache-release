@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/benbjohnson/jmphash"
-	"github.com/cespare/xxhash"
+	"github.com/cespare/xxhash/v2"
 )
 
 // RoutingTable makes decisions for where a item should be routed.
