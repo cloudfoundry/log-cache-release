@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cespare/xxhash/v2"
+	"github.com/cespare/xxhash"
 	"github.com/pkg/errors"
 )
 
