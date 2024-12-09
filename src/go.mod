@@ -1,7 +1,6 @@
 module code.cloudfoundry.org/log-cache
 
 go 1.22.0
-
 toolchain go1.22.10
 
 require (
@@ -16,7 +15,7 @@ require (
 	github.com/cloudfoundry/gosigar v1.3.79
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.23.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
 	github.com/onsi/ginkgo/v2 v2.22.0
 	github.com/onsi/gomega v1.36.0
