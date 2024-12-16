@@ -9,7 +9,7 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20241202111822-779c0b5a3368
 	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20241209201411-ef47a098cdc4
-	code.cloudfoundry.org/tlsconfig v0.11.0
+	code.cloudfoundry.org/tlsconfig v0.12.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
