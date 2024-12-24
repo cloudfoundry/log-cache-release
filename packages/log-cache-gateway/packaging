@@ -3,7 +3,7 @@
 set -e -u -x -o pipefail
 
 # shellcheck source=/dev/null
-source /var/vcap/packages/golang-1.22-linux/bosh/compile.env
+source /var/vcap/packages/golang-1.23-linux/bosh/compile.env
 
 VERSION=$(cat version)
 go build \
