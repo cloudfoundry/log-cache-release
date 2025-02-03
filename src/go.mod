@@ -34,7 +34,7 @@ require (
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.1
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/go-chi/chi/v5 v5.2.0
-	github.com/shirou/gopsutil/v4 v4.24.12
+	github.com/shirou/gopsutil/v4 v4.25.1
 )
 
 require (
