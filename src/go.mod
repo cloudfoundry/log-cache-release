@@ -5,15 +5,15 @@ go 1.23.0
 toolchain go1.23.6
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20250120134235-6e0bbd144b70
-	code.cloudfoundry.org/go-diodes v0.0.0-20250120125122-6d632ec80998
+	code.cloudfoundry.org/go-batching v0.0.0-20250211080613-4a7cabc0fad6
+	code.cloudfoundry.org/go-diodes v0.0.0-20250217093403-cd1363c1f46a
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20250120152804-381e68ddcf4c
-	code.cloudfoundry.org/tlsconfig v0.17.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20250211080758-b1d4eddf8bb8
+	code.cloudfoundry.org/tlsconfig v0.18.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cloudfoundry/gosigar v1.3.86
+	github.com/cloudfoundry/gosigar v1.3.88
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.1
@@ -24,7 +24,7 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.62.0
 	github.com/prometheus/prometheus v1.99.0
-	golang.org/x/net v0.34.0
+	golang.org/x/net v0.35.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
 )
@@ -72,9 +72,9 @@ require (
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250207221924-e9438ea467c6 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250207221924-e9438ea467c6 // indirect
+	golang.org/x/tools v0.30.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250212204824-5a70512c5d8b // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250212204824-5a70512c5d8b // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
