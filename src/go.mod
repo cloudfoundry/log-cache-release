@@ -5,15 +5,15 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20250217142405-e451d572b3eb
-	code.cloudfoundry.org/go-diodes v0.0.0-20250217093403-cd1363c1f46a
+	code.cloudfoundry.org/go-batching v0.0.0-20250317153438-425cd9af613c
+	code.cloudfoundry.org/go-diodes v0.0.0-20250317104522-5c806ff4fd8d
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20250225215424-238194030075
-	code.cloudfoundry.org/tlsconfig v0.20.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20250317173500-2aa4b42ca9ca
+	code.cloudfoundry.org/tlsconfig v0.21.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cloudfoundry/gosigar v1.3.88
+	github.com/cloudfoundry/gosigar v1.3.90
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
@@ -22,7 +22,7 @@ require (
 	github.com/onsi/gomega v1.36.2
 	github.com/prometheus/client_golang v1.21.1
 	github.com/prometheus/client_model v0.6.1
-	github.com/prometheus/common v0.62.0
+	github.com/prometheus/common v0.63.0
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.37.0
 	google.golang.org/grpc v1.71.0
@@ -54,9 +54,9 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20250302191652-9094ed2288e7 // indirect
+	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/lufia/plan9stats v0.0.0-20250303091104-876f3ea5145d // indirect
+	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
@@ -73,8 +73,8 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
