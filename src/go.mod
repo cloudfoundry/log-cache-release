@@ -5,15 +5,15 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20250317153438-425cd9af613c
-	code.cloudfoundry.org/go-diodes v0.0.0-20250317104522-5c806ff4fd8d
+	code.cloudfoundry.org/go-batching v0.0.0-20250324153037-ac776dbe7880
+	code.cloudfoundry.org/go-diodes v0.0.0-20250324121313-75aea42a1fc3
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20250318085922-a92b53f5f52f
-	code.cloudfoundry.org/tlsconfig v0.21.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20250325082948-e9e7a096ad4d
+	code.cloudfoundry.org/tlsconfig v0.22.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cloudfoundry/gosigar v1.3.90
+	github.com/cloudfoundry/gosigar v1.3.91
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.37.0
 	google.golang.org/grpc v1.71.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -67,14 +67,14 @@ require (
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.step.sm/crypto v0.59.1 // indirect
+	go.step.sm/crypto v0.60.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250324211829-b45e905df463 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
