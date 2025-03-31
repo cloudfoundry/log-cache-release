@@ -16,7 +16,7 @@ code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1
 ## explicit; go 1.22.0
 code.cloudfoundry.org/go-loggregator/v10
 code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2
-# code.cloudfoundry.org/go-metric-registry v0.0.0-20250325082948-e9e7a096ad4d
+# code.cloudfoundry.org/go-metric-registry v0.0.0-20250326210619-55aec564e1b0
 ## explicit; go 1.23.0
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers
@@ -286,7 +286,7 @@ golang.org/x/crypto/salsa20/salsa
 golang.org/x/crypto/scrypt
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
-# golang.org/x/net v0.37.0
+# golang.org/x/net v0.38.0
 ## explicit; go 1.23.0
 golang.org/x/net/context
 golang.org/x/net/html

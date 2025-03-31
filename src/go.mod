@@ -8,7 +8,7 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20250324153037-ac776dbe7880
 	code.cloudfoundry.org/go-diodes v0.0.0-20250324121313-75aea42a1fc3
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20250325082948-e9e7a096ad4d
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20250326210619-55aec564e1b0
 	code.cloudfoundry.org/tlsconfig v0.22.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
@@ -24,7 +24,7 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.63.0
 	github.com/prometheus/prometheus v1.99.0
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.6
 )

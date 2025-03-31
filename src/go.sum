@@ -12,8 +12,8 @@ code.cloudfoundry.org/go-log-cache/v3 v3.1.0 h1:/7Fn9ID9wCzLSbqaw6JBJbVo5481xn7L
 code.cloudfoundry.org/go-log-cache/v3 v3.1.0/go.mod h1:3kRhDyPZhjBUxUFT0ysMM8Sh27ZtKaPuKzI5x9AmmuE=
 code.cloudfoundry.org/go-loggregator/v10 v10.1.0 h1:Hwp3dUklynGlkJakzyfmXKiOT+WpPCz4t3fDGQNoegI=
 code.cloudfoundry.org/go-loggregator/v10 v10.1.0/go.mod h1:zXRyE5kx5TwI95gePR2p8d5kPYr6NGqoCbby1ly0XWE=
-code.cloudfoundry.org/go-metric-registry v0.0.0-20250325082948-e9e7a096ad4d h1:xOoFe7YQz+nSmfJSxT74OxenrWMGE9o+Ql4VJg3XmYc=
-code.cloudfoundry.org/go-metric-registry v0.0.0-20250325082948-e9e7a096ad4d/go.mod h1:SXnQaTeHXhjPh0/4iLAcl+RkVx7+84zVNB1QAcNVq3U=
+code.cloudfoundry.org/go-metric-registry v0.0.0-20250326210619-55aec564e1b0 h1:xNJT5ioCX8lVdQlzMuaMdRR55R0SWlNeQQW5IhMftqI=
+code.cloudfoundry.org/go-metric-registry v0.0.0-20250326210619-55aec564e1b0/go.mod h1:SXnQaTeHXhjPh0/4iLAcl+RkVx7+84zVNB1QAcNVq3U=
 code.cloudfoundry.org/tlsconfig v0.22.0 h1:zgzDd4lp++vov8azKP1LdAOBEViPRwm1lg67FHJ4W7Q=
 code.cloudfoundry.org/tlsconfig v0.22.0/go.mod h1:RX++v+3sJ7bCv0rhFAMryoDAeQeGWJv7bXdwK7DfIzo=
 contrib.go.opencensus.io/exporter/ocagent v0.6.0/go.mod h1:zmKjrJcdo0aYcVS7bmEeSEBLPA9YJp5bjrofdU3pIXs=
@@ -494,8 +494,8 @@ golang.org/x/net v0.0.0-20190613194153-d28f0bde5980/go.mod h1:z5CRVTTTmAJ677TzLL
 golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20190628185345-da137c7871d7/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20190724013045-ca1201d0de80/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
-golang.org/x/net v0.37.0 h1:1zLorHbz+LYj7MQlSf1+2tPIIgibq2eL5xkrGk6f+2c=
-golang.org/x/net v0.37.0/go.mod h1:ivrbrMbzFq5J41QOQh0siUuly180yBYtLp+CKbEaFx8=
+golang.org/x/net v0.38.0 h1:vRMAPTMaeGqVhG5QyLJHqNDwecKTomGeqbnfZyKlBI8=
+golang.org/x/net v0.38.0/go.mod h1:ivrbrMbzFq5J41QOQh0siUuly180yBYtLp+CKbEaFx8=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
