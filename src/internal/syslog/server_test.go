@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
@@ -25,6 +26,15 @@ const (
 	GAUGE_MSG   = `132 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/3] - [gauge@47450 name="cpu" value="0.23" unit="percentage"] ` + "\n"
 	EVENT_MSG   = `128 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [event@47450 title="event-title" body="event-body"] ` + "\n"
 	TIMER_MSG   = `128 <14>1 1970-01-01T00:00:00.012345+00:00 test-hostname test-app-id [APP/2] - [timer@47450 name="some-name" start="10" stop="20"] ` + "\n"
+)
+
+var (
+	// Same messages but without the MSGLEN
+	_, LOG_MSG_NT, _     = strings.Cut(LOG_MSG, " ")
+	_, COUNTER_MSG_NT, _ = strings.Cut(COUNTER_MSG, " ")
+	_, GAUGE_MSG_NT, _   = strings.Cut(GAUGE_MSG, " ")
+	_, EVENT_MSG_NT, _   = strings.Cut(EVENT_MSG, " ")
+	_, TIMER_MSG_NT, _   = strings.Cut(TIMER_MSG, " ")
 )
 
 var _ = Describe("Server", func() {
@@ -219,6 +229,89 @@ var _ = Describe("Server", func() {
 			Entry("default", func(s *syslog.Server) {}, "just a test with with whitespace"),
 			Entry("explicitly disabled", syslog.WithServerTrimMessageWhitespace(false), "    just a test with with whitespace    "),
 			Entry("explicitly enabled", syslog.WithServerTrimMessageWhitespace(true), "just a test with with whitespace"),
+		)
+
+		DescribeTableSubtree("nontransparent framing",
+			func(msg string, expected *loggregator_v2.Envelope) {
+				BeforeEach(func() {
+					serverOpts = append(serverOpts, syslog.WithNonTransparentFraming())
+				})
+
+				It("correctly parses RFC5424 formatted messages without MSGLEN", func() {
+					_, err := fmt.Fprint(clientConn, msg)
+					Expect(err).ToNot(HaveOccurred())
+
+					Expect(server.Stream(context.Background(), &loggregator_v2.EgressBatchRequest{})()).Should(ContainElement(expected))
+				})
+			},
+			Entry("log", LOG_MSG_NT, &loggregator_v2.Envelope{
+				Tags: map[string]string{
+					"source_type": "actual-source-type",
+					"key":         "value",
+				},
+				InstanceId: "2",
+				Timestamp:  12345000,
+				SourceId:   "test-app-id",
+				Message: &loggregator_v2.Envelope_Log{
+					Log: &loggregator_v2.Log{
+						Payload: []byte("just a test"),
+						Type:    loggregator_v2.Log_OUT,
+					},
+				},
+			}),
+			Entry("counter", COUNTER_MSG_NT, &loggregator_v2.Envelope{
+				InstanceId: "1",
+				Timestamp:  12345000,
+				SourceId:   "test-app-id",
+				Tags: map[string]string{
+					"key": "value",
+				},
+				Message: &loggregator_v2.Envelope_Counter{
+					Counter: &loggregator_v2.Counter{
+						Name:  "test",
+						Delta: 5,
+						Total: 10,
+					},
+				},
+			}),
+			Entry("gauge", GAUGE_MSG_NT, &loggregator_v2.Envelope{
+				InstanceId: "3",
+				Timestamp:  12345000,
+				SourceId:   "test-app-id",
+				Tags:       map[string]string{},
+				Message: &loggregator_v2.Envelope_Gauge{
+					Gauge: &loggregator_v2.Gauge{
+						Metrics: map[string]*loggregator_v2.GaugeValue{
+							"cpu": {Unit: "percentage", Value: 0.23},
+						},
+					},
+				},
+			}),
+			Entry("event", EVENT_MSG_NT, &loggregator_v2.Envelope{
+				InstanceId: "2",
+				Timestamp:  12345000,
+				SourceId:   "test-app-id",
+				Tags:       map[string]string{},
+				Message: &loggregator_v2.Envelope_Event{
+					Event: &loggregator_v2.Event{
+						Title: "event-title",
+						Body:  "event-body",
+					},
+				},
+			}),
+			Entry("timer", TIMER_MSG_NT, &loggregator_v2.Envelope{
+				InstanceId: "2",
+				Timestamp:  12345000,
+				SourceId:   "test-app-id",
+				Tags:       map[string]string{},
+				Message: &loggregator_v2.Envelope_Timer{
+					Timer: &loggregator_v2.Timer{
+						Name:  "some-name",
+						Start: 10,
+						Stop:  20,
+					},
+				},
+			}),
 		)
 
 		Context("when max message length is exceeded", func() {
