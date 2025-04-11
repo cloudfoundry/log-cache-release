@@ -12,6 +12,7 @@ import (
 	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/tlsconfig"
 	"github.com/leodido/go-syslog/v4"
+	"github.com/leodido/go-syslog/v4/nontransparent"
 	"github.com/leodido/go-syslog/v4/octetcounting"
 	"github.com/leodido/go-syslog/v4/rfc5424"
 
@@ -34,9 +35,11 @@ type Server struct {
 	idleTimeout           time.Duration
 	maxMessageLength      int
 	trimMessageWhitespace bool
+	nonTransparentFraming bool
 
 	ingress        metrics.Counter
 	invalidIngress metrics.Counter
+	newParserFunc  func(...syslog.ParserOption) syslog.Parser
 
 	loggr *log.Logger
 }
@@ -58,10 +61,15 @@ func NewServer(
 		idleTimeout:           2 * time.Minute,
 		maxMessageLength:      65 * 1024, // Diego should never send logs bigger than 64Kib
 		trimMessageWhitespace: true,
+		newParserFunc:         octetcounting.NewParser,
 	}
 
 	for _, o := range opts {
 		o(s)
+	}
+
+	if s.nonTransparentFraming {
+		s.newParserFunc = nontransparent.NewParser
 	}
 
 	s.ingress = m.NewCounter(
@@ -104,6 +112,12 @@ func WithServerTLS(cert, key string) ServerOption {
 func WithSyslogClientCA(syslogClientCA string) ServerOption {
 	return func(s *Server) {
 		s.syslogClientCA = syslogClientCA
+	}
+}
+
+func WithNonTransparentFraming() ServerOption {
+	return func(s *Server) {
+		s.nonTransparentFraming = true
 	}
 }
 
@@ -159,7 +173,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	defer conn.Close()
 	s.setReadDeadline(conn)
 
-	p := octetcounting.NewParser(
+	p := s.newParserFunc(
 		syslog.WithMaxMessageLength(s.maxMessageLength),
 		syslog.WithListener(s.parseListenerForConnection(conn)),
 	)
