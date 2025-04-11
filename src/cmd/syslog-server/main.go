@@ -84,6 +84,10 @@ func main() {
 		serverOptions = append(serverOptions, syslog.WithSyslogClientCA(cfg.SyslogClientTrustedCAFile))
 	}
 
+	if cfg.SyslogNonTransparentFraming {
+		serverOptions = append(serverOptions, syslog.WithNonTransparentFraming())
+	}
+
 	server := syslog.NewServer(
 		loggr,
 		m,
