@@ -11,9 +11,9 @@ import (
 	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
 	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/tlsconfig"
-	"github.com/influxdata/go-syslog/v3"
-	"github.com/influxdata/go-syslog/v3/octetcounting"
-	"github.com/influxdata/go-syslog/v3/rfc5424"
+	"github.com/leodido/go-syslog/v4"
+	"github.com/leodido/go-syslog/v4/octetcounting"
+	"github.com/leodido/go-syslog/v4/rfc5424"
 
 	"net"
 	"strconv"

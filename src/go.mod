@@ -17,7 +17,6 @@ require (
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3
-	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/prometheus/client_golang v1.22.0
@@ -34,6 +33,7 @@ require (
 	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/go-chi/chi/v5 v5.2.1
+	github.com/leodido/go-syslog/v4 v4.2.0
 	github.com/shirou/gopsutil/v4 v4.25.3
 )
 

@@ -125,12 +125,13 @@ github.com/google/pprof/profile
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
 github.com/grpc-ecosystem/grpc-gateway/v2/runtime
 github.com/grpc-ecosystem/grpc-gateway/v2/utilities
-# github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6
-## explicit; go 1.13
-github.com/influxdata/go-syslog/v3
-github.com/influxdata/go-syslog/v3/common
-github.com/influxdata/go-syslog/v3/octetcounting
-github.com/influxdata/go-syslog/v3/rfc5424
+# github.com/leodido/go-syslog/v4 v4.2.0
+## explicit; go 1.21
+github.com/leodido/go-syslog/v4
+github.com/leodido/go-syslog/v4/common
+github.com/leodido/go-syslog/v4/octetcounting
+github.com/leodido/go-syslog/v4/rfc3164
+github.com/leodido/go-syslog/v4/rfc5424
 # github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35
 ## explicit; go 1.21
 github.com/lufia/plan9stats
