@@ -17,6 +17,7 @@ processes:
     SYSLOG_PORT: "<%= p('syslog_port') %>"
     SYSLOG_IDLE_TIMEOUT: "<%= p('syslog_idle_timeout') %>"
     SYSLOG_TRIM_MESSAGE_WHITESPACE: "<%= p('syslog_trim_message_whitespace') %>"
+    SYSLOG_NON_TRANSPARENT_FRAMING: "<%= p('syslog_non_transparent_framing') %>"
 
     SYSLOG_TLS_CERT_PATH: "<%= "#{certDir}/syslog.crt" %>"
     SYSLOG_TLS_KEY_PATH: "<%= "#{certDir}/syslog.key" %>"

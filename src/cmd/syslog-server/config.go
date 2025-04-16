@@ -24,6 +24,8 @@ type Config struct {
 
 	SyslogClientTrustedCAFile string `env:"SYSLOG_CLIENT_TRUSTED_CA_FILE,  report"`
 
+	SyslogNonTransparentFraming bool `env:"SYSLOG_NON_TRANSPARENT_FRAMING, report"`
+
 	MetricsServer config.MetricsServer
 	UseRFC339     bool `env:"USE_RFC339"`
 }
