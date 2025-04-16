@@ -38,6 +38,9 @@ properties:
   syslog_trim_message_whitespace:
     description: "Defines if the leading and trailing whitespace in the Syslog log messages should be trimmed"
     default: true
+  syslog_non_transparent_framing:
+    description: "Defines if the non-transparent framing technique should be used for parsing the Syslog messages"
+    default: false
 
   syslog_client_ca_cert:
     description: The CA certificate for key/cert verification.
