@@ -129,9 +129,14 @@ github.com/grpc-ecosystem/grpc-gateway/v2/utilities
 ## explicit; go 1.21
 github.com/leodido/go-syslog/v4
 github.com/leodido/go-syslog/v4/common
+github.com/leodido/go-syslog/v4/nontransparent
 github.com/leodido/go-syslog/v4/octetcounting
 github.com/leodido/go-syslog/v4/rfc3164
 github.com/leodido/go-syslog/v4/rfc5424
+# github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b
+## explicit
+github.com/leodido/ragel-machinery
+github.com/leodido/ragel-machinery/parser
 # github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35
 ## explicit; go 1.21
 github.com/lufia/plan9stats
