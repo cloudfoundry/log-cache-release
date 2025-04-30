@@ -194,6 +194,12 @@ $ curl -G "https://<log-cache-addr>/api/v1/query_range" \
 }
 ```
 
+## Syslog messages framing techniques
+
+By default, the syslog server expects syslog messages to be formatted as outlined in [RFC 5425](https://datatracker.ietf.org/doc/html/rfc5425). This format mandates the inclusion of a `MSG-LEN` field at the beginning of the message. This technique is referred to as [octet counting](https://datatracker.ietf.org/doc/html/rfc6587#section-3.4.1).
+
+You can set the environment variable `SYSLOG_NON_TRANSPARENT_FRAMING=true` to change the framing technique to [non-transparent framing](https://datatracker.ietf.org/doc/html/rfc6587#section-3.4.2), which is compatible with [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424) and does not require the `MSG-LEN` field to be present. This technique allows you to send syslog messages from tools that only support RFC 5424, such as Fluentd and it's [syslog output](https://docs.fluentbit.io/manual/pipeline/outputs/syslog) plugin.
+
 ## Cloud Foundry CLI Plugin
 
 Log Cache provides a [plugin][log-cache-cli] for the Cloud Foundry command
