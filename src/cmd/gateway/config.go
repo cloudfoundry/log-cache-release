@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log/slog"
+
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/log-cache/internal/config"
 	"code.cloudfoundry.org/log-cache/internal/tls"
@@ -18,7 +20,6 @@ type Config struct {
 
 	TLS           tls.TLS
 	MetricsServer config.MetricsServer
-	UseRFC339     bool `env:"USE_RFC339"`
 }
 
 // LoadConfig creates Config object from environment variables
@@ -39,7 +40,7 @@ func LoadConfig() (*Config, error) {
 
 	err := envstruct.WriteReport(&c)
 	if err != nil {
-		return nil, err
+		slog.Error("Failed to write report", "error", err)
 	}
 
 	return &c, nil
