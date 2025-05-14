@@ -46,6 +46,8 @@ permissions.
 When querying the API via gRPC, authorization for all app and component data
 is granted.
 
+Please note that in case of missing or insufficient authorization, an http status code of 404 (not found) will be returned to discourage malicious actors. Don't expect 401 or 403.
+
 ### **GET** `/api/v1/info`
 
 Retrieve JSON representation of deployed Log Cache version.
