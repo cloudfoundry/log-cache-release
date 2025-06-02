@@ -37,12 +37,15 @@ type LogCache struct {
 	metrics    Metrics
 	closing    int64
 
-	maxPerSource       int
-	memoryLimitPercent float64
-	memoryLimit        uint64
-	queryTimeout       time.Duration
-	truncationInterval time.Duration
-	prunesPerGC        int64
+	maxPerSource                   int
+	memoryLimitPercent             float64
+	memoryLimit                    uint64
+	queryTimeout                   time.Duration
+	truncationInterval             time.Duration
+	prunesPerGC                    int64
+	ingressBufferSize              int
+	ingressBufferReadBatchSize     int
+	ingressBufferReadBatchInterval int
 
 	// Cluster Properties
 	addr     string
@@ -60,13 +63,16 @@ type LogCache struct {
 // NewLogCache creates a new LogCache.
 func New(m Metrics, logger *log.Logger, opts ...LogCacheOption) *LogCache {
 	cache := &LogCache{
-		log:                logger,
-		metrics:            m,
-		maxPerSource:       100000,
-		memoryLimitPercent: 50,
-		queryTimeout:       10 * time.Second,
-		truncationInterval: 1 * time.Second,
-		prunesPerGC:        int64(3),
+		log:                            logger,
+		metrics:                        m,
+		maxPerSource:                   100000,
+		ingressBufferSize:              10000,
+		ingressBufferReadBatchSize:     100,
+		ingressBufferReadBatchInterval: 250,
+		memoryLimitPercent:             50,
+		queryTimeout:                   10 * time.Second,
+		truncationInterval:             1 * time.Second,
+		prunesPerGC:                    int64(3),
 
 		addr:     ":8080",
 		dialOpts: []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
@@ -92,6 +98,33 @@ type LogCacheOption func(*LogCache)
 func WithMaxPerSource(size int) LogCacheOption {
 	return func(c *LogCache) {
 		c.maxPerSource = size
+	}
+}
+
+// WithIngressBufferSize returns a LogCacheOption that configures the size
+// of the batched input buffer size as number of envelopes. Defaults to
+// 10000 envelopes
+func WithIngressBufferSize(size int) LogCacheOption {
+	return func(c *LogCache) {
+		c.ingressBufferSize = size
+	}
+}
+
+// WithIngressBufferReadBatchSize returns a LogCacheOption that configures size
+// of the ingress buffer(diode) read batch in number of envelopes.
+// Defaults to 100 envelopes
+func WithIngressBufferReadBatchSize(size int) LogCacheOption {
+	return func(c *LogCache) {
+		c.ingressBufferReadBatchSize = size
+	}
+}
+
+// WithIngressBufferReadBatchInterval returns a LogCacheOption that configures read interval
+// of the ingress buffer(diode) in milliseconds.
+// Defaults to 100 envelopes
+func WithIngressBufferReadBatchInterval(interval int) LogCacheOption {
+	return func(c *LogCache) {
+		c.ingressBufferReadBatchInterval = interval
 	}
 }
 
@@ -225,8 +258,9 @@ func (c *LogCache) setupRouting(s *store.Store) {
 			}
 
 			bw := routing.NewBatchedIngressClient(
-				100,
-				250*time.Millisecond,
+				c.ingressBufferReadBatchSize,
+				c.ingressBufferSize,
+				time.Duration(c.ingressBufferReadBatchInterval)*time.Millisecond,
 				logcache_v1.NewIngressClient(conn),
 				c.metrics.NewCounter(
 					"ingress_dropped",
