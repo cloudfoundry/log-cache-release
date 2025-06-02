@@ -20,7 +20,7 @@ type BatchedIngressClient struct {
 	c rpc.IngressClient
 
 	buffer            *diodes.OneToOne
-	size              int
+	batchSize         int
 	interval          time.Duration
 	log               *log.Logger
 	sendFailureMetric metrics.Counter
@@ -36,7 +36,8 @@ func WithLocalOnlyDisabled(b *BatchedIngressClient) {
 
 // NewBatchedIngressClient returns a new BatchedIngressClient.
 func NewBatchedIngressClient(
-	size int,
+	batchSize int,
+	bufferSize int,
 	interval time.Duration,
 	c rpc.IngressClient,
 	droppedMetric metrics.Counter,
@@ -46,13 +47,13 @@ func NewBatchedIngressClient(
 ) *BatchedIngressClient {
 	b := &BatchedIngressClient{
 		c:                 c,
-		size:              size,
+		batchSize:         batchSize,
 		interval:          interval,
 		log:               log,
 		sendFailureMetric: sendFailureMetric,
 		localOnly:         true,
 
-		buffer: diodes.NewOneToOne(10000, diodes.AlertFunc(func(dropped int) {
+		buffer: diodes.NewOneToOne(bufferSize, diodes.AlertFunc(func(dropped int) {
 			log.Printf("dropped %d envelopes", dropped)
 			droppedMetric.Add(float64(dropped))
 		})),
@@ -77,7 +78,7 @@ func (b *BatchedIngressClient) Send(ctx context.Context, in *rpc.SendRequest, op
 }
 
 func (b *BatchedIngressClient) start() {
-	batcher := batching.NewBatcher(b.size, b.interval, batching.WriterFunc(b.write))
+	batcher := batching.NewBatcher(b.batchSize, b.interval, batching.WriterFunc(b.write))
 	for {
 		e, ok := b.buffer.TryNext()
 		if !ok {

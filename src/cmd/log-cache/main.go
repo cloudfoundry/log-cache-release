@@ -97,6 +97,9 @@ func main() {
 		WithQueryTimeout(cfg.QueryTimeout),
 		WithTruncationInterval(cfg.TruncationInterval),
 		WithPrunesPerGC(cfg.PrunesPerGC),
+		WithIngressBufferSize(cfg.IngressBufferSize),
+		WithIngressBufferReadBatchSize(cfg.IngressBufferReadBatchSize),
+		WithIngressBufferReadBatchInterval(cfg.IngressBufferReadBatchInterval),
 	}
 	var transport grpc.DialOption
 	if cfg.TLS.HasAnyCredential() {
