@@ -57,6 +57,24 @@ type Config struct {
 	// assumed that the current node is the only one.
 	NodeAddrs []string `env:"NODE_ADDRS, report"`
 
+	// IngressBufferSize sets the size of the ingress buffer(diode) in number of items,
+	// used when LogCache nodes send items between each other. Depending on the Log
+	// Envelope Load in some cases it might be useful to raise the size in order to avoid
+	// ingress drops. Default is 10000.
+	IngressBufferSize int `env:"INGRESS_BUFFER_SIZE, report"`
+
+	// IngressBufferReadBatchSize sets the size of the ingress buffer(diode) read batch in number of items,
+	// used when used when LogCache nodes send items between each other. Depending on the Log
+	// Envelope Load in some cases it might be useful to raise the size in order to avoid
+	// ingress drops. Default is 100.
+	IngressBufferReadBatchSize int `env:"INGRESS_BUFFER_READ_BATCH_SIZE, report"`
+
+	// IngressBufferReadBatchInterval sets the interval in which the items will be read out from the ingress buffer(diode)
+	// in milliseconds, used when used when LogCache nodes send items between each other. Depending on the Log
+	// Envelope Load in some cases it might be useful to adjust the interval in order to avoid
+	// ingress drops. Default is 250.
+	IngressBufferReadBatchInterval int `env:"INGRESS_BUFFER_READ_BATCH_INTERVAL, report"`
+
 	TLS           tls.TLS
 	MetricsServer config.MetricsServer
 	UseRFC339     bool `env:"USE_RFC339"`
@@ -65,12 +83,15 @@ type Config struct {
 // LoadConfig creates Config object from environment variables
 func LoadConfig() (*Config, error) {
 	c := Config{
-		Addr:               ":8080",
-		QueryTimeout:       10 * time.Second,
-		MemoryLimitPercent: 50,
-		MaxPerSource:       100000,
-		TruncationInterval: 1 * time.Second,
-		PrunesPerGC:        int64(3),
+		Addr:                           ":8080",
+		QueryTimeout:                   10 * time.Second,
+		MemoryLimitPercent:             50,
+		MaxPerSource:                   100000,
+		TruncationInterval:             1 * time.Second,
+		PrunesPerGC:                    int64(3),
+		IngressBufferSize:              10000,
+		IngressBufferReadBatchSize:     100,
+		IngressBufferReadBatchInterval: 250,
 		MetricsServer: config.MetricsServer{
 			Port: 6060,
 		},
