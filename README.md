@@ -43,6 +43,13 @@ Memory limit - Increasing memory limit allows for more storage, but may cause ou
 
 Larger CPUs - Increasing the CPU budget per instance should allow higher throughput
 
+Sometimes, depending on the scaling of Log Cache, the number of sources (CF applications and platform components) and the log load, ingress drops may occur when Log Cache nodes send items between each other. The Log Cache `ingress_dropped` metric should be monitored, to make sure that there are no drops. For such cases, the following three parameters can be adjusted until the log loss is gone.
+
+- Ingress Buffer Size - The ingress buffer (diode) size in number of items used when LogCache nodes send items between each other. The default size is 10000. Can be increased when ingress drops occur.
+- Ingress Buffer Read Batch Size - The ingress buffer read batch size in number of items. The size of the ingress buffer read batch used when LogCache nodes send items between each other.  The default size is 100. Can be increased when ingress drops occur.
+- Ingress Buffer Read Batch Interval - The ingress buffer read interval in milliseconds. The default value is 250. Can be increased when ingress drops occur.
+
+
 Log Cache is known to exceed memory limits under high throughput/stress. If you see your log-cache reaching higher memory
 then you have set, you might want to scale your log-cache up. Either solely in terms of CPU per instance, or more instances.
 

@@ -47,6 +47,18 @@ properties:
     description: "The maximum number of items stored in LogCache per source."
     default: 100000
 
+  ingress_buffer_size:
+    description: "The ingress buffer (diode) size in number of items. The size of the ingress buffer used when LogCache nodes send items between each other. In some cases, the buffer size must be risen in order to avoid ingress drops. Must be an integer."
+    default: 10000
+
+  ingress_buffer_read_batch_size:
+    description: "The ingress buffer read batch size in number of items. The size of the ingress buffer read batch used when LogCache nodes send envelopes between each other. In some cases, the batch size must be risen in order to make place in the buffer faster and avoid ingress drops. Must be an integer."
+    default: 100
+
+  ingress_buffer_read_batch_interval:
+    description: "The ingress buffer read batch interval in milliseconds. The interval in which the data will be read out from the ingress buffer used when LogCache nodes send envelopes between each other. In some cases, the batch read interval must be adjusted in order to make place in the buffer faster and avoid ingress drops. Must be an integer."
+    default: 250
+
   truncation_interval:
     description: "The amount of time between log-cache checking if it needs to prune"
     default: "1s"
