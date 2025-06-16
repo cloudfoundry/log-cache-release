@@ -8,8 +8,8 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20250505163757-782705ba2997
 	code.cloudfoundry.org/go-diodes v0.0.0-20250505082646-e4c2d772c2ec
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20250512163413-c16153523050
-	code.cloudfoundry.org/tlsconfig v0.28.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20250611124144-ca953cadd16e
+	code.cloudfoundry.org/tlsconfig v0.29.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
