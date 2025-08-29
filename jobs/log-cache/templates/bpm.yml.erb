@@ -25,6 +25,9 @@ processes:
   env:
     ADDR:        "<%= ":#{p('port')}" %>"
     MEMORY_LIMIT_PERCENT: "<%= p('memory_limit_percent') %>"
+<%- if_p('memory_limit_bytes') do |memory_limit_bytes| %>
+    MEMORY_LIMIT_BYTES: "<%= memory_limit_bytes %>"
+<% end -%>
     MAX_PER_SOURCE: "<%= p('max_per_source') %>"
     INGRESS_BUFFER_SIZE: "<%= p('ingress_buffer_size') %>"
     INGRESS_BUFFER_READ_BATCH_SIZE: "<%= p('ingress_buffer_read_batch_size') %>"
