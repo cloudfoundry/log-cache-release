@@ -43,6 +43,9 @@ properties:
     description: "Percentage of system memory to use for the cache. Must be an integer."
     default: 50
 
+  memory_limit_bytes:
+    description: "Overrides memory_limit_percent with a specific size cache in bytes."
+
   max_per_source:
     description: "The maximum number of items stored in LogCache per source."
     default: 100000
