@@ -3,6 +3,6 @@
 set -e -u -x -o pipefail
 
 # shellcheck source=/dev/null
-source /var/vcap/packages/golang-1.23-linux/bosh/compile.env
+source /var/vcap/packages/golang-1.25-linux/bosh/compile.env
 
 go build -o "${BOSH_INSTALL_TARGET}/log-cache-cf-auth-proxy" ./cmd/cf-auth-proxy
