@@ -22,7 +22,7 @@ import (
 	"code.cloudfoundry.org/go-envstruct"
 	client "code.cloudfoundry.org/go-log-cache/v3"
 	"code.cloudfoundry.org/log-cache/internal/auth"
-	. "code.cloudfoundry.org/log-cache/internal/cfauthproxy"
+	"code.cloudfoundry.org/log-cache/internal/cfauthproxy"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/promql"
 )
@@ -109,7 +109,7 @@ func main() {
 
 	if cfg.ProxyCAPath != "" {
 		proxyCACertPool := loadCA(cfg.ProxyCAPath, loggr)
-		metaHTTPClient.Transport = NewTransportWithRootCA(proxyCACertPool)
+		metaHTTPClient.Transport = cfauthproxy.NewTransportWithRootCA(proxyCACertPool)
 	}
 
 	metaFetcher := client.NewClient(
@@ -125,26 +125,26 @@ func main() {
 		capiClient,
 	)
 
-	proxyOptions := []CFAuthProxyOption{
-		WithAuthMiddleware(middlewareProvider.Middleware),
+	proxyOptions := []cfauthproxy.CFAuthProxyOption{
+		cfauthproxy.WithAuthMiddleware(middlewareProvider.Middleware),
 	}
 
 	if cfg.ProxyCAPath != "" {
 		proxyCACertPool := loadCA(cfg.ProxyCAPath, loggr)
-		proxyOptions = append(proxyOptions, WithCFAuthProxyCACertPool(proxyCACertPool))
+		proxyOptions = append(proxyOptions, cfauthproxy.WithCFAuthProxyCACertPool(proxyCACertPool))
 	}
 
 	if cfg.PromQLUnimplemented {
-		proxyOptions = append(proxyOptions, WithPromMiddleware(promql.UnimplementedMiddleware))
+		proxyOptions = append(proxyOptions, cfauthproxy.WithPromMiddleware(promql.UnimplementedMiddleware))
 	}
 
 	if cfg.CertPath == "" && cfg.KeyPath == "" {
-		proxyOptions = append(proxyOptions, WithCFAuthProxyTLSDisabled())
+		proxyOptions = append(proxyOptions, cfauthproxy.WithCFAuthProxyTLSDisabled())
 	} else {
-		proxyOptions = append(proxyOptions, WithCFAuthProxyTLSServer(cfg.CertPath, cfg.KeyPath))
+		proxyOptions = append(proxyOptions, cfauthproxy.WithCFAuthProxyTLSServer(cfg.CertPath, cfg.KeyPath))
 	}
 
-	proxy := NewCFAuthProxy(
+	proxy := cfauthproxy.NewCFAuthProxy(
 		gatewayURL.String(),
 		cfg.Addr,
 		proxyOptions...,
@@ -169,7 +169,7 @@ func main() {
 
 		accessLogger := auth.NewAccessLogger(accessLog)
 		accessMiddleware := auth.NewAccessMiddleware(accessLogger, cfg.InternalIP, localPort)
-		WithAccessMiddleware(accessMiddleware)(proxy)
+		cfauthproxy.WithAccessMiddleware(accessMiddleware)(proxy)
 	}
 
 	proxy.Start(uaaClient.RefreshTokenKeys)
