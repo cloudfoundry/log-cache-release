@@ -28,7 +28,7 @@ func (f WriterFunc) Write(batch []interface{}) {
 	f(batch)
 }
 
-// NewBatcher creates a new Batcher. It is recommended to use a wrapper type
+// NewBatcher creates a new Batcher. It is recommenended to use a wrapper type
 // such as NewByteBatcher or NewV2EnvelopeBatcher vs using this directly.
 func NewBatcher(size int, interval time.Duration, writer Writer) *Batcher {
 	return &Batcher{
