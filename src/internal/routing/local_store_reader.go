@@ -49,11 +49,11 @@ func (r *LocalStoreReader) Read(ctx context.Context, req *logcache_v1.ReadReques
 	}
 
 	if req.Limit > 1000 {
-		return nil, fmt.Errorf("Limit (%d) must be 1000 or less", req.Limit)
+		return nil, fmt.Errorf("limit (%d) must be 1000 or less", req.Limit)
 	}
 
 	if req.Limit < 0 {
-		return nil, fmt.Errorf("Limit (%d) must be greater than zero", req.Limit)
+		return nil, fmt.Errorf("limit (%d) must be greater than zero", req.Limit)
 	}
 
 	if req.EndTime == 0 {
@@ -69,7 +69,7 @@ func (r *LocalStoreReader) Read(ctx context.Context, req *logcache_v1.ReadReques
 	if req.NameFilter != "" {
 		nameFilter, err = regexp.Compile(req.NameFilter)
 		if err != nil {
-			return nil, fmt.Errorf("Name filter must be a valid regular expression: %s", err)
+			return nil, fmt.Errorf("name filter must be a valid regular expression: %s", err)
 		}
 	}
 

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega" //nolint:staticcheck
 )
 
 func FormatTimeWithDecimalMillis(t time.Time) string {

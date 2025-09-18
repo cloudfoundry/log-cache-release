@@ -13,7 +13,7 @@ import (
 
 	"code.cloudfoundry.org/go-envstruct"
 	metrics "code.cloudfoundry.org/go-metric-registry"
-	. "code.cloudfoundry.org/log-cache/internal/nozzle"
+	"code.cloudfoundry.org/log-cache/internal/nozzle"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"code.cloudfoundry.org/log-cache/internal/syslog"
 	"code.cloudfoundry.org/tlsconfig"
@@ -96,7 +96,7 @@ func main() {
 
 	go server.Start()
 
-	nozzleOptions := []NozzleOption{}
+	nozzleOptions := []nozzle.NozzleOption{}
 	if cfg.LogCacheTLS.HasAnyCredential() {
 		tlsConfig, err := tlsconfig.Build(
 			tlsconfig.WithInternalServiceDefaults(),
@@ -108,12 +108,12 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))))
+		nozzleOptions = append(nozzleOptions, nozzle.WithDialOpts(grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig))))
 	} else {
-		nozzleOptions = append(nozzleOptions, WithDialOpts(grpc.WithTransportCredentials(insecure.NewCredentials())))
+		nozzleOptions = append(nozzleOptions, nozzle.WithDialOpts(grpc.WithTransportCredentials(insecure.NewCredentials())))
 	}
 
-	nozzle := NewNozzle(
+	noz := nozzle.NewNozzle(
 		server,
 		cfg.LogCacheAddr,
 		m,
@@ -121,5 +121,5 @@ func main() {
 		nozzleOptions...,
 	)
 
-	nozzle.Start()
+	noz.Start()
 }

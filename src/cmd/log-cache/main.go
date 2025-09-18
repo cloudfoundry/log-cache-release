@@ -17,7 +17,7 @@ import (
 	"code.cloudfoundry.org/tlsconfig"
 
 	"code.cloudfoundry.org/go-envstruct"
-	. "code.cloudfoundry.org/log-cache/internal/cache"
+	"code.cloudfoundry.org/log-cache/internal/cache"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -89,17 +89,17 @@ func main() {
 		}
 	}(time.Now())
 
-	logCacheOptions := []LogCacheOption{
-		WithAddr(cfg.Addr),
-		WithMemoryLimitPercent(float64(cfg.MemoryLimitPercent)),
-		WithMemoryLimit(cfg.MemoryLimit),
-		WithMaxPerSource(cfg.MaxPerSource),
-		WithQueryTimeout(cfg.QueryTimeout),
-		WithTruncationInterval(cfg.TruncationInterval),
-		WithPrunesPerGC(cfg.PrunesPerGC),
-		WithIngressBufferSize(cfg.IngressBufferSize),
-		WithIngressBufferReadBatchSize(cfg.IngressBufferReadBatchSize),
-		WithIngressBufferReadBatchInterval(cfg.IngressBufferReadBatchInterval),
+	logCacheOptions := []cache.LogCacheOption{
+		cache.WithAddr(cfg.Addr),
+		cache.WithMemoryLimitPercent(float64(cfg.MemoryLimitPercent)),
+		cache.WithMemoryLimit(cfg.MemoryLimit),
+		cache.WithMaxPerSource(cfg.MaxPerSource),
+		cache.WithQueryTimeout(cfg.QueryTimeout),
+		cache.WithTruncationInterval(cfg.TruncationInterval),
+		cache.WithPrunesPerGC(cfg.PrunesPerGC),
+		cache.WithIngressBufferSize(cfg.IngressBufferSize),
+		cache.WithIngressBufferReadBatchSize(cfg.IngressBufferReadBatchSize),
+		cache.WithIngressBufferReadBatchInterval(cfg.IngressBufferReadBatchInterval),
 	}
 	var transport grpc.DialOption
 	if cfg.TLS.HasAnyCredential() {
@@ -125,24 +125,24 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		logCacheOptions = append(logCacheOptions, WithServerOpts(grpc.Creds(credentials.NewTLS(tlsConfigServer)), grpc.MaxRecvMsgSize(50*1024*1024)))
+		logCacheOptions = append(logCacheOptions, cache.WithServerOpts(grpc.Creds(credentials.NewTLS(tlsConfigServer)), grpc.MaxRecvMsgSize(50*1024*1024)))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
-	logCacheOptions = append(logCacheOptions, WithClustered(
+	logCacheOptions = append(logCacheOptions, cache.WithClustered(
 		cfg.NodeIndex,
 		cfg.NodeAddrs,
 		transport,
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024)),
 	))
 
-	cache := New(
+	lc := cache.New(
 		m,
 		logger,
 		logCacheOptions...,
 	)
 
-	cache.Start()
+	lc.Start()
 	waitForTermination()
 }
 

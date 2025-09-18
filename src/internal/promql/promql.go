@@ -340,7 +340,7 @@ func (l *LogCacheQuerier) Select(params *storage.SelectParams, ll ...*labels.Mat
 	}
 
 	if len(sourceIDs) == 0 {
-		err := fmt.Errorf("Metric '%s' does not have a 'source_id' label.", metric)
+		err := fmt.Errorf("metric '%s' does not have a 'source_id' label", metric)
 		l.errf(err)
 		return nil, nil, err
 	}

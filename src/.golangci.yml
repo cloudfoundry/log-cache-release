@@ -1,6 +1,8 @@
+version: "2"
+
 run:
-  # Timeout for analysis.
-  # Default: 1m.
+  # Timeout full work, e.g. 30s, 5m.
+  # Default: none
   timeout: 5m
 
 linters:
@@ -13,9 +15,28 @@ linters:
     - gosec
     # Enforces standards of using ginkgo and gomega.
     - ginkgolinter
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 
 issues:
   # Disable max issues per linter.
   max-issues-per-linter: 0
   # Disable max same issues.
   max-same-issues: 0
+
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -3,7 +3,7 @@ package testing
 import (
 	"net"
 
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega" //nolint:staticcheck
 )
 
 func GetFreePort() int {

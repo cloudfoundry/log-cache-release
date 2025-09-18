@@ -14,7 +14,7 @@ import (
 	//nolint: gosec
 	_ "net/http/pprof"
 
-	. "code.cloudfoundry.org/log-cache/internal/gateway"
+	"code.cloudfoundry.org/log-cache/internal/gateway"
 	"code.cloudfoundry.org/log-cache/internal/plumbing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -67,14 +67,14 @@ func main() {
 		go func() { log.Println("PPROF SERVER STOPPED " + pprofServer.ListenAndServe().Error()) }()
 	}
 
-	gatewayOptions := []GatewayOption{
-		WithGatewayLogger(gatewayLoggr),
-		WithGatewayVersion(cfg.Version),
-		WithGatewayBlock(),
+	gatewayOptions := []gateway.GatewayOption{
+		gateway.WithGatewayLogger(gatewayLoggr),
+		gateway.WithGatewayVersion(cfg.Version),
+		gateway.WithGatewayBlock(),
 	}
 
 	if cfg.ProxyCertPath != "" || cfg.ProxyKeyPath != "" {
-		gatewayOptions = append(gatewayOptions, WithGatewayTLSServer(cfg.ProxyCertPath, cfg.ProxyKeyPath))
+		gatewayOptions = append(gatewayOptions, gateway.WithGatewayTLSServer(cfg.ProxyCertPath, cfg.ProxyKeyPath))
 	}
 	if cfg.TLS.HasAnyCredential() {
 		tlsConfig, err := tlsconfig.Build(
@@ -88,13 +88,13 @@ func main() {
 			panic(err)
 		}
 
-		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
+		gatewayOptions = append(gatewayOptions, gateway.WithGatewayLogCacheDialOpts(
 			grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024)),
 		),
 		)
 	} else {
-		gatewayOptions = append(gatewayOptions, WithGatewayLogCacheDialOpts(
+		gatewayOptions = append(gatewayOptions, gateway.WithGatewayLogCacheDialOpts(
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(50*1024*1024)),
 		),
@@ -102,7 +102,7 @@ func main() {
 
 	}
 
-	gateway := NewGateway(cfg.LogCacheAddr, cfg.Addr, gatewayOptions...)
+	gw := gateway.NewGateway(cfg.LogCacheAddr, cfg.Addr, gatewayOptions...)
 
-	gateway.Start()
+	gw.Start()
 }
