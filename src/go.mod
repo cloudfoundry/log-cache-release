@@ -32,7 +32,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/leodido/go-syslog/v4 v4.3.0
-	github.com/shirou/gopsutil/v4 v4.25.11
+	github.com/shirou/gopsutil/v4 v4.25.12
 )
 
 require (

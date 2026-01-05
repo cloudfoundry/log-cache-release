@@ -244,7 +244,7 @@ github.com/prometheus/prometheus/util/stats
 github.com/prometheus/prometheus/util/strutil
 github.com/prometheus/prometheus/util/teststorage
 github.com/prometheus/prometheus/util/testutil
-# github.com/shirou/gopsutil/v4 v4.25.11
+# github.com/shirou/gopsutil/v4 v4.25.12
 ## explicit; go 1.24.0
 github.com/shirou/gopsutil/v4/common
 github.com/shirou/gopsutil/v4/cpu
