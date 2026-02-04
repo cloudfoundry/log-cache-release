@@ -3,15 +3,15 @@ module code.cloudfoundry.org/log-cache
 go 1.25.0
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20260119204239-2929d5532953
-	code.cloudfoundry.org/go-diodes v0.0.0-20260119094648-9c5f37160881
+	code.cloudfoundry.org/go-batching v0.0.0-20260203144829-40917c3c535d
+	code.cloudfoundry.org/go-diodes v0.0.0-20260203143438-37966a112aa6
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20260121160742-6919d065dcf4
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20260203145707-c2be33097cc5
 	code.cloudfoundry.org/tlsconfig v0.44.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cloudfoundry/gosigar v1.3.112
+	github.com/cloudfoundry/gosigar v1.3.115
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.7
@@ -75,8 +75,8 @@ require (
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260128011058-8636f8732409 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260128011058-8636f8732409 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260203192932-546029d2fa20 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260203192932-546029d2fa20 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
