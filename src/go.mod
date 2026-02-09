@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	code.cloudfoundry.org/go-batching v0.0.0-20260203144829-40917c3c535d
-	code.cloudfoundry.org/go-diodes v0.0.0-20260203143438-37966a112aa6
+	code.cloudfoundry.org/go-diodes v0.0.0-20260209061029-a81ffbc46978
 	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20260203145707-c2be33097cc5
 	code.cloudfoundry.org/tlsconfig v0.44.0
@@ -30,7 +30,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v3 v3.1.1
 	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
-	github.com/go-chi/chi/v5 v5.2.4
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/leodido/go-syslog/v4 v4.3.0
 	github.com/shirou/gopsutil/v4 v4.26.1
 )
@@ -72,7 +72,7 @@ require (
 	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260203192932-546029d2fa20 // indirect
