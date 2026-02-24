@@ -5,10 +5,7 @@ set -o pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-set +e
-bundler_executable=$(which bundle)
-set -e
-if [ -z "${bundler_executable}" ] || [ ! -x "${bundler_executable}" ]; then
+if ! command -v bundle &> /dev/null; then
   gem install bundler
 fi
 

@@ -1,10 +1,15 @@
 package syslog
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
+	"net"
+	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/v10"
@@ -15,13 +20,6 @@ import (
 	"github.com/leodido/go-syslog/v4/nontransparent"
 	"github.com/leodido/go-syslog/v4/octetcounting"
 	"github.com/leodido/go-syslog/v4/rfc5424"
-
-	"net"
-	"strconv"
-	"strings"
-	"sync"
-
-	"golang.org/x/net/context"
 )
 
 type Server struct {
@@ -269,7 +267,7 @@ func (s *Server) convertMessage(env *loggregator_v2.Envelope, msg *rfc5424.Syslo
 	env.Message = &loggregator_v2.Envelope_Log{
 		Log: &loggregator_v2.Log{
 			Payload: []byte(payload),
-			Type:    s.typeFromPriority(int(*msg.Priority)), //#nosec G115
+			Type:    s.typeFromPriority(int(*msg.Priority)),
 		},
 	}
 

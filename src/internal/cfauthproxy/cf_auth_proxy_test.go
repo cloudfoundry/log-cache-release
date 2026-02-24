@@ -287,7 +287,7 @@ func makeTLSReq(addr string) (*http.Response, error) {
 	}
 	client := &http.Client{Transport: tr}
 
-	return client.Do(req)
+	return client.Do(req) //nolint:gosec
 }
 
 func makeReq(addr string) (*http.Response, error) {
@@ -296,5 +296,5 @@ func makeReq(addr string) (*http.Response, error) {
 
 	client := &http.Client{}
 
-	return client.Do(req)
+	return client.Do(req) //nolint:gosec
 }
