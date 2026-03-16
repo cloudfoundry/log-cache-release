@@ -23,8 +23,8 @@ func NewStaticLookup(numOfRoutes int, hasher func(string) uint64) *StaticLookup 
 
 	// NOTE: 18446744073709551615 is 0xFFFFFFFFFFFFFFFF or the max value of a
 	// uint64.
-	x := (18446744073709551615 / uint64(numOfRoutes))
-	for i := uint64(0); i < uint64(numOfRoutes); i++ {
+	x := (18446744073709551615 / uint64(numOfRoutes))  //nolint:gosec
+	for i := uint64(0); i < uint64(numOfRoutes); i++ { //nolint:gosec
 		t.Put(i*x, i)
 	}
 
@@ -39,5 +39,5 @@ func NewStaticLookup(numOfRoutes int, hasher func(string) uint64) *StaticLookup 
 func (l *StaticLookup) Lookup(sourceID string) int {
 	h := l.hash(sourceID)
 	n, _ := l.t.Floor(h)
-	return int(n.Value.(uint64)) //#nosec G115
+	return int(n.Value.(uint64)) //nolint:gosec
 }
