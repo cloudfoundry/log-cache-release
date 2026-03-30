@@ -16,11 +16,11 @@ code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1
 ## explicit; go 1.25.0
 code.cloudfoundry.org/go-loggregator/v10
 code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2
-# code.cloudfoundry.org/go-metric-registry v0.0.0-20260316221732-b5ae994e6b10
+# code.cloudfoundry.org/go-metric-registry v0.0.0-20260325091030-e6272bdc60ad
 ## explicit; go 1.25.0
 code.cloudfoundry.org/go-metric-registry
 code.cloudfoundry.org/go-metric-registry/testhelpers
-# code.cloudfoundry.org/tlsconfig v0.48.0
+# code.cloudfoundry.org/tlsconfig v0.49.0
 ## explicit; go 1.25.0
 code.cloudfoundry.org/tlsconfig
 code.cloudfoundry.org/tlsconfig/certtest
@@ -142,7 +142,7 @@ github.com/leodido/go-syslog/v4/rfc5424
 ## explicit
 github.com/leodido/ragel-machinery
 github.com/leodido/ragel-machinery/parser
-# github.com/lufia/plan9stats v0.0.0-20260216142805-b3301c5f2a88
+# github.com/lufia/plan9stats v0.0.0-20260324052639-156f7da3f749
 ## explicit; go 1.21
 github.com/lufia/plan9stats
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822

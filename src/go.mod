@@ -6,8 +6,8 @@ require (
 	code.cloudfoundry.org/go-batching v0.0.0-20260210084635-251b58acc355
 	code.cloudfoundry.org/go-diodes v0.0.0-20260209061029-a81ffbc46978
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20260316221732-b5ae994e6b10
-	code.cloudfoundry.org/tlsconfig v0.48.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20260325091030-e6272bdc60ad
+	code.cloudfoundry.org/tlsconfig v0.49.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
@@ -55,7 +55,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20260302011040-a15ffb7f9dcc // indirect
 	github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b // indirect
-	github.com/lufia/plan9stats v0.0.0-20260216142805-b3301c5f2a88 // indirect
+	github.com/lufia/plan9stats v0.0.0-20260324052639-156f7da3f749 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect

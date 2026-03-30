@@ -12,10 +12,10 @@ code.cloudfoundry.org/go-log-cache/v3 v3.1.1 h1:1DL5Ifs7WNIQBuMWUDac0f5IMGoP99gH
 code.cloudfoundry.org/go-log-cache/v3 v3.1.1/go.mod h1:ofLDRs05U5ER8jt4lzRZbaK+CRQc5cKNc79M0E9mdCI=
 code.cloudfoundry.org/go-loggregator/v10 v10.3.1 h1:iuAoFA4ajpH1pBmVGQlUNRMvVAHC71ToU1tRjEAbYyg=
 code.cloudfoundry.org/go-loggregator/v10 v10.3.1/go.mod h1:Md5WIfzcFSiT//dNHTS6Zfj4MCmO+Zz9d/2ihZjaj+0=
-code.cloudfoundry.org/go-metric-registry v0.0.0-20260316221732-b5ae994e6b10 h1:zwdnFfNhDnXpIdq++1+YcyMfv1pkZ9XchZYvqcfMIv0=
-code.cloudfoundry.org/go-metric-registry v0.0.0-20260316221732-b5ae994e6b10/go.mod h1:sa1LhuWM8QUBCEwtKBhb9CecTyeJcRAKzumF9hhFhNY=
-code.cloudfoundry.org/tlsconfig v0.48.0 h1:pXgD+Ctes+K4lLpXmobDzn47OthNSM/T6q6M2x/FImI=
-code.cloudfoundry.org/tlsconfig v0.48.0/go.mod h1:Y6e79JPXDXlky4pwaSTJd4qa84GyCW+U09XxSPQiuj4=
+code.cloudfoundry.org/go-metric-registry v0.0.0-20260325091030-e6272bdc60ad h1:ZUjn7+ac9yce1EaxoXqSxYu2MkFF+cCc5gPEcqM97/s=
+code.cloudfoundry.org/go-metric-registry v0.0.0-20260325091030-e6272bdc60ad/go.mod h1:qavzop3HdX6XxluF8v8TsLllRMWu5ecUE+bwhA9hy+c=
+code.cloudfoundry.org/tlsconfig v0.49.0 h1:ponDsxilO6+N1evL7fyGJFH+PJXIriKAsvNI/5QUAn0=
+code.cloudfoundry.org/tlsconfig v0.49.0/go.mod h1:ghAEm7G6wcxlQ9ZihAqzPYde2VaQ44bP3Ud4ewDwuUE=
 contrib.go.opencensus.io/exporter/ocagent v0.6.0/go.mod h1:zmKjrJcdo0aYcVS7bmEeSEBLPA9YJp5bjrofdU3pIXs=
 filippo.io/edwards25519 v1.2.0 h1:crnVqOiS4jqYleHd9vaKZ+HKtHfllngJIiOpNpoJsjo=
 filippo.io/edwards25519 v1.2.0/go.mod h1:xzAOLCNug/yB62zG1bQ8uziwrIqIuxhctzJT18Q77mc=
@@ -303,8 +303,8 @@ github.com/leodido/go-syslog/v4 v4.3.0 h1:bbSpI/41bYK9iSdlYzcwvlxuLOE8yi4VTFmedt
 github.com/leodido/go-syslog/v4 v4.3.0/go.mod h1:eJ8rUfDN5OS6dOkCOBYlg2a+hbAg6pJa99QXXgMrd98=
 github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b h1:11UHH39z1RhZ5dc4y4r/4koJo6IYFgTRMe/LlwRTEw0=
 github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b/go.mod h1:WZxr2/6a/Ar9bMDc2rN/LJrE/hF6bXE4LPyDSIxwAfg=
-github.com/lufia/plan9stats v0.0.0-20260216142805-b3301c5f2a88 h1:PTw+yKnXcOFCR6+8hHTyWBeQ/P4Nb7dd4/0ohEcWQuM=
-github.com/lufia/plan9stats v0.0.0-20260216142805-b3301c5f2a88/go.mod h1:autxFIvghDt3jPTLoqZ9OZ7s9qTGNAWmYCjVFWPX/zg=
+github.com/lufia/plan9stats v0.0.0-20260324052639-156f7da3f749 h1:Qj3hTcdWH8uMZDI41HNuTuJN525C7NBrbtH5kSO6fPk=
+github.com/lufia/plan9stats v0.0.0-20260324052639-156f7da3f749/go.mod h1:autxFIvghDt3jPTLoqZ9OZ7s9qTGNAWmYCjVFWPX/zg=
 github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mailru/easyjson v0.0.0-20190312143242-1de009706dbe/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
