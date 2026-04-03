@@ -96,7 +96,7 @@ func (c *CAPIClient) IsAuthorized(sourceId string, clientToken string) bool {
 }
 
 func (c *CAPIClient) HasApp(sourceID, authToken string) bool {
-	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps/"+sourceID, nil)
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps/"+sourceID, nil) //nolint:gosec
 	if err != nil {
 		c.log.Printf("failed to build authorize log access request: %s", err)
 		return false
@@ -130,7 +130,7 @@ func (c *CAPIClient) GetRelatedSourceIds(appNames []string, authToken string) ma
 		return map[string][]string{}
 	}
 
-	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps", nil)
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps", nil) //nolint:gosec
 	if err != nil {
 		c.log.Printf("failed to build app list request: %s", err)
 		return map[string][]string{}

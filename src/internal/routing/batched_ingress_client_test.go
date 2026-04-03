@@ -1,6 +1,7 @@
 package routing_test
 
 import (
+	"context"
 	"io"
 	"log"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
 	metrics "code.cloudfoundry.org/go-metric-registry"
 	"code.cloudfoundry.org/log-cache/internal/routing"
-	"golang.org/x/net/context"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

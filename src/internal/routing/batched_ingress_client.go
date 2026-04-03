@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	diodes "code.cloudfoundry.org/go-diodes"
 	rpc "code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
@@ -96,7 +96,8 @@ func (b *BatchedIngressClient) write(batch []interface{}) {
 		e = append(e, i.(*loggregator_v2.Envelope))
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 	_, err := b.c.Send(ctx, &rpc.SendRequest{
 		LocalOnly: b.localOnly,
 		Envelopes: &loggregator_v2.EnvelopeBatch{Batch: e},
