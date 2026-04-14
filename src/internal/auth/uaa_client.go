@@ -99,7 +99,7 @@ func (c *UAAClient) RefreshTokenKeys() error {
 	}
 	atomic.CompareAndSwapInt64(&c.lastQueryTime, lastQueryTime, time.Now().UnixNano())
 
-	req, err := http.NewRequest("GET", c.uaa.String(), nil)
+	req, err := http.NewRequest("GET", c.uaa.String(), nil) //nolint:gosec // G704: URL from operator config only
 	if err != nil {
 		panic(fmt.Sprintf("failed to create request to UAA: %s", err))
 	}
@@ -188,29 +188,64 @@ func (e UnknownTokenKeyError) Error() string {
 	return fmt.Sprintf("using unknown token key: %s", e.Kid)
 }
 
+// JWTKeyMaterialError is returned when the JWT alg header does not match the
+// kind of key material UAA published for the token's kid (e.g. HS256 with an
+// RSA public key). Returning a distinct type avoids spurious UAA key refresh
+// and closes algorithm-confusion issues in the JOSE stack.
+type JWTKeyMaterialError struct {
+	Alg string
+	Kid string
+}
+
+func (e JWTKeyMaterialError) Error() string {
+	return fmt.Sprintf("token algorithm %s is incompatible with UAA key material for kid %s", e.Alg, e.Kid)
+}
+
 func (c *UAAClient) Read(token string) (Oauth2ClientContext, error) {
 	if token == "" {
 		return Oauth2ClientContext{}, errors.New("missing token")
 	}
 
 	payload, _, err := jose.Decode(trimBearer(token), func(headers map[string]interface{}, payload string) interface{} {
-		if headers["alg"] != "RS256" && headers["alg"] != "HS256" {
-			return AlgorithmError{Alg: headers["alg"].(string)}
+		alg, ok := headers["alg"].(string)
+		if !ok {
+			return AlgorithmError{Alg: fmt.Sprintf("%v", headers["alg"])}
+		}
+		if alg != "RS256" && alg != "HS256" {
+			return AlgorithmError{Alg: alg}
 		}
 
-		keyId := headers["kid"].(string)
+		keyID, ok := headers["kid"].(string)
+		if !ok {
+			return UnknownTokenKeyError{Kid: fmt.Sprintf("%v", headers["kid"])}
+		}
 
-		publicKey, err := c.loadOrFetchPublicKey(keyId)
+		keyMaterial, err := c.loadOrFetchPublicKey(keyID)
 		if err != nil {
 			return err
 		}
 
-		return publicKey
+		switch alg {
+		case "RS256":
+			rsaKey, ok := keyMaterial.(*rsa.PublicKey)
+			if !ok {
+				return JWTKeyMaterialError{Alg: alg, Kid: keyID}
+			}
+			return rsaKey
+		case "HS256":
+			symmetricKey, ok := keyMaterial.([]byte)
+			if !ok {
+				return JWTKeyMaterialError{Alg: alg, Kid: keyID}
+			}
+			return symmetricKey
+		default:
+			return AlgorithmError{Alg: alg}
+		}
 	})
 
 	if err != nil {
 		switch err.(type) {
-		case AlgorithmError, UnknownTokenKeyError:
+		case AlgorithmError, UnknownTokenKeyError, JWTKeyMaterialError:
 			// no-op
 		default:
 			// we're specifically trying to catch "crypto/rsa: verification error",

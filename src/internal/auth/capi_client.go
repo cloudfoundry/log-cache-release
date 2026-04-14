@@ -96,7 +96,7 @@ func (c *CAPIClient) IsAuthorized(sourceId string, clientToken string) bool {
 }
 
 func (c *CAPIClient) HasApp(sourceID, authToken string) bool {
-	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps/"+sourceID, nil)
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/apps/"+sourceID, nil) //nolint:gosec // G704: URL from operator config only
 	if err != nil {
 		c.log.Printf("failed to build authorize log access request: %s", err)
 		return false
@@ -111,7 +111,7 @@ func (c *CAPIClient) HasApp(sourceID, authToken string) bool {
 }
 
 func (c *CAPIClient) HasService(sourceID, authToken string) bool {
-	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/service_instances/"+sourceID, nil)
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/service_instances/"+sourceID, nil) //nolint:gosec // G704: URL from operator config only
 	if err != nil {
 		c.log.Printf("failed to build authorize log access request: %s", err)
 		return false
@@ -171,7 +171,7 @@ func (c *CAPIClient) AvailableSourceIDs(authToken string) []string {
 
 func (c *CAPIClient) sourceIDsForResourceType(resourceType, authToken string, metrics metrics.Gauge) ([]string, error) {
 	var sourceIDs []string
-	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/"+resourceType, nil)
+	req, err := http.NewRequest(http.MethodGet, c.addr+"/v3/"+resourceType, nil) //nolint:gosec // G704: URL from operator config only
 	if err != nil {
 		c.log.Printf("failed to build authorize service instance access request: %s", err)
 		return nil, err

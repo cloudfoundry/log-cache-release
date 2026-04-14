@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"log"
 	"net"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 
 	metrics "code.cloudfoundry.org/go-metric-registry"
 
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 

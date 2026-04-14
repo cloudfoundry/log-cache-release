@@ -23,8 +23,9 @@ func NewStaticLookup(numOfRoutes int, hasher func(string) uint64) *StaticLookup 
 
 	// NOTE: 18446744073709551615 is 0xFFFFFFFFFFFFFFFF or the max value of a
 	// uint64.
-	x := (18446744073709551615 / uint64(numOfRoutes))
-	for i := uint64(0); i < uint64(numOfRoutes); i++ {
+	nr := uint64(numOfRoutes) //#nosec G115
+	x := 18446744073709551615 / nr
+	for i := uint64(0); i < nr; i++ {
 		t.Put(i*x, i)
 	}
 

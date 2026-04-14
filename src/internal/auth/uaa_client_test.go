@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -55,6 +56,19 @@ var _ = Describe("UAAClient", func() {
 			_, err := tc.uaaClient.Read(withBearer(token))
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("failed to decode token: unsupported algorithm: none"))
+		})
+
+		It("rejects HS256 JWTs when UAA only published an RSA key for that kid (algorithm confusion)", func() {
+			kid := tc.privateKeys[0].keyId
+			header := fmt.Sprintf(`{"alg":"HS256","kid":%q}`, kid)
+			payload := `{"scope":["logs.admin"],"exp":9999999999}`
+			enc := base64.RawURLEncoding.EncodeToString
+			forged := enc([]byte(header)) + "." + enc([]byte(payload)) + "."
+
+			_, err := tc.uaaClient.Read(withBearer(forged))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("failed to decode token"))
+			Expect(err.Error()).To(ContainSubstring("incompatible with UAA key material"))
 		})
 
 		It("returns IsAdmin == true when scopes include doppler.firehose", func() {
