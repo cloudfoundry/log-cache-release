@@ -1,6 +1,7 @@
 package nozzle
 
 import (
+	"context"
 	"log"
 	"runtime"
 	"time"
@@ -11,7 +12,6 @@ import (
 	diodes "code.cloudfoundry.org/go-diodes"
 	"code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -177,12 +177,13 @@ func (n *Nozzle) envelopeWriter(ch chan []*loggregator_v2.Envelope, client logca
 	for {
 		envelopes := <-ch
 
-		ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		_, err := client.Send(ctx, &logcache_v1.SendRequest{
 			Envelopes: &loggregator_v2.EnvelopeBatch{
 				Batch: envelopes,
 			},
 		})
+		cancel()
 
 		if err != nil {
 			n.errCounter.Add(1)

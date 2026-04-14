@@ -1,10 +1,15 @@
 package syslog
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
+	"net"
+	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/v10"
@@ -15,13 +20,6 @@ import (
 	"github.com/leodido/go-syslog/v4/nontransparent"
 	"github.com/leodido/go-syslog/v4/octetcounting"
 	"github.com/leodido/go-syslog/v4/rfc5424"
-
-	"net"
-	"strconv"
-	"strings"
-	"sync"
-
-	"golang.org/x/net/context"
 )
 
 type Server struct {
