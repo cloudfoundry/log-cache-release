@@ -22,7 +22,7 @@ require (
 	github.com/prometheus/common v0.67.5
 	github.com/prometheus/prometheus v1.99.0
 	golang.org/x/net v0.53.0 // indirect
-	google.golang.org/grpc v1.80.0
+	google.golang.org/grpc v1.81.0
 	google.golang.org/protobuf v1.36.11
 )
 
