@@ -7,14 +7,14 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20260720065427-59f65622c841
 	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20260729193147-2eaf2ad59577
-	code.cloudfoundry.org/tlsconfig v0.63.0
+	code.cloudfoundry.org/tlsconfig v0.64.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cloudfoundry/gosigar v1.3.125
+	github.com/cloudfoundry/gosigar v1.3.126
 	github.com/dvsekhvalnov/jose2go v1.8.0
 	github.com/emirpasic/gods v1.18.1
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0
 	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.1
 	github.com/prometheus/client_golang v1.24.1
@@ -60,7 +60,7 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/power-devops/perfstat v0.0.0-20260805114148-88456608a4f6 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/square/certstrap v1.3.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
@@ -74,8 +74,8 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	golang.org/x/tools v0.48.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260729162451-8efbd57d26e0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260729162451-8efbd57d26e0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260807164820-c8921c73eeea // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260807164820-c8921c73eeea // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
