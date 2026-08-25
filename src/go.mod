@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/log-cache
 
-go 1.25.8
+go 1.26
 
 require (
 	code.cloudfoundry.org/go-batching v0.0.0-20260818081528-9e768cac2659
