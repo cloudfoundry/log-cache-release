@@ -3,10 +3,10 @@ module code.cloudfoundry.org/log-cache
 go 1.26.0
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20260922073416-3183ae5012d2
+	code.cloudfoundry.org/go-batching v0.0.0-20260928211223-16dd17ccfe80
 	code.cloudfoundry.org/go-diodes v0.0.0-20260928063035-f81ac938b818
 	code.cloudfoundry.org/go-envstruct v1.7.0
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20260922073832-5661ea5c3a88
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20260928211359-6c1485edfdb8
 	code.cloudfoundry.org/tlsconfig v0.68.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
@@ -32,7 +32,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/leodido/go-syslog/v4 v4.6.0
-	github.com/shirou/gopsutil/v4 v4.26.8
+	github.com/shirou/gopsutil/v4 v4.26.9
 )
 
 require (
@@ -53,7 +53,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20260926063103-aaccee046517 // indirect
+	github.com/google/pprof v0.0.0-20261003200830-ebaad5f31b4d // indirect
 	github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b // indirect
 	github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -73,9 +73,9 @@ require (
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
-	golang.org/x/tools v0.50.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
+	golang.org/x/tools v0.51.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
