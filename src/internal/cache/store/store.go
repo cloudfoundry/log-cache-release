@@ -173,6 +173,7 @@ func (storage *storage) insertOrSwap(store *Store, e *loggregator_v2.Envelope) {
 	}
 
 	storage.Put(e.Timestamp+timestampFudge, e)
+	storage.meta.Count = int64(storage.Size())
 
 	if e.Timestamp > storage.meta.NewestTimestamp {
 		storage.meta.NewestTimestamp = e.Timestamp
@@ -313,6 +314,7 @@ func (store *Store) removeOldestEnvelope(treeToPrune *storage, sourceId string) 
 	oldestEnvelope := treeToPrune.Left()
 
 	treeToPrune.Remove(oldestEnvelope.Key.(int64))
+	treeToPrune.meta.Count = int64(treeToPrune.Size())
 
 	if treeToPrune.Size() == 0 {
 		store.storageIndex.Delete(sourceId)
@@ -535,7 +537,7 @@ func (store *Store) Meta() map[string]logcache_v1.MetaInfo {
 	store.storageIndex.Range(func(sourceId interface{}, tree interface{}) bool {
 		tree.(*storage).RLock()
 		metaReport[sourceId.(string)] = logcache_v1.MetaInfo{
-			Count:           int64(tree.(*storage).meta.GetCount()),
+			Count:           tree.(*storage).meta.GetCount(),
 			Expired:         tree.(*storage).meta.GetExpired(),
 			OldestTimestamp: tree.(*storage).meta.GetOldestTimestamp(),
 			NewestTimestamp: tree.(*storage).meta.GetNewestTimestamp(),
@@ -545,20 +547,6 @@ func (store *Store) Meta() map[string]logcache_v1.MetaInfo {
 		return true
 	})
 
-	// Range over our local copy of metaReport
-	// TODO - shouldn't we just maintain Count on metaReport..?!
-	for sourceId := range metaReport {
-		tree, _ := store.storageIndex.Load(sourceId)
-
-		tree.(*storage).RLock()
-		metaReport[sourceId] = logcache_v1.MetaInfo{
-			Count:           int64(tree.(*storage).Size()),
-			Expired:         tree.(*storage).meta.GetExpired(),
-			OldestTimestamp: tree.(*storage).meta.GetOldestTimestamp(),
-			NewestTimestamp: tree.(*storage).meta.GetNewestTimestamp(),
-		}
-		tree.(*storage).RUnlock()
-	}
 	return metaReport
 }
 
