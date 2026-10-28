@@ -203,6 +203,7 @@ func (s *Server) parseListener(res *syslog.Result) {
 	if !ok {
 		s.invalidIngress.Add(1)
 		s.loggr.Printf("invalid message format: not rfc5424")
+		return
 	}
 
 	env, err := s.convertToEnvelope(msg)
@@ -229,9 +230,18 @@ func (s *Server) convertToEnvelope(msg *rfc5424.SyslogMessage) (*loggregator_v2.
 		return nil, fmt.Errorf("missing app name in syslog message")
 	}
 
+	var timestamp int64
+	if msg.Timestamp != nil {
+		timestamp = msg.Timestamp.UnixNano()
+	} else {
+		// RFC5424 §6.2.3 allows the TIMESTAMP to be the NILVALUE "-", in which
+		// case the parser leaves it nil. Fall back to the time of receipt.
+		timestamp = time.Now().UnixNano()
+	}
+
 	env := &loggregator_v2.Envelope{
 		SourceId:   *sourceID,
-		Timestamp:  msg.Timestamp.UnixNano(),
+		Timestamp:  timestamp,
 		InstanceId: instanceId,
 		Tags:       map[string]string{},
 	}

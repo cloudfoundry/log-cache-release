@@ -117,6 +117,31 @@ var _ = Describe("Server", func() {
 			}).Should(Equal(5.0))
 		})
 
+		// RFC5424 allows the TIMESTAMP to be the NILVALUE "-", which leaves
+		// msg.Timestamp nil. The server must accept it and use the receive time.
+		It("accepts a message with a nil timestamp", func() {
+			before := time.Now()
+			body := `<14>1 - test-hostname test-app-id [APP/2] - - just a test`
+			_, err := fmt.Fprintf(clientConn, "%d %s", len(body), body)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(server.Stream(context.Background(), &loggregator_v2.EgressBatchRequest{})()).Should(ContainElement(
+				SatisfyAll(
+					HaveField("SourceId", "test-app-id"),
+					HaveField("InstanceId", "2"),
+					HaveField("Timestamp", BeNumerically(">=", before.UnixNano())),
+					HaveField("Timestamp", BeNumerically("<=", time.Now().UnixNano())),
+					HaveField("Message", &loggregator_v2.Envelope_Log{
+						Log: &loggregator_v2.Log{
+							Payload: []byte("just a test"),
+							Type:    loggregator_v2.Log_OUT,
+						},
+					}),
+				),
+			))
+			Expect(spyRegistry.GetMetric("invalid_ingress", nil).Value()).To(Equal(0.0))
+		})
+
 		DescribeTable("message streaming",
 			func(msg string, expected *loggregator_v2.Envelope) {
 				_, err := fmt.Fprint(clientConn, msg)
