@@ -3,27 +3,27 @@ module code.cloudfoundry.org/log-cache
 go 1.27.3
 
 require (
-	code.cloudfoundry.org/go-batching v0.0.0-20261014054149-7b65ef71a22e
-	code.cloudfoundry.org/go-diodes v0.0.0-20261019063924-5f5277928191
+	code.cloudfoundry.org/go-batching v0.0.0-20261109144114-ee19edea3e38
+	code.cloudfoundry.org/go-diodes v0.0.0-20261109092731-97a033397c51
 	code.cloudfoundry.org/go-envstruct v1.7.0
 	code.cloudfoundry.org/go-log-cache/v3 v3.1.2
 	code.cloudfoundry.org/go-loggregator/v10 v10.3.1
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20261104064010-a4a6e43d5ab4
-	code.cloudfoundry.org/tlsconfig v0.71.0
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20261110084834-0138664d3a28
+	code.cloudfoundry.org/tlsconfig v0.73.0
 	github.com/Benjamintf1/unmarshalledmatchers v0.0.0-20190408201839-bb1c1f34eaea
 	github.com/benbjohnson/jmphash v0.0.0-20141216154655-2d58f234cd86
 	github.com/cespare/xxhash/v2 v2.3.0
-	github.com/cloudfoundry/gosigar v1.3.131
+	github.com/cloudfoundry/gosigar v1.3.133
 	github.com/dvsekhvalnov/jose2go v1.11.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/go-chi/chi/v5 v5.5.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0
 	github.com/leodido/go-syslog/v4 v4.6.0
 	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
-	github.com/prometheus/common v0.73.1
+	github.com/prometheus/common v0.74.0
 	github.com/prometheus/prometheus v1.99.0
 	github.com/shirou/gopsutil/v4 v4.26.10
 	google.golang.org/grpc v1.85.0
@@ -49,7 +49,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261105003125-4bf881d7fb0b // indirect
+	github.com/google/pprof v0.0.0-20261111200114-fac431ef4d26 // indirect
 	github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b // indirect
 	github.com/lufia/plan9stats v0.0.0-20261101121723-be84dd9509a0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -66,15 +66,15 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.step.sm/crypto v0.92.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/mod v0.42.0 // indirect
+	golang.org/x/crypto v0.59.0 // indirect
+	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
-	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
-	golang.org/x/tools v0.52.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab // indirect
+	golang.org/x/sync v0.25.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
+	golang.org/x/tools v0.52.1-0.20261106145633-d407941a339a // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261116203732-fd2c7689a808 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261116203732-fd2c7689a808 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
